@@ -54,7 +54,7 @@ fun RegisterScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "MealMatch - Register") },
+                title = { Text(text = "Country Guesser - Register") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
