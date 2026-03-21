@@ -21,6 +21,7 @@ okhttp = "4.12.0"
 coilCompose = "2.7.0"
 hilt = "2.51.1"
 accompanistPermissions = "0.37.3"
+moshi = "1.15.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -60,6 +61,10 @@ dagger-compiler = { group = "com.google.dagger", name = "dagger-compiler", versi
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanistPermissions" }
+converter-moshi = { group = "com.squareup.retrofit2", name = "converter-moshi", version.ref = "retrofit" }
+moshi = { group = "com.squareup.moshi", name = "moshi", version = "1.15.1" }
+moshi-adapters = { group = "com.squareup.moshi", name = "moshi-adapters", version = "1.15.1" }
+moshi-kotlin = { group = "com.squareup.moshi", name = "moshi-kotlin", version = "1.15.1" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

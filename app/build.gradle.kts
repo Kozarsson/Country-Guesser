@@ -25,6 +25,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "BASE_RESTCOUNTRIES_URI", "\"https://restcountries.com/v3.1/\"")
     }
 
     buildTypes {
@@ -42,6 +44,9 @@ android {
     }
     kotlinOptions {
         jvmTarget = "11"
+    }
+    buildFeatures {
+        buildConfig = true
     }
 }
 
@@ -85,6 +90,10 @@ dependencies {
     kapt(libs.hilt.android.compiler)
     kapt (libs.dagger.compiler)
     implementation(libs.androidx.material.icons.extended)
+    implementation(libs.converter.moshi)
+    implementation(libs.moshi)
+    implementation(libs.moshi.adapters)
+    implementation(libs.moshi.kotlin)
 }
 
 kapt {
