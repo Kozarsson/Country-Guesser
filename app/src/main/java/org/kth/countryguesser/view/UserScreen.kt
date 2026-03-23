@@ -63,7 +63,8 @@ private fun UserScreenContent(
     ) { padding ->
         Column(
             modifier = Modifier
-                .fillMaxSize(),
+                .fillMaxSize()
+                .padding(padding),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Header()
