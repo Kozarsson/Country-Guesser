@@ -1,4 +1,4 @@
-package org.kth.countryguesser.model.data
+package org.kth.countryguesser.model.dto
 
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
@@ -6,7 +6,7 @@ import kotlinx.parcelize.Parcelize
 
 //TODO: Remove every field not required for the app
 @Parcelize
-data class CountryResult(
+data class CountryResultDto(
 	val tld: List<String>? = null,
 	val cca2: String? = null,
 	val ccn3: String? = null,
