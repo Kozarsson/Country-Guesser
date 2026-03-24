@@ -4,8 +4,8 @@ import org.kth.countryguesser.model.dto.CountryResultDto
 import retrofit2.http.GET
 import retrofit2.http.Path
 
-/** All endpoints related to the searching of countries. */
-interface CountriesEndpoints {
+/** All endpoints related to the searching of countries via RestCountries. */
+interface RestCountriesEndpoints {
     @GET("name/{name}")
     suspend fun searchCountries(@Path("name") name: String): List<CountryResultDto>
 }

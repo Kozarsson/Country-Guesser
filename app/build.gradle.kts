@@ -27,6 +27,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "BASE_RESTCOUNTRIES_URI", "\"https://restcountries.com/v3.1/\"")
+        buildConfigField("String", "BASE_WIKIDATA_URI", "\"https://www.wikidata.org/\"")
     }
 
     buildTypes {
