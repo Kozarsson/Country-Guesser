@@ -28,10 +28,10 @@ data class CountryResultDto(
 	val fifa: String? = null,
 	val car: Car? = null,
 	val timezones: List<String>? = null,
-	val continents: List<String>? = null,
+	val continents: List<String>? = null, //TODO: Add this in CountryModel
 	val flag: String? = null,
 	val name: CountryName? = null,
-	val currencies: Map<String, CurrencyInfo>? = null,
+	val currencies: Map<String, CurrencyInfo>? = null, //Potential attribute; structured with either $, € or others
 	val languages: Map<String, String>? = null,
 	val latlng: List<Double>? = null,
 	val demonyms: Map<String, GenderedDemonym>? = null,
