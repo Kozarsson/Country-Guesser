@@ -12,7 +12,8 @@ interface CountryModel {
     val inceptionYear: InceptionYear?
     
 //    fun compareTo(other: CountryModel): CountryComparisonResult
-    fun compareAttributesTo(other: CountryModel, closenessCriteria: Double): CountryComparisonResult
+    fun compareAttributesTo(other: CountryModel, closenessCriteria: Double?): CountryComparisonResult
+    fun compareAttributesTo(other: CountryModel): CountryComparisonResult
     suspend fun saveToDatabase()
 }
 
@@ -24,7 +25,7 @@ class CountryModelImpl private constructor(
     private val restCountriesApiService: RestCountriesEndpoints,
     private val wikiDataApiService: WikiDataEndpoints
 ) : CountryModel {
-    override fun compareAttributesTo(other: CountryModel, closenessCriteria: Double): CountryComparisonResult {
+    override fun compareAttributesTo(other: CountryModel, closenessCriteria: Double?): CountryComparisonResult {
         return CountryComparisonResult(
             populationComparison = compareAttribute(this.population, other.population, closenessCriteria),
             areaComparison = compareAttribute(this.area, other.area, closenessCriteria),
@@ -32,21 +33,28 @@ class CountryModelImpl private constructor(
         )
     }
 
+    override fun compareAttributesTo(other: CountryModel): CountryComparisonResult {
+        return compareAttributesTo(other, closenessCriteria = null)
+    }
+
     override suspend fun saveToDatabase() {
         // TODO: Implement save logic
     }
     
-    private fun <T : Comparable<T>> compareAttribute(value1: T?, value2: T?, closenessCriteria: Double): CountryAttributeResult {
+    private fun <T : Comparable<T>> compareAttribute(value1: T?, value2: T?, closenessCriteria: Double?): CountryAttributeResult {
         if (value1 == null || value2 == null) {
             return CountryAttributeResult(comparison = null, isClose = null)
         }
         val comparison = value1.compareTo(value2)
+        if (closenessCriteria == null) {
+            return CountryAttributeResult(comparison = comparison, isClose = null)
+        }
         var isClose: Boolean? = null
         if (value1 is Number && value2 is Number) {
             val diff = kotlin.math.abs(value1.toDouble() - value2.toDouble())
             isClose = diff < closenessCriteria * value1.toDouble()
         } else if (value1 is InceptionYear && value2 is InceptionYear) {
-            // Normalize BC/AD: BC years as negative, AD as positive
+            // Normalise BC/AD: BC years as negative, AD as positive
             val year1 = if (value1.datingSystem == "BC") -value1.year else value1.year
             val year2 = if (value2.datingSystem == "BC") -value2.year else value2.year
             val diff = kotlin.math.abs(year1 - year2)
