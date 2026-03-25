@@ -41,7 +41,7 @@ fun BottomBar(navController: NavController, authViewModel: IAuthViewModel, user:
             //TODO: DECIDE WHAT WE WANT AT THE BOTTOM BAR
 
             if (authViewModel.authenticated()) {
-                TextButton(onClick = { navController.navigate("TODO") }) {
+                TextButton(onClick = { /*navController.navigate("TODO")*/ }) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(
                             Icons.Filled.BarChart,
@@ -53,7 +53,7 @@ fun BottomBar(navController: NavController, authViewModel: IAuthViewModel, user:
                     }
                 }
             }
-            TextButton(onClick = { navController.navigate("TODO") }) {
+            TextButton(onClick = { /*navController.navigate("TODO")*/ }) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(Icons.Filled.Settings, contentDescription = "Settings", modifier = Modifier.size(32.dp), tint = MaterialTheme.colorScheme.background)
                     Text("Settings", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.background)
