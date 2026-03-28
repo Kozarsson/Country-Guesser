@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,19 +25,26 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImagePainter
 import org.kth.countryguesser.view.components.BottomBar
 import org.kth.countryguesser.viewmodel.IAuthViewModel
 
@@ -47,6 +55,17 @@ fun GameScreen(
     mode: String, // 'daily' or 'endless'
 ) {
     val user by authViewModel.userEntity.collectAsState()
+    var showSuccessDialog by remember { mutableStateOf(false) }
+
+    if (showSuccessDialog) {
+        SuccessScreen(onConfirm = {
+            showSuccessDialog = false
+            if (mode == "daily") {
+                navController.popBackStack()
+            }
+            // stay here (do nothing) if 'endless' mode
+        })
+    }
 
     GameScreenContent(
         navController = navController,
@@ -54,15 +73,16 @@ fun GameScreen(
             BottomBar(navController = navController, authViewModel = authViewModel, user = user)
         },
         mode = mode,
+        onCorrectGuess = { showSuccessDialog = true },
     )
 }
 
-@Preview(showBackground = true)
 @Composable
 fun GameScreenContent(
     navController: NavHostController,
     bottomBar: @Composable () -> Unit = {},
     mode: String,
+    onCorrectGuess: () -> Unit,
 ) {
     Scaffold(
         bottomBar = bottomBar,
@@ -78,7 +98,7 @@ fun GameScreenContent(
                     .padding(horizontal = 8.dp, vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text(mode) // Temporary debug
+                Text("Gamemode: $mode") // (debug) TODO: remove
                 HorizontalDivider(thickness = 2.dp)
                 Text(
                     text = "Clues 3/5", // TODO: show num clues visible
@@ -95,7 +115,7 @@ fun GameScreenContent(
                 Spacer(modifier = Modifier.weight(1f))
 
                 HorizontalDivider(thickness = 2.dp)
-                Input()
+                Input(onCorrectGuess)
             }
         }
 
@@ -123,7 +143,9 @@ private fun Header(
     ) {
         IconButton(
             onClick = { navController.popBackStack() },
-            modifier = Modifier.align(Alignment.TopStart)
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(top = 16.dp),
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -141,7 +163,7 @@ private fun Header(
             verticalAlignment = Alignment.Bottom,
         ) {
             Text(
-                text = "6", // TODO: display current points (10 - 2*clues) or streak if in 'endless' mode
+                text = "6", // TODO: display current score
                 style = TextStyle(
                     fontSize = 120.sp,
                     fontWeight = FontWeight.Bold,
@@ -217,12 +239,14 @@ private fun Clue(
 }
 
 @Composable
-private fun Input()
-{
+private fun Input(
+    onCorrectGuess: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(IntrinsicSize.Min),
+            .height(IntrinsicSize.Min)
+            .padding(bottom = 100.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.Bottom,
     ) {
@@ -238,7 +262,10 @@ private fun Input()
 
         // SUBMIT BUTTON
         OutlinedButton(
-            onClick = { /* TODO: submit guess */ },
+            onClick = {
+                // TODO: validate guess
+                onCorrectGuess()
+            },
             shape = MaterialTheme.shapes.extraSmall,
             modifier = Modifier
                 .height(56.dp), // aligns with text field outline
@@ -250,4 +277,34 @@ private fun Input()
             )
         }
     }
+}
+
+@Composable
+private fun SuccessScreen(
+    onConfirm: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = { },
+        title = { Text("Correct!") },
+        text = { Text("You found the correct country!") },
+        confirmButton = {
+            TextButton( onClick = {
+                onConfirm()
+            }) {
+                Text("OK")
+            }
+        }
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun GameScreenPreview() {
+//    SuccessScreen(onConfirm = {})
+    val navController = rememberNavController()
+    GameScreenContent(
+        navController = navController,
+        mode = "daily",
+        onCorrectGuess = {}
+    )
 }
