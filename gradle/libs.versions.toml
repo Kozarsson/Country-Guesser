@@ -22,6 +22,7 @@ coilCompose = "2.7.0"
 hilt = "2.51.1"
 accompanistPermissions = "0.37.3"
 moshi = "1.15.1"
+composeTesting = "1.0.0-alpha12"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -65,6 +66,7 @@ converter-moshi = { group = "com.squareup.retrofit2", name = "converter-moshi", 
 moshi = { group = "com.squareup.moshi", name = "moshi", version = "1.15.1" }
 moshi-adapters = { group = "com.squareup.moshi", name = "moshi-adapters", version = "1.15.1" }
 moshi-kotlin = { group = "com.squareup.moshi", name = "moshi-kotlin", version = "1.15.1" }
+androidx-compose-testing = { group = "androidx.xr.compose", name = "compose-testing", version.ref = "composeTesting" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

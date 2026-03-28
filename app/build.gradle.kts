@@ -69,6 +69,7 @@ dependencies {
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.play.services.location)
     implementation(libs.androidx.espresso.core)
+    implementation(libs.androidx.compose.testing)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
