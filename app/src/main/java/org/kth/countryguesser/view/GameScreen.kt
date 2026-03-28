@@ -44,20 +44,25 @@ import org.kth.countryguesser.viewmodel.IAuthViewModel
 fun GameScreen(
     navController: NavHostController,
     authViewModel: IAuthViewModel,
+    mode: String, // 'daily' or 'endless'
 ) {
     val user by authViewModel.userEntity.collectAsState()
 
     GameScreenContent(
+        navController = navController,
         bottomBar = {
             BottomBar(navController = navController, authViewModel = authViewModel, user = user)
         },
+        mode = mode,
     )
 }
 
 @Preview(showBackground = true)
 @Composable
 fun GameScreenContent(
+    navController: NavHostController,
     bottomBar: @Composable () -> Unit = {},
+    mode: String,
 ) {
     Scaffold(
         bottomBar = bottomBar,
@@ -65,7 +70,7 @@ fun GameScreenContent(
         Column(
             modifier = Modifier.fillMaxSize(),
         ) {
-            Header()
+            Header(navController, mode)
 
             Column(
                 modifier = Modifier
@@ -73,6 +78,7 @@ fun GameScreenContent(
                     .padding(horizontal = 8.dp, vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                Text(mode) // Temporary debug
                 HorizontalDivider(thickness = 2.dp)
                 Text(
                     text = "Clues 3/5", // TODO: show num clues visible
@@ -98,7 +104,10 @@ fun GameScreenContent(
 
 
 @Composable
-private fun Header() {
+private fun Header(
+    navController: NavHostController,
+    mode: String,
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -113,7 +122,7 @@ private fun Header() {
             )
     ) {
         IconButton(
-            onClick = { /* TODO: nav back to home */ },
+            onClick = { navController.popBackStack() },
             modifier = Modifier.align(Alignment.TopStart)
         ) {
             Icon(
@@ -132,7 +141,7 @@ private fun Header() {
             verticalAlignment = Alignment.Bottom,
         ) {
             Text(
-                text = "6", // TODO: display current points (10 - 2*clues)
+                text = "6", // TODO: display current points (10 - 2*clues) or streak if in 'endless' mode
                 style = TextStyle(
                     fontSize = 120.sp,
                     fontWeight = FontWeight.Bold,

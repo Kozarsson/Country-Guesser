@@ -27,6 +27,15 @@ fun NavGraph(
         composable(Routes.REGISTER) {
             RegisterScreen(navController, authVM)
         }
+
+        composable("${Routes.GAME}/{mode}") { stackEntry ->
+            val mode = stackEntry.arguments?.getString("mode") ?: "daily"
+            org.kth.countryguesser.view.GameScreen(
+                navController = navController,
+                authViewModel = authVM,
+                mode = mode,
+            )
+        }
     }
 
 }
@@ -35,5 +44,6 @@ object Routes {
     const val HOME = "home"
     const val LOGIN = "login"
     const val REGISTER = "register"
+    const val GAME = "game"
 
 }

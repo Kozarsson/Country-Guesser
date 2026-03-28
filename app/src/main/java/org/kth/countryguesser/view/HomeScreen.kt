@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import org.kth.countryguesser.view.components.BottomBar
+import org.kth.countryguesser.view.components.Routes
 import org.kth.countryguesser.viewmodel.IAuthViewModel
 
 @Composable
@@ -84,12 +85,16 @@ fun HomeScreen(
 				MenuActionButton(
 					label = "DAILY",
 					icon = Icons.Filled.SportsEsports,
-					onClick = { },
+					onClick = {
+                        navController.navigate("${Routes.GAME}/daily")
+                    },
 				)
                 MenuActionButton(
                     label = "ENDLESS",
                     icon = Icons.Filled.AllInclusive,
-                    onClick = { },
+                    onClick = {
+                        navController.navigate("${Routes.GAME}/endless")
+                    },
                 )
                 MenuActionButton(
                     label = "LEADERBOARDS",

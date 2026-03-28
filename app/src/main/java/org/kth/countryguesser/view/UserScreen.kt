@@ -93,18 +93,7 @@ private fun Header() {
                         )
                     )
                 )
-        ) {
-            IconButton(
-                onClick = { /* TODO: nav back to home */ },
-                modifier = Modifier.align(Alignment.TopStart)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }
-        }
+        )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
