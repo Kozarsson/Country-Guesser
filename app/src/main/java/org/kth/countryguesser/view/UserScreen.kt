@@ -23,6 +23,7 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -144,12 +145,14 @@ private fun Stats(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         // DAILY CHALLENGE STATS
-        HorizontalDivider(thickness = 2.dp)
-        Text(
-            text = "Daily Challenge",
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.surfaceVariant,
-        )
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            HorizontalDivider(thickness = 2.dp)
+            Text(
+                text = "Daily Challenge",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.surfaceVariant,
+            )
+        }
 
         // max day's in a row
         Stat(label = "Longest Streak", stat = "10d")
@@ -162,12 +165,14 @@ private fun Stats(
 
 
         // COUNTRY STREAK STATS
-        HorizontalDivider(thickness = 2.dp)
-        Text(
-            text = "Country Streak",
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.surfaceVariant,
-        )
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            HorizontalDivider(thickness = 2.dp)
+            Text(
+                text = "Country Streak",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.surfaceVariant,
+            )
+        }
 
         // highest streak
         Stat(label = "Longest Streak", stat = "7")
@@ -192,7 +197,7 @@ private fun Stat(
         },
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(4.dp)),
+            .clip(RoundedCornerShape(8.dp)),
         trailingContent = {
             Text(
                 text = stat,

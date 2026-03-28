@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -26,6 +27,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -37,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.material3.TopAppBar
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -46,6 +50,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImagePainter
 import org.kth.countryguesser.view.components.BottomBar
+import org.kth.countryguesser.view.components.Routes
 import org.kth.countryguesser.viewmodel.IAuthViewModel
 
 @Composable
@@ -77,6 +82,7 @@ fun GameScreen(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GameScreenContent(
     navController: NavHostController,
@@ -85,10 +91,40 @@ fun GameScreenContent(
     onCorrectGuess: () -> Unit,
 ) {
     Scaffold(
+//        topBar = {
+//            TopAppBar(
+//                title = {
+//                    Row(
+//                        modifier = Modifier.fillMaxWidth(),
+//                        verticalAlignment = Ali
+//                    ) {
+//                        Text(text = mode.replaceFirstChar { it.uppercase() })
+//                    } },
+//                navigationIcon = {
+//                    IconButton(onClick = {
+//                        navController.navigate(Routes.HOME) {
+//                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
+//                        }
+//                    }) {
+//                        Icon(
+//                            Icons.AutoMirrored.Filled.ArrowBack,
+//                            contentDescription = "Return to Home"
+//                        )
+//                    }
+//                },
+//                colors = TopAppBarDefaults.topAppBarColors(
+//                    titleContentColor = MaterialTheme.colorScheme.primary,
+//                    navigationIconContentColor = MaterialTheme.colorScheme.primary,
+//                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+//                ),
+//            )
+//        },
         bottomBar = bottomBar,
     ) { padding ->
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = padding.calculateTopPadding(), bottom = padding.calculateBottomPadding()),
         ) {
             Header(navController, mode)
 
@@ -96,15 +132,16 @@ fun GameScreenContent(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 8.dp, vertical = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Text("Gamemode: $mode") // (debug) TODO: remove
-                HorizontalDivider(thickness = 2.dp)
-                Text(
-                    text = "Clues 3/5", // TODO: show num clues visible
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                )
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    HorizontalDivider(thickness = 2.dp)
+                    Text(
+                        text = "Clues 3/5", // TODO: show num clues visible
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                    )
+                }
 
                 // CLUES 1-5
                 ClueBox(
@@ -131,7 +168,7 @@ private fun Header(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(150.dp) // Increased height for "Large Text" look
+            .height(IntrinsicSize.Min)
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
@@ -141,31 +178,43 @@ private fun Header(
                 )
             )
     ) {
-        IconButton(
-            onClick = { navController.popBackStack() },
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(top = 16.dp),
+        Row(
+            modifier = Modifier.align(Alignment.TopStart),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
-                tint = MaterialTheme.colorScheme.onPrimaryContainer
+            IconButton(
+                onClick = { navController.popBackStack() },
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+
+            Text(
+                text = mode.replaceFirstChar { it.uppercase() },
+                style = TextStyle(
+                    fontSize = 24.sp,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                ),
+
             )
         }
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .align(Alignment.BottomEnd)
-                .padding(8.dp),
+                .height(170.dp)
+                .align(Alignment.BottomEnd),
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.Bottom,
         ) {
             Text(
                 text = "6", // TODO: display current score
                 style = TextStyle(
-                    fontSize = 120.sp,
+                    fontSize = 200.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.surfaceTint,
                 ),
@@ -173,12 +222,12 @@ private fun Header(
             Text(
                 text = "pts",
                 style = TextStyle(
-                    fontSize = 40.sp,
+                    fontSize = 60.sp,
                     fontWeight = FontWeight.ExtraBold,
                     letterSpacing = (-3).sp,
                     color = MaterialTheme.colorScheme.surfaceTint,
                 ),
-                modifier = Modifier.padding(bottom = 15.dp, end = 20.dp),
+                modifier = Modifier.padding(bottom = 20.dp, end = 20.dp),
             )
         }
 
@@ -223,7 +272,7 @@ private fun Clue(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(4.dp)),
+                .clip(RoundedCornerShape(8.dp)),
             trailingContent = {
                 Text(
                     text = info,
@@ -246,18 +295,19 @@ private fun Input(
         modifier = Modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Min)
-            .padding(bottom = 100.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.Bottom,
     ) {
         // INPUT BOX
         OutlinedTextField(
             label = { Text("Guess") },
-            value = "Country Name",
+            value = "",
             textStyle = MaterialTheme.typography.bodyMedium,
             onValueChange = {/* TODO: set current guess */},
             singleLine = true,
             modifier = Modifier.weight(1f),
+            shape = RoundedCornerShape(8.dp),
         )
 
         // SUBMIT BUTTON
@@ -266,7 +316,7 @@ private fun Input(
                 // TODO: validate guess
                 onCorrectGuess()
             },
-            shape = MaterialTheme.shapes.extraSmall,
+            shape = RoundedCornerShape(8.dp),
             modifier = Modifier
                 .height(56.dp), // aligns with text field outline
         ) {
@@ -305,6 +355,6 @@ fun GameScreenPreview() {
     GameScreenContent(
         navController = navController,
         mode = "daily",
-        onCorrectGuess = {}
+        onCorrectGuess = { }
     )
 }
