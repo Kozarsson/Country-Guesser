@@ -27,8 +27,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -40,17 +38,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import coil.compose.AsyncImagePainter
+import org.kth.countryguesser.model.repository.GameModel
+import org.kth.countryguesser.model.repository.GameModelImpl
 import org.kth.countryguesser.view.components.BottomBar
-import org.kth.countryguesser.view.components.Routes
 import org.kth.countryguesser.viewmodel.IAuthViewModel
 
 @Composable
@@ -60,8 +57,12 @@ fun GameScreen(
     mode: String, // 'daily' or 'endless'
 ) {
     val user by authViewModel.userEntity.collectAsState()
-    var showSuccessDialog by remember { mutableStateOf(false) }
+    val game = remember { GameModelImpl(mode) }
+    LaunchedEffect(Unit) {
+        game.fetchCountry()
+    }
 
+    var showSuccessDialog by remember { mutableStateOf(false) }
     if (showSuccessDialog) {
         SuccessScreen(onConfirm = {
             showSuccessDialog = false
@@ -77,9 +78,11 @@ fun GameScreen(
         bottomBar = {
             BottomBar(navController = navController, authViewModel = authViewModel, user = user)
         },
+        game = game,
         mode = mode,
         onCorrectGuess = { showSuccessDialog = true },
     )
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,38 +90,11 @@ fun GameScreen(
 fun GameScreenContent(
     navController: NavHostController,
     bottomBar: @Composable () -> Unit = {},
+    game: GameModel,
     mode: String,
     onCorrectGuess: () -> Unit,
 ) {
     Scaffold(
-//        topBar = {
-//            TopAppBar(
-//                title = {
-//                    Row(
-//                        modifier = Modifier.fillMaxWidth(),
-//                        verticalAlignment = Ali
-//                    ) {
-//                        Text(text = mode.replaceFirstChar { it.uppercase() })
-//                    } },
-//                navigationIcon = {
-//                    IconButton(onClick = {
-//                        navController.navigate(Routes.HOME) {
-//                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
-//                        }
-//                    }) {
-//                        Icon(
-//                            Icons.AutoMirrored.Filled.ArrowBack,
-//                            contentDescription = "Return to Home"
-//                        )
-//                    }
-//                },
-//                colors = TopAppBarDefaults.topAppBarColors(
-//                    titleContentColor = MaterialTheme.colorScheme.primary,
-//                    navigationIconContentColor = MaterialTheme.colorScheme.primary,
-//                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-//                ),
-//            )
-//        },
         bottomBar = bottomBar,
     ) { padding ->
         Column(
@@ -126,33 +102,39 @@ fun GameScreenContent(
                 .fillMaxSize()
                 .padding(top = padding.calculateTopPadding(), bottom = padding.calculateBottomPadding()),
         ) {
-            Header(navController, mode)
-
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 8.dp, vertical = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    HorizontalDivider(thickness = 2.dp)
-                    Text(
-                        text = "Clues 3/5", // TODO: show num clues visible
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                    )
+            Header(navController, mode, game.score)
+            if (game.country == null) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    // TODO: add loading indicator
+                    Text("Loading Country Data...", style = MaterialTheme.typography.bodyLarge)
                 }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 8.dp, vertical = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        HorizontalDivider(thickness = 2.dp)
+                        Text(
+                            text = "Clues ${game.numClues}/5",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.surfaceVariant,
+                        )
+                    }
 
-                // CLUES 1-5
-                ClueBox(
-                    numClues = 3, // TODO: show num clues visible
-                    answers = listOf("10.2mil", "Europe", "Blue", "450k sqkm", "1200km"), // TODO: get from API
-                )
+                    // CLUES 1-5
+                    ClueBox(
+                        numClues = game.numClues,
+                        answers = game.getClues(),
+                    )
 
-                Spacer(modifier = Modifier.weight(1f))
+                    Spacer(modifier = Modifier.weight(1f))
 
-                HorizontalDivider(thickness = 2.dp)
-                Input(onCorrectGuess)
+                    HorizontalDivider(thickness = 2.dp)
+                    Input(game, onCorrectGuess)
+                }
             }
         }
 
@@ -164,6 +146,7 @@ fun GameScreenContent(
 private fun Header(
     navController: NavHostController,
     mode: String,
+    score: Int,
 ) {
     Box(
         modifier = Modifier
@@ -212,10 +195,11 @@ private fun Header(
             verticalAlignment = Alignment.Bottom,
         ) {
             Text(
-                text = "6", // TODO: display current score
+                text = "$score",
                 style = TextStyle(
                     fontSize = 200.sp,
                     fontWeight = FontWeight.Bold,
+                    letterSpacing = (-25).sp,
                     color = MaterialTheme.colorScheme.surfaceTint,
                 ),
             )
@@ -240,7 +224,7 @@ private fun ClueBox(
     numClues: Int = 1,
     answers: List<String>,
 ) {
-    val labels = listOf("Population", "Region", "Color in Flag", "Area", "Last Guess") // subject to change
+    val labels = listOf("Population", "Area", "Color in Flag", "Region", "Last Guess") // subject to change
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         labels.forEachIndexed { index, label ->
@@ -289,8 +273,11 @@ private fun Clue(
 
 @Composable
 private fun Input(
-    onCorrectGuess: () -> Unit
+    game: GameModel,
+    onCorrectGuess: () -> Unit,
 ) {
+    var guess by remember { mutableStateOf("") }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -302,9 +289,9 @@ private fun Input(
         // INPUT BOX
         OutlinedTextField(
             label = { Text("Guess") },
-            value = "",
+            value = guess,
             textStyle = MaterialTheme.typography.bodyMedium,
-            onValueChange = {/* TODO: set current guess */},
+            onValueChange = { inp -> guess = inp},
             singleLine = true,
             modifier = Modifier.weight(1f),
             shape = RoundedCornerShape(8.dp),
@@ -313,8 +300,10 @@ private fun Input(
         // SUBMIT BUTTON
         OutlinedButton(
             onClick = {
-                // TODO: validate guess
-                onCorrectGuess()
+                if (game.checkGuess(guess)) {
+                    onCorrectGuess()
+                    guess = ""
+                }
             },
             shape = RoundedCornerShape(8.dp),
             modifier = Modifier
@@ -354,6 +343,7 @@ fun GameScreenPreview() {
     val navController = rememberNavController()
     GameScreenContent(
         navController = navController,
+        game = GameModelImpl(),
         mode = "daily",
         onCorrectGuess = { }
     )
