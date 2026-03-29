@@ -44,6 +44,8 @@ class GameModelImpl constructor(
                 // TODO: end game
             } else {
                 score++
+                numClues = 1
+                country = null
                 GlobalScope.launch { fetchCountry() }
             }
             return true
