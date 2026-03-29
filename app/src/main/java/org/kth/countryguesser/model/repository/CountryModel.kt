@@ -69,17 +69,17 @@ class CountryModelImpl private constructor(
             restCountriesApiService: RestCountriesEndpoints,
             wikiDataApiService: WikiDataEndpoints
         ): CountryModel {
-            val restCountriesResult = restCountriesApiService.searchCountries(name).firstOrNull()
+            val restCountriesResult = restCountriesApiService.searchCountries(name).firstOrNull() ?: throw Exception("Country not found")
                 ?: throw IllegalArgumentException("Country not found")
-            val countryIdResult = wikiDataApiService.wikiDataCountryIdByName(search = name)
-            val entityId = countryIdResult.search.firstOrNull()?.id ?: throw IllegalArgumentException("Entity ID not found")
-            val entityResult = wikiDataApiService.wikiDataEntityById(entityId)
-            val inceptionYearResult = entityResult.entities[entityId]?.claims?.inception?.firstOrNull()?.mainsnak?.datavalue?.value?.time
+//            val countryIdResult = wikiDataApiService.wikiDataCountryIdByName(search = name)
+//            val entityId = countryIdResult.search.firstOrNull()?.id ?: throw IllegalArgumentException("Entity ID not found")
+//            val entityResult = wikiDataApiService.wikiDataEntityById(entityId)
+//            val inceptionYearResult = entityResult.entities[entityId]?.claims?.inception?.firstOrNull()?.mainsnak?.datavalue?.value?.time
             return CountryModelImpl(
                 countryName = restCountriesResult.name?.common!!,
                 population = restCountriesResult.population,
                 area = restCountriesResult.area,
-                inceptionYear = CountryRepository().extractYearFromWikiData(inceptionYearResult!!),
+//                inceptionYear = CountryRepository().extractYearFromWikiData(inceptionYearResult!!),
                 restCountriesApiService = restCountriesApiService,
                 wikiDataApiService = wikiDataApiService
             )

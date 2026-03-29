@@ -1,5 +1,11 @@
 package org.kth.countryguesser.model.repository
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.kth.countryguesser.model.service.RestCountriesApiService
 import org.kth.countryguesser.model.service.WikiDataApiService
 
@@ -7,53 +13,70 @@ interface GameModel {
     val gamemode: String
     val country: CountryModel?
     val numClues: Int
-    val clues: List<String>
     val score: Int
 
-    suspend fun checkGuess(guess: String) : Boolean
+    fun getClues() : List<String>
 
-    suspend fun fetchCountry() : CountryModel
+    fun checkGuess(guess: String) : Boolean
+
+    suspend fun fetchCountry()
 }
 
-class GameModelImpl private constructor(
+class GameModelImpl constructor(
     override var gamemode: String = "daily",
-    override var country: CountryModel? = null,
-    override var numClues: Int = 0,
-    override var clues: List<String>,
-    override var score: Int = if (gamemode == "daily") 10 else 0,
 ) : GameModel {
-    override suspend fun checkGuess(guess: String) : Boolean {
+    override var country: CountryModel? by mutableStateOf(null)
+    override var numClues: Int by mutableIntStateOf(1)
+    override var score: Int by mutableIntStateOf(if (gamemode == "daily") 10 else 0)
+
+    override fun getClues() : List<String> {
+        return listOf(
+            country?.population.toString(),
+            country?.area.toString(),
+            country?.inceptionYear.toString()
+        )
+    }
+
+    override fun checkGuess(guess: String) : Boolean {
         if (country?.countryName.equals(guess, ignoreCase = true)) { // CORRECT GUESS
             if (gamemode == "daily") {
                 // TODO: save score
                 // TODO: end game
             } else {
                 score++
-                country = fetchCountry()
+                GlobalScope.launch { fetchCountry() }
             }
             return true
         }
+
         // WRONG GUESS
         if (numClues >= 5) {
             // TODO: end game
         }
         numClues++
-        if (gamemode == "daily") score = 10 - 2*numClues
+        if (gamemode == "daily") {
+            score = 10 - 2*(numClues-1)
+        }
         return false
     }
 
-    override suspend fun fetchCountry() : CountryModel {
-        val restApi = RestCountriesApiService.api
-        val wikiApi = WikiDataApiService.api
-        var newCountry: String
-        newCountry = "Sweden" // (debug) TODO: remove
+    override suspend fun fetchCountry() {
+        try {
+            val restApi = RestCountriesApiService.api
+            val wikiApi = WikiDataApiService.api
+            var newCountry: String
 
-        if (gamemode == "daily") {
-            // TODO: determine the daily country
-        } else {
-            // TODO: get new country
+            if (gamemode == "daily") {
+                // TODO: determine the daily country
+                newCountry = "Sweden" // (debug) TODO: remove
+            } else {
+                // TODO: get new country
+                newCountry = "Switzerland" // (debug) TODO: remove
+            }
+
+            country = CountryModelImpl.create(newCountry, restApi, wikiApi)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-
-        return CountryModelImpl.create(newCountry, restApi, wikiApi)
     }
 }
