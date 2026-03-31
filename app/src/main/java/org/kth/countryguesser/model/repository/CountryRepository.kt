@@ -1,26 +1,64 @@
 package org.kth.countryguesser.model.repository
 
-class CountryRepository {
+import android.util.Log
+import org.kth.countryguesser.model.CountryModel
+import org.kth.countryguesser.model.CountryModelImpl
+import org.kth.countryguesser.model.api.RestCountriesEndpoints
+import org.kth.countryguesser.model.api.WikiDataEndpoints
+import org.kth.countryguesser.ui.model.CountryUiModel
+import org.kth.countryguesser.ui.model.toUiModel
+import org.kth.countryguesser.util.WikiDataParser
+import retrofit2.HttpException
+import javax.inject.Inject
+import javax.inject.Singleton
 
-    fun extractYearFromWikiData(wikiData: String): InceptionYear {
-        var datingSystem = ""
-        if (wikiData.startsWith("+")) {
-            datingSystem = "AD"
-        } else if (wikiData.startsWith("-")) {
-            datingSystem = "BC" // Kinda redundant because the oldest country according to wikipedia is Japan at 539 AD
-        }
-        val year: Int = wikiData.trimStart('+', '-').take(4).toInt()
-        return InceptionYear(datingSystem, year)
-    }
+interface CountryRepository {
+    suspend fun searchCountries(searchQuery: String): List<CountryUiModel>
+    suspend fun getCountryByName(name: String): CountryModel?
 }
 
-data class InceptionYear(
-    val datingSystem: String,
-    val year: Int
-) : Comparable<InceptionYear> {
-    override fun compareTo(other: InceptionYear): Int {
-        val thisNormalized = if (this.datingSystem == "BC") -this.year else this.year
-        val otherNormalized = if (other.datingSystem == "BC") -other.year else other.year
-        return thisNormalized.compareTo(otherNormalized)
+@Singleton
+class CountryRepositoryImpl @Inject constructor(
+    private val restCountriesApiService: RestCountriesEndpoints,
+    private val wikiDataApiService: WikiDataEndpoints,
+    private val wikiDataParser: WikiDataParser
+) : CountryRepository {
+    override suspend fun searchCountries(searchQuery: String): List<CountryUiModel> {
+        return try {
+            val result = restCountriesApiService.searchCountries(searchQuery)
+            result.map { it.toUiModel() }
+        } catch (e: HttpException) {
+            Log.e("CountryRepository", "HTTP exception: ${e.message}")
+            if (e.code() == 404) emptyList() else throw e
+        }
+    }
+
+    override suspend fun getCountryByName(name: String): CountryModel? {
+        val restCountriesResult = try {
+            restCountriesApiService.searchCountries(name).firstOrNull()
+        } catch (e: HttpException) {
+            Log.e("CountryRepository", "HTTP exception: ${e.message}")
+            if (e.code() == 404) return null else throw e
+        }
+        if (restCountriesResult == null) {
+            Log.e("CountryRepository", "No country found with name $name")
+            return null
+        }
+        try {
+            val countryIdResult = wikiDataApiService.wikiDataCountryIdByName(search = name)
+            val entityId = countryIdResult.search.firstOrNull()?.id ?: return null
+            val entityResult = wikiDataApiService.wikiDataEntityById(entityId)
+            val inceptionYearResult = entityResult.entities[entityId]?.claims?.inception?.firstOrNull()?.mainsnak?.datavalue?.value?.time
+            val inceptionYear = inceptionYearResult?.let { wikiDataParser.extractYearFromWikiData(it) }
+            return CountryModelImpl(
+                countryName = restCountriesResult.name?.common ?: name,
+                population = restCountriesResult.population,
+                area = restCountriesResult.area,
+                inceptionYear = inceptionYear
+            )
+        } catch (e: HttpException) {
+            Log.e("CountryRepository", "WikiData HTTP exception: ${e.message}")
+            if (e.code() == 404 || e.code() == 403) return null else throw e
+        }
     }
 }

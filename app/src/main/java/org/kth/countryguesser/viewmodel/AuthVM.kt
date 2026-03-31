@@ -14,7 +14,7 @@ import org.kth.countryguesser.model.service.MyFirebaseMessagingService
 import org.kth.countryguesser.util.NetworkUtils
 
 
-interface IAuthViewModel {
+interface AuthVM {
     val userEntity: StateFlow<UserEntity?>
     fun signInWithEmailPassword(
         email: String,
@@ -33,9 +33,9 @@ interface IAuthViewModel {
     fun signInAnonymously()
 }
 
-class AuthViewModel(
+class AuthVMImpl(
     private val authRepository: FirebaseAuthRepository
-) : ViewModel(), IAuthViewModel {
+) : ViewModel(), AuthVM {
 
     companion object {
         const val TAG: String = "[Authentication]"
@@ -44,8 +44,8 @@ class AuthViewModel(
             object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    if (modelClass.isAssignableFrom(AuthViewModel::class.java)) {
-                        return AuthViewModel(authRepository) as T
+                    if (modelClass.isAssignableFrom(AuthVMImpl::class.java)) {
+                        return AuthVMImpl(authRepository) as T
                     }
                     throw IllegalArgumentException("Unknown ViewModel class")
                 }

@@ -96,6 +96,7 @@ dependencies {
     implementation(libs.moshi)
     implementation(libs.moshi.adapters)
     implementation(libs.moshi.kotlin)
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 }
 
 kapt {

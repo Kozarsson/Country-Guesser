@@ -1,8 +1,8 @@
-package org.kth.countryguesser.model.repository
+package org.kth.countryguesser.model
 
-import org.kth.countryguesser.model.api.RestCountriesEndpoints
-import org.kth.countryguesser.model.api.WikiDataEndpoints
-import org.kth.countryguesser.model.repository.CountryRepository
+import org.kth.countryguesser.util.InceptionYear
+import org.kth.countryguesser.util.WikiDataParser
+import kotlin.math.abs
 
 
 interface CountryModel {
@@ -17,13 +17,11 @@ interface CountryModel {
     suspend fun saveToDatabase()
 }
 
-class CountryModelImpl private constructor(
+class CountryModelImpl(
     override var countryName: String = "",
     override var population: Long? = null,
     override var area: Double? = null,
-    override var inceptionYear: InceptionYear? = null,
-    private val restCountriesApiService: RestCountriesEndpoints,
-    private val wikiDataApiService: WikiDataEndpoints
+    override var inceptionYear: InceptionYear? = null
 ) : CountryModel {
     override fun compareAttributesTo(other: CountryModel, closenessCriteria: Double?): CountryComparisonResult {
         return CountryComparisonResult(
@@ -51,39 +49,16 @@ class CountryModelImpl private constructor(
         }
         var isClose: Boolean? = null
         if (value1 is Number && value2 is Number) {
-            val diff = kotlin.math.abs(value1.toDouble() - value2.toDouble())
+            val diff = abs(value1.toDouble() - value2.toDouble())
             isClose = diff < closenessCriteria * value1.toDouble()
         } else if (value1 is InceptionYear && value2 is InceptionYear) {
             // Normalise BC/AD: BC years as negative, AD as positive
             val year1 = if (value1.datingSystem == "BC") -value1.year else value1.year
             val year2 = if (value2.datingSystem == "BC") -value2.year else value2.year
-            val diff = kotlin.math.abs(year1 - year2)
-            isClose = diff < closenessCriteria * kotlin.math.abs(year1)
+            val diff = abs(year1 - year2)
+            isClose = diff < closenessCriteria * abs(year1)
         }
         return CountryAttributeResult(comparison = comparison, isClose = isClose)
-    }
-
-    companion object {
-        suspend fun create(
-            name: String,
-            restCountriesApiService: RestCountriesEndpoints,
-            wikiDataApiService: WikiDataEndpoints
-        ): CountryModel {
-            val restCountriesResult = restCountriesApiService.searchCountries(name).firstOrNull() ?: throw Exception("Country not found")
-                ?: throw IllegalArgumentException("Country not found")
-//            val countryIdResult = wikiDataApiService.wikiDataCountryIdByName(search = name)
-//            val entityId = countryIdResult.search.firstOrNull()?.id ?: throw IllegalArgumentException("Entity ID not found")
-//            val entityResult = wikiDataApiService.wikiDataEntityById(entityId)
-//            val inceptionYearResult = entityResult.entities[entityId]?.claims?.inception?.firstOrNull()?.mainsnak?.datavalue?.value?.time
-            return CountryModelImpl(
-                countryName = restCountriesResult.name?.common!!,
-                population = restCountriesResult.population,
-                area = restCountriesResult.area,
-//                inceptionYear = CountryRepository().extractYearFromWikiData(inceptionYearResult!!),
-                restCountriesApiService = restCountriesApiService,
-                wikiDataApiService = wikiDataApiService
-            )
-        }
     }
 }
 

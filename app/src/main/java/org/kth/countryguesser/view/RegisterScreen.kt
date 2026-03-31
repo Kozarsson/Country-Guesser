@@ -36,15 +36,15 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import org.kth.countryguesser.model.repository.FirebaseAuthRepository
-import org.kth.countryguesser.viewmodel.AuthViewModel
-import org.kth.countryguesser.viewmodel.IAuthViewModel
+import org.kth.countryguesser.viewmodel.AuthVMImpl
+import org.kth.countryguesser.viewmodel.AuthVM
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(
     navController: NavController,
-    authVM: IAuthViewModel
+    authVM: AuthVM
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -176,6 +176,6 @@ fun RegisterScreen(
 fun RegisterScreenPreview() {
     Surface() {
         val navController = rememberNavController()
-        RegisterScreen(navController = navController, AuthViewModel(FirebaseAuthRepository()))
+        RegisterScreen(navController = navController, AuthVMImpl(FirebaseAuthRepository()))
     }
 }

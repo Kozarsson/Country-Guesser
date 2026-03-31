@@ -8,12 +8,13 @@ import org.kth.countryguesser.view.HomeScreen
 import org.kth.countryguesser.view.LoginScreen
 import org.kth.countryguesser.view.RegisterScreen
 import org.kth.countryguesser.view.UserScreen
-import org.kth.countryguesser.viewmodel.IAuthViewModel
+import org.kth.countryguesser.viewmodel.AuthVM
+import org.kth.countryguesser.viewmodel.GameVM
 
 @Composable
 fun NavGraph(
     navController: NavHostController,
-    authVM: IAuthViewModel
+    authVM: AuthVM,
 ) {
     NavHost(
         navController = navController,
@@ -34,7 +35,7 @@ fun NavGraph(
             org.kth.countryguesser.view.GameScreen(
                 navController = navController,
                 authViewModel = authVM,
-                mode = mode,
+                mode = mode
             )
         }
         composable(Routes.PROFILE) {

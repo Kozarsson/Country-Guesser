@@ -25,12 +25,12 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import org.kth.countryguesser.model.entity.UserEntity
-import org.kth.countryguesser.viewmodel.IAuthViewModel
+import org.kth.countryguesser.viewmodel.AuthVM
 
 //TODO: CREATE A TOPAPPBAR WITH USER LOGIN/REGISTER ON RIGHT SIDE AND SETTINGS ON LEFT
 
 @Composable
-fun BottomBar(navController: NavController, authViewModel: IAuthViewModel, user: UserEntity?) {
+fun BottomBar(navController: NavController, authViewModel: AuthVM, user: UserEntity?) {
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
     Surface(
         modifier = Modifier.fillMaxWidth(),

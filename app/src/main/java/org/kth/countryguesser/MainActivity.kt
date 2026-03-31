@@ -9,21 +9,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.compose.rememberNavController
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import dagger.hilt.android.AndroidEntryPoint
 import org.kth.countryguesser.model.repository.FirebaseAuthRepository
 import org.kth.countryguesser.model.repository.FirebaseTokenRepository
 import org.kth.countryguesser.ui.theme.DefaultTheme
 import org.kth.countryguesser.view.components.NavGraph
-import org.kth.countryguesser.viewmodel.AuthViewModel
+import org.kth.countryguesser.viewmodel.AuthVMImpl
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private lateinit var authViewModel: AuthViewModel
+    private lateinit var authViewModel: AuthVMImpl
 
     @SuppressLint("StateFlowValueCalledInComposition")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,9 +58,10 @@ class MainActivity : ComponentActivity() {
         val firebaseAuthRepository = FirebaseAuthRepository()
         val tokenRepository = FirebaseTokenRepository()
 
-        val authViewModelFactory = AuthViewModel.Factory(firebaseAuthRepository)
+        val authViewModelFactory = AuthVMImpl.Factory(firebaseAuthRepository)
 
-        authViewModel = ViewModelProvider(this, authViewModelFactory)[AuthViewModel::class.java]
+
+        authViewModel = ViewModelProvider(this, authViewModelFactory)[AuthVMImpl::class.java]
     }
 
     override fun onRequestPermissionsResult(

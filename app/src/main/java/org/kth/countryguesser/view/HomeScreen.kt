@@ -14,15 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AllInclusive
-import androidx.compose.material.icons.filled.Build
-import androidx.compose.material.icons.filled.DirectionsBoat
 import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.Flight
 import androidx.compose.material.icons.filled.SportsEsports
-import androidx.compose.material.icons.filled.Terrain
-import androidx.compose.material.icons.filled.Wifi
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -40,12 +33,12 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import org.kth.countryguesser.view.components.BottomBar
 import org.kth.countryguesser.view.components.Routes
-import org.kth.countryguesser.viewmodel.IAuthViewModel
+import org.kth.countryguesser.viewmodel.AuthVM
 
 @Composable
 fun HomeScreen(
     navController: NavHostController,
-    authViewModel: IAuthViewModel,
+    authViewModel: AuthVM,
 ) {
     val user by authViewModel.userEntity.collectAsState()
 

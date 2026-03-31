@@ -1,22 +1,30 @@
 package org.kth.countryguesser.view
 
+import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -28,6 +36,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,33 +45,37 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import org.kth.countryguesser.model.repository.GameModel
-import org.kth.countryguesser.model.repository.GameModelImpl
+import org.kth.countryguesser.ui.model.CountryUiModel
+import org.kth.countryguesser.viewmodel.GameVM
 import org.kth.countryguesser.view.components.BottomBar
-import org.kth.countryguesser.viewmodel.IAuthViewModel
+import org.kth.countryguesser.viewmodel.AuthVM
+import androidx.hilt.navigation.compose.hiltViewModel
+import org.kth.countryguesser.viewmodel.GameVMImpl
 
 @Composable
 fun GameScreen(
     navController: NavHostController,
-    authViewModel: IAuthViewModel,
+    authViewModel: AuthVM,
     mode: String, // 'daily' or 'endless'
 ) {
     val user by authViewModel.userEntity.collectAsState()
-    val game = remember { GameModelImpl(mode) }
-    LaunchedEffect(Unit) {
-        game.fetchCountry()
+    var showSuccessDialog by remember { mutableStateOf(false) }
+    val gameVM = hiltViewModel<GameVMImpl>()
+
+    // Reset guessed countries when mode changes or on first composition
+    LaunchedEffect(mode) {
+        //gameViewModelImpl.resetGuessedCountries()
     }
 
-    var showSuccessDialog by remember { mutableStateOf(false) }
     if (showSuccessDialog) {
         SuccessScreen(onConfirm = {
             showSuccessDialog = false
@@ -72,17 +85,15 @@ fun GameScreen(
             // stay here (do nothing) if 'endless' mode
         })
     }
-
     GameScreenContent(
         navController = navController,
         bottomBar = {
             BottomBar(navController = navController, authViewModel = authViewModel, user = user)
         },
-        game = game,
         mode = mode,
         onCorrectGuess = { showSuccessDialog = true },
+        vm = gameVM
     )
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -90,10 +101,12 @@ fun GameScreen(
 fun GameScreenContent(
     navController: NavHostController,
     bottomBar: @Composable () -> Unit = {},
-    game: GameModel,
     mode: String,
     onCorrectGuess: () -> Unit,
+    vm: GameVMImpl
 ) {
+
+
     Scaffold(
         bottomBar = bottomBar,
     ) { padding ->
@@ -102,45 +115,17 @@ fun GameScreenContent(
                 .fillMaxSize()
                 .padding(top = padding.calculateTopPadding(), bottom = padding.calculateBottomPadding()),
         ) {
-            Header(navController, mode, game.score)
-            if (game.country == null) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    // TODO: add loading indicator
-                    Text("Loading Country Data...", style = MaterialTheme.typography.bodyLarge)
-                }
-            } else {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 8.dp, vertical = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        HorizontalDivider(thickness = 2.dp)
-                        Text(
-                            text = "Clues ${game.numClues}/5",
-                            style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.surfaceVariant,
-                        )
-                    }
-
-                    // CLUES 1-5
-                    ClueBox(
-                        numClues = game.numClues,
-                        answers = game.getClues(),
-                    )
-
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    HorizontalDivider(thickness = 2.dp)
-                    Input(game, onCorrectGuess)
-                }
+            Header(navController, mode, 0) // TODO: Replace 0 with actual score
+            Spacer(modifier = Modifier.height(16.dp))
+            Input(onCorrectGuess = onCorrectGuess, vm = vm)
+            Spacer(modifier = Modifier.height(16.dp))
+            if (vm.guessedCountries.collectAsState().value.isNotEmpty()) {
+                //TODO: add a header for guessed countries; Country, Population, Area, Inception Year
+                GuessedCountries(guessedCountries = vm.guessedCountries.collectAsState().value)
             }
         }
-
     }
 }
-
 
 @Composable
 private fun Header(
@@ -273,47 +258,106 @@ private fun Clue(
 
 @Composable
 private fun Input(
-    game: GameModel,
     onCorrectGuess: () -> Unit,
+    vm: GameVMImpl
 ) {
     var guess by remember { mutableStateOf("") }
+    var isFocused by remember { mutableStateOf(false) }
+    val searchResults by vm.searchResults.collectAsState()
+    val focusManager = LocalFocusManager.current
 
-    Row(
+    // Trigger search on every text change
+    LaunchedEffect(guess) {
+        if (guess.isNotBlank()) {
+            vm.searchCountries(guess)
+        }
+    }
+
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(IntrinsicSize.Min)
-            .padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.Bottom,
+            .padding(horizontal = 16.dp)
     ) {
-        // INPUT BOX
-        OutlinedTextField(
-            label = { Text("Guess") },
-            value = guess,
-            textStyle = MaterialTheme.typography.bodyMedium,
-            onValueChange = { inp -> guess = inp},
-            singleLine = true,
-            modifier = Modifier.weight(1f),
-            shape = RoundedCornerShape(8.dp),
-        )
-
-        // SUBMIT BUTTON
-        OutlinedButton(
-            onClick = {
-                if (game.checkGuess(guess)) {
-                    onCorrectGuess()
-                    guess = ""
-                }
-            },
-            shape = RoundedCornerShape(8.dp),
+        Row(
             modifier = Modifier
-                .height(56.dp), // aligns with text field outline
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.Bottom,
         ) {
-            Text(
-                text = "Submit",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onBackground,
+            OutlinedTextField(
+                label = { Text("Guess") },
+                value = guess,
+                textStyle = MaterialTheme.typography.bodyMedium,
+                onValueChange = { input -> guess = input },
+                singleLine = true,
+                modifier = Modifier
+                    .weight(1f)
+                    .onFocusChanged { isFocused = it.isFocused },
+                shape = RoundedCornerShape(8.dp),
             )
+            OutlinedButton(
+                onClick = {
+                    vm.guessCountry(guess)
+                    focusManager.clearFocus()
+                },
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier.height(56.dp),
+            ) {
+                Text(
+                    text = "Submit",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+            }
+        }
+        // Show suggestions dropdown
+        if (isFocused && searchResults.isNotEmpty()) {
+            SuggestionsDropdown(
+                results = searchResults,
+                onSuggestionClick = { country ->
+                    guess = country.countryName
+                    focusManager.clearFocus()
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .offset(y = 64.dp) // below the text field
+            )
+        }
+    }
+}
+
+@Composable
+private fun SuggestionsDropdown(
+    results: List<CountryUiModel>,
+    onSuggestionClick: (CountryUiModel) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(8.dp))
+    ) {
+        results.forEach { country ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onSuggestionClick(country) }
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Flag,
+                    contentDescription = "Flag",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(end = 12.dp)
+                )
+                Text(
+                    text = country.countryName,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
         }
     }
 }
@@ -336,15 +380,93 @@ private fun SuccessScreen(
     )
 }
 
-@Preview(showBackground = true)
 @Composable
-fun GameScreenPreview() {
-//    SuccessScreen(onConfirm = {})
-    val navController = rememberNavController()
-    GameScreenContent(
-        navController = navController,
-        game = GameModelImpl(),
-        mode = "daily",
-        onCorrectGuess = { }
-    )
+fun GuessedCountries(
+    guessedCountries: List<CountryUiModel>,
+) {
+    val cellSize = 96.dp
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        items(guessedCountries) { country: CountryUiModel ->
+            Row(
+                modifier = Modifier
+                    .width(cellSize * 4)
+                    .height(cellSize),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(cellSize)
+                        .padding(2.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.primary,
+                            shape = MaterialTheme.shapes.medium
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = country.countryName, //TODO: replace with flag
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.background,
+                        maxLines = 1
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .size(cellSize)
+                        .padding(2.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.primary,
+                            shape = MaterialTheme.shapes.medium
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = country.population?.toString() ?: "N/A",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.background,
+                        maxLines = 1
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .size(cellSize)
+                        .padding(2.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.primary,
+                            shape = MaterialTheme.shapes.medium
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = country.area?.toString()?: "N/A",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.background,
+                        maxLines = 1
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .size(cellSize)
+                        .padding(2.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.primary,
+                            shape = MaterialTheme.shapes.medium
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = country.inceptionYear?.year?.toString() ?: "N/A",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.background,
+                        maxLines = 1
+                    )
+                }
+            }
+        }
+    }
 }
