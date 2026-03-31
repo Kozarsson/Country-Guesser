@@ -1,13 +1,12 @@
 package org.kth.countryguesser.view.components
 
-import android.view.RoundedCorner
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
@@ -20,11 +19,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -36,17 +32,9 @@ import org.kth.countryguesser.viewmodel.IAuthViewModel
 @Composable
 fun BottomBar(navController: NavController, authViewModel: IAuthViewModel, user: UserEntity?) {
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
-    val density = androidx.compose.ui.platform.LocalDensity.current
-    val view = LocalView.current
-    val deviceCornerRadius = remember(LocalView.current) {
-        val radius = view.rootWindowInsets?.getRoundedCorner(RoundedCorner.POSITION_BOTTOM_LEFT)?.radius ?: 0
-        with(density) { radius.toDp()}
-    }
     Surface(
-        modifier = Modifier
-            .padding(vertical = 14.dp, horizontal = 14.dp)
-            .fillMaxWidth(),
-        shape = RoundedCornerShape((deviceCornerRadius - 10.dp).coerceAtLeast(8.dp)),
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium.copy(all = ZeroCornerSize),
         color = MaterialTheme.colorScheme.primary,
         contentColor = MaterialTheme.colorScheme.onPrimary,
         tonalElevation = 8.dp,
