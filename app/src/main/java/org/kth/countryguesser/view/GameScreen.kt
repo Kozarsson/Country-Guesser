@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -51,6 +52,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -119,10 +122,9 @@ fun GameScreenContent(
             Spacer(modifier = Modifier.height(16.dp))
             Input(onCorrectGuess = onCorrectGuess, vm = vm)
             Spacer(modifier = Modifier.height(16.dp))
-            if (vm.guessedCountries.collectAsState().value.isNotEmpty()) {
-                //TODO: add a header for guessed countries; Country, Population, Area, Inception Year
-                GuessedCountries(guessedCountries = vm.guessedCountries.collectAsState().value)
-            }
+//            if (vm.guessedCountries.collectAsState().value.isNotEmpty()) {
+            GuessedCountries(guessedCountries = vm.guessedCountries.collectAsState().value)
+//            }
         }
     }
 }
@@ -201,59 +203,6 @@ private fun Header(
         }
 
     }
-}
-
-
-@Composable
-private fun ClueBox(
-    numClues: Int = 1,
-    answers: List<String>,
-) {
-    val labels = listOf("Population", "Area", "Color in Flag", "Region", "Last Guess") // subject to change
-
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        labels.forEachIndexed { index, label ->
-            Clue(
-                label = label,
-                info = answers.getOrElse(index) { "N/A" },
-                enabled = numClues > index,
-            )
-        }
-    }
-
-    // Note to self: display color as an actual color (not in text)
-}
-
-@Composable
-private fun Clue(
-    label: String,
-    info: String,
-    enabled: Boolean = false,
-) {
-    if (enabled)
-        ListItem(
-            headlineContent = {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onBackground,
-                )
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(8.dp)),
-            trailingContent = {
-                Text(
-                    text = info,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.surfaceTint,
-                    fontWeight = FontWeight.Bold,
-                )
-            },
-            colors = ListItemDefaults.colors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-            ),
-        )
 }
 
 @Composable
@@ -385,88 +334,145 @@ fun GuessedCountries(
     guessedCountries: List<CountryUiModel>,
 ) {
     val cellSize = 96.dp
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(text = "Country", modifier = Modifier.width(cellSize), textAlign = TextAlign.Center)
+        Text(text = "Population", modifier = Modifier.width(cellSize), textAlign = TextAlign.Center)
+        Text(text = "Area", modifier = Modifier.width(cellSize), textAlign = TextAlign.Center)
+        Text(text = "Inception Year", modifier = Modifier.width(cellSize), textAlign = TextAlign.Center)
+    }
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        items(guessedCountries) { country: CountryUiModel ->
-            Row(
-                modifier = Modifier
-                    .width(cellSize * 4)
-                    .height(cellSize),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(cellSize)
-                        .padding(2.dp)
-                        .background(
-                            color = MaterialTheme.colorScheme.primary,
-                            shape = MaterialTheme.shapes.medium
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = country.countryName, //TODO: replace with flag
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.background,
-                        maxLines = 1
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .size(cellSize)
-                        .padding(2.dp)
-                        .background(
-                            color = MaterialTheme.colorScheme.primary,
-                            shape = MaterialTheme.shapes.medium
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = country.population?.toString() ?: "N/A",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.background,
-                        maxLines = 1
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .size(cellSize)
-                        .padding(2.dp)
-                        .background(
-                            color = MaterialTheme.colorScheme.primary,
-                            shape = MaterialTheme.shapes.medium
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = country.area?.toString()?: "N/A",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.background,
-                        maxLines = 1
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .size(cellSize)
-                        .padding(2.dp)
-                        .background(
-                            color = MaterialTheme.colorScheme.primary,
-                            shape = MaterialTheme.shapes.medium
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = country.inceptionYear?.year?.toString() ?: "N/A",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.background,
-                        maxLines = 1
-                    )
-                }
+        items(5) { idx ->
+            if (idx < guessedCountries.size) {
+                val country = guessedCountries[idx]
+                CountryRow(country, cellSize)
+            } else {
+                EmptyRow(cellSize)
             }
         }
     }
+}
+
+@Composable
+fun CountryRow(
+    country: CountryUiModel,
+    cellSize: Dp,
+) {
+    Row(
+        modifier = Modifier
+            .width(cellSize * 4)
+            .height(cellSize),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(cellSize)
+                .padding(2.dp)
+                .background(
+                    color = getColor(country.countryName),
+                    shape = MaterialTheme.shapes.medium
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = country.countryName, //TODO: replace with flag
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.background,
+                maxLines = 1
+            )
+        }
+        Box(
+            modifier = Modifier
+                .size(cellSize)
+                .padding(2.dp)
+                .background(
+                    color = getColor(country.population?.toString()),
+                    shape = MaterialTheme.shapes.medium
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = country.population?.toString() ?: "N/A",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.background,
+                maxLines = 1
+            )
+        }
+        Box(
+            modifier = Modifier
+                .size(cellSize)
+                .padding(2.dp)
+                .background(
+                    color = getColor(country.area?.toString()),
+                    shape = MaterialTheme.shapes.medium
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = country.area?.toString()?: "N/A",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.background,
+                maxLines = 1
+            )
+        }
+        Box(
+            modifier = Modifier
+                .size(cellSize)
+                .padding(2.dp)
+                .background(
+                    color = getColor(country.inceptionYear?.year?.toString()),
+                    shape = MaterialTheme.shapes.medium
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = country.inceptionYear?.year?.toString() ?: "N/A",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.background,
+                maxLines = 1
+            )
+        }
+    }
+}
+@Composable
+private fun EmptyRow(cellSize: Dp) {
+    LazyRow(
+        modifier = Modifier
+            .width(cellSize * 4)
+            .height(cellSize),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        items(5) { idx ->
+            Box(
+                modifier = Modifier
+                    .size(cellSize)
+                    .padding(2.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = MaterialTheme.shapes.medium
+                    ),
+                contentAlignment = Alignment.Center
+            ) {}
+        }
+    }
+}
+
+@Composable
+private fun getColor(value: String?): Color {
+    if (value != null) {
+        // TODO: select colors based on value differential to answer
+        return MaterialTheme.colorScheme.primary
+    }
+
+    return MaterialTheme.colorScheme.surfaceVariant
 }
