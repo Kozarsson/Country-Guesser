@@ -48,7 +48,7 @@ fun BottomBar(navController: NavController, authViewModel: AuthVM, user: UserEnt
             verticalAlignment = Alignment.CenterVertically,
         ) {
             //TODO: DECIDE WHAT WE WANT AT THE BOTTOM BAR
-            TextButton(onClick = { /* if (currentRoute != Routes.STUDY) navController.navigate(Routes.STUDY */ }) {
+            TextButton(onClick = { if (currentRoute != Routes.STUDY) navController.navigate(Routes.STUDY) }) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(
                         Icons.Default.Map,
