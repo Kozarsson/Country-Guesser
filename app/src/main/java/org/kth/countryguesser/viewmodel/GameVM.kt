@@ -7,7 +7,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import org.kth.countryguesser.model.CountryModel
+import org.kth.countryguesser.model.CountryModelImpl
 import org.kth.countryguesser.model.repository.CountryRepository
 import org.kth.countryguesser.model.repository.GameRepository
 import org.kth.countryguesser.ui.model.CountryUiModel
@@ -26,8 +28,22 @@ interface GameVM {
 @HiltViewModel
 class GameVMImpl @Inject constructor(
     private val countryRepository: CountryRepository,
-    private val gameRepository: GameRepository
+    private val gameRepository: GameRepository,
 ) : ViewModel(), GameVM {
+    private val targetCountry = MutableStateFlow<CountryModel?>(null)
+
+    init {
+        fetchCountry()
+    }
+
+    fun fetchCountry() {
+        viewModelScope.launch {
+            val countryName = "Sweden"  // TODO: randomize based on gamemode
+            val result = countryRepository.getCountryByName(countryName)
+            targetCountry.value = result
+        }
+    }
+
     private val _guessedCountries = MutableStateFlow<List<CountryUiModel>>(listOf())
     override val guessedCountries: StateFlow<List<CountryUiModel>>
         get() = _guessedCountries
@@ -38,8 +54,9 @@ class GameVMImpl @Inject constructor(
 
     override fun searchCountries(searchQuery: String) {
         viewModelScope.launch {
-            val results = countryRepository.searchCountries(searchQuery)
-            _searchResults.value = results
+            val result = countryRepository.searchCountries(searchQuery)
+            _searchResults.value = result
+            Log.d("GameVM", "Target Country: $result")
         }
     }
 
@@ -47,9 +64,19 @@ class GameVMImpl @Inject constructor(
         viewModelScope.launch {
             val result = countryRepository.getCountryByName(country)
             if (result != null) {
-                //if guessed country correct win game
-                _guessedCountries.value += result.toUiModel()
-                Log.d("GameVM", _guessedCountries.value.toString())
+                val comp = targetCountry.value?.compareAttributesTo(result)
+
+                if (targetCountry.value?.countryName == result.countryName) {
+                    // TODO: win ame
+                    Log.d("GameVM", "Correct guess")
+                }
+
+                _guessedCountries.value += result.toUiModel(
+                    comp?.populationComparison?.comparison,
+                    comp?.areaComparison?.comparison,
+                    comp?.inceptionYearComparison?.comparison
+                )
+                Log.d("GameVM", "Guessed country: ${_guessedCountries.value}")
             } else {
                 Log.e("GameVM", "No country found with name $country")
             }

@@ -10,7 +10,20 @@ fun CountryModel.toUiModel(): CountryUiModel = CountryUiModel(
     countryName = this.countryName,
     population = this.population,
     area = this.area,
-    inceptionYear = this.inceptionYear
+    inceptionYear = this.inceptionYear,
+)
+fun CountryModel.toUiModel(
+    populationDiff: Int?,
+    areaDiff: Int?,
+    inceptionYearDiff: Int?,
+): CountryUiModel = CountryUiModel(
+    countryName = this.countryName,
+    population = this.population,
+    populationDiff = populationDiff,
+    area = this.area,
+    areaDiff = areaDiff,
+    inceptionYear = this.inceptionYear,
+    inceptionYearDiff = inceptionYearDiff,
 )
 
 /**

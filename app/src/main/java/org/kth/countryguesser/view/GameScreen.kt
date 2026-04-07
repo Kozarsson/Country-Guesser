@@ -63,6 +63,7 @@ import org.kth.countryguesser.view.components.BottomBar
 import org.kth.countryguesser.viewmodel.AuthVM
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.kth.countryguesser.viewmodel.GameVMImpl
+import kotlin.math.abs
 
 @Composable
 fun GameScreen(
@@ -368,79 +369,43 @@ fun CountryRow(
     country: CountryUiModel,
     cellSize: Dp,
 ) {
-    Row(
+    LazyRow(
         modifier = Modifier
             .width(cellSize * 4)
             .height(cellSize),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(
-            modifier = Modifier
-                .size(cellSize)
-                .padding(2.dp)
-                .background(
-                    color = getColor(country.countryName),
-                    shape = MaterialTheme.shapes.medium
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = country.countryName, //TODO: replace with flag
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.background,
-                maxLines = 1
-            )
-        }
-        Box(
-            modifier = Modifier
-                .size(cellSize)
-                .padding(2.dp)
-                .background(
-                    color = getColor(country.population?.toString()),
-                    shape = MaterialTheme.shapes.medium
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = country.population?.toString() ?: "N/A",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.background,
-                maxLines = 1
-            )
-        }
-        Box(
-            modifier = Modifier
-                .size(cellSize)
-                .padding(2.dp)
-                .background(
-                    color = getColor(country.area?.toString()),
-                    shape = MaterialTheme.shapes.medium
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = country.area?.toString()?: "N/A",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.background,
-                maxLines = 1
-            )
-        }
-        Box(
-            modifier = Modifier
-                .size(cellSize)
-                .padding(2.dp)
-                .background(
-                    color = getColor(country.inceptionYear?.year?.toString()),
-                    shape = MaterialTheme.shapes.medium
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = country.inceptionYear?.year?.toString() ?: "N/A",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.background,
-                maxLines = 1
-            )
+        val attrs = listOf(
+            country.countryName,
+            country.population?.toString(),
+            country.area?.toString(),
+            country.inceptionYear?.year?.toString(),
+            // TODO add country flag
+        )
+        val diffs = listOf(
+            0,
+            country.populationDiff,
+            country.areaDiff,
+            country.inceptionYearDiff,
+        )
+        items(attrs.size) { idx ->
+            Box(
+                modifier = Modifier
+                    .size(cellSize)
+                    .padding(2.dp)
+                    .background(
+                        color = getColor(diffs[idx] ?: 0, attrs[idx] ?: 0),
+                        shape = MaterialTheme.shapes.medium
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = "${if ((diffs[idx] ?: 0) < 0) "⇩" else "⇧"} ${attrs[idx] ?: "N/A"}",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.background,
+                    maxLines = 1,
+                )
+            }
         }
     }
 }
@@ -468,11 +433,11 @@ private fun EmptyRow(cellSize: Dp) {
 }
 
 @Composable
-private fun getColor(value: String?): Color {
-    if (value != null) {
-        // TODO: select colors based on value differential to answer
+private fun getColor(diff: Int, guess: Any): Color {
+    if (diff == 0)
         return MaterialTheme.colorScheme.primary
-    }
+    else if (guess is Number && abs(diff).toDouble() / (guess as Number).toDouble() < 0.2) // guess within 20% of answer
+        return Color.Yellow
 
-    return MaterialTheme.colorScheme.surfaceVariant
+    return Color.Red
 }
