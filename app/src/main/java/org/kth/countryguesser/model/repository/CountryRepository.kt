@@ -15,6 +15,7 @@ import javax.inject.Singleton
 interface CountryRepository {
     suspend fun searchCountries(searchQuery: String): List<CountryUiModel>
     suspend fun getCountryByName(name: String): CountryModel?
+    suspend fun getAllCountryNames(): List<String>
 }
 
 @Singleton
@@ -59,6 +60,16 @@ class CountryRepositoryImpl @Inject constructor(
         } catch (e: HttpException) {
             Log.e("CountryRepository", "WikiData HTTP exception: ${e.message}")
             if (e.code() == 404 || e.code() == 403) return null else throw e
+        }
+    }
+
+    override suspend fun getAllCountryNames(): List<String> {
+        return try {
+            val result = restCountriesApiService.getAllCountries()
+            result.mapNotNull { it.name?.common }
+        } catch (e: Exception) {
+            Log.e("CountryRepository", "Error fetching all countries: ${e.message}")
+            emptyList()
         }
     }
 }

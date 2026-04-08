@@ -14,7 +14,10 @@ import org.kth.countryguesser.model.repository.CountryRepository
 import org.kth.countryguesser.model.repository.GameRepository
 import org.kth.countryguesser.ui.model.CountryUiModel
 import org.kth.countryguesser.ui.model.toUiModel
+import java.time.LocalDate
+import java.time.ZoneOffset
 import javax.inject.Inject
+import kotlin.random.Random
 
 
 interface GameVM {
@@ -51,7 +54,16 @@ class GameVMImpl @Inject constructor(
 
     fun fetchCountry() {
         viewModelScope.launch {
-            val countryName = "Sweden"  // TODO: randomize based on gamemode
+            var countryName = ""
+            val countries = countryRepository.getAllCountryNames()
+
+            if (_gamemode.value == "daily") {
+                val seed = LocalDate.now(ZoneOffset.UTC).toEpochDay()
+                countryName = countries.random(Random(seed))
+            } else {
+                countryName = countries.random()
+            }
+
             val result = countryRepository.getCountryByName(countryName)
             targetCountry.value = result
         }
