@@ -1,6 +1,7 @@
 package org.kth.countryguesser.view
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -9,7 +10,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,17 +19,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -49,6 +48,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -58,7 +58,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import org.kth.countryguesser.ui.model.CountryUiModel
-import org.kth.countryguesser.viewmodel.GameVM
 import org.kth.countryguesser.view.components.BottomBar
 import org.kth.countryguesser.viewmodel.AuthVM
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -72,22 +71,22 @@ fun GameScreen(
     mode: String, // 'daily' or 'endless'
 ) {
     val user by authViewModel.userEntity.collectAsState()
-    var showSuccessDialog by remember { mutableStateOf(false) }
     val gameVM = hiltViewModel<GameVMImpl>()
+    val isGameWon by gameVM.gameWon.collectAsState()
 
-    // Reset guessed countries when mode changes or on first composition
-    LaunchedEffect(mode) {
-        //gameViewModelImpl.resetGuessedCountries()
-    }
+    gameVM.setGamemode(mode)
 
-    if (showSuccessDialog) {
-        SuccessScreen(onConfirm = {
-            showSuccessDialog = false
-            if (mode == "daily") {
-                navController.popBackStack()
-            }
-            // stay here (do nothing) if 'endless' mode
-        })
+    if (isGameWon) {
+        SuccessScreen(
+            onConfirm = {
+                if (mode == "daily") {
+                    navController.popBackStack()
+                }
+                // stay here (do nothing) if 'endless' mode
+                gameVM.resetGameState()
+            },
+            score = gameVM.score.collectAsState().value,
+        )
     }
     GameScreenContent(
         navController = navController,
@@ -95,8 +94,7 @@ fun GameScreen(
             BottomBar(navController = navController, authViewModel = authViewModel, user = user)
         },
         mode = mode,
-        onCorrectGuess = { showSuccessDialog = true },
-        vm = gameVM
+        vm = gameVM,
     )
 }
 
@@ -106,26 +104,35 @@ fun GameScreenContent(
     navController: NavHostController,
     bottomBar: @Composable () -> Unit = {},
     mode: String,
-    onCorrectGuess: () -> Unit,
     vm: GameVMImpl
 ) {
-
-
+    // TODO: add loading icon until answer country is fetched
+    val context = LocalContext.current
     Scaffold(
         bottomBar = bottomBar,
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    val answer = vm.getAnswer()
+                    Toast.makeText(context, "Answer: $answer", Toast.LENGTH_SHORT).show()
+                },
+                containerColor = MaterialTheme.colorScheme.errorContainer,
+                contentColor = MaterialTheme.colorScheme.onErrorContainer,
+            ) {
+                Icon(imageVector = Icons.Default.BugReport, contentDescription = "Reveal Answer")
+            }
+        }
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = padding.calculateTopPadding(), bottom = padding.calculateBottomPadding()),
         ) {
-            Header(navController, mode, 0) // TODO: Replace 0 with actual score
+            Header(navController, mode, vm.score.collectAsState().value)
             Spacer(modifier = Modifier.height(16.dp))
-            Input(onCorrectGuess = onCorrectGuess, vm = vm)
+            Input(vm = vm)
             Spacer(modifier = Modifier.height(16.dp))
-//            if (vm.guessedCountries.collectAsState().value.isNotEmpty()) {
             GuessedCountries(guessedCountries = vm.guessedCountries.collectAsState().value)
-//            }
         }
     }
 }
@@ -208,7 +215,6 @@ private fun Header(
 
 @Composable
 private fun Input(
-    onCorrectGuess: () -> Unit,
     vm: GameVMImpl
 ) {
     var guess by remember { mutableStateOf("") }
@@ -314,12 +320,15 @@ private fun SuggestionsDropdown(
 
 @Composable
 private fun SuccessScreen(
-    onConfirm: () -> Unit
+    onConfirm: () -> Unit,
+    score: Int,
 ) {
     AlertDialog(
         onDismissRequest = { },
         title = { Text("Correct!") },
-        text = { Text("You found the correct country!") },
+        text = {
+            Text("You found the correct country!\nScore: $score")
+        },
         confirmButton = {
             TextButton( onClick = {
                 onConfirm()
@@ -331,7 +340,7 @@ private fun SuccessScreen(
 }
 
 @Composable
-fun GuessedCountries(
+private fun GuessedCountries(
     guessedCountries: List<CountryUiModel>,
 ) {
     val cellSize = 96.dp
@@ -365,7 +374,7 @@ fun GuessedCountries(
 }
 
 @Composable
-fun CountryRow(
+private fun CountryRow(
     country: CountryUiModel,
     cellSize: Dp,
 ) {
@@ -380,7 +389,7 @@ fun CountryRow(
             country.population?.toString(),
             country.area?.toString(),
             country.inceptionYear?.year?.toString(),
-            // TODO add country flag
+            // TODO: add country flag
         )
         val diffs = listOf(
             0,
@@ -399,8 +408,9 @@ fun CountryRow(
                     ),
                 contentAlignment = Alignment.Center,
             ) {
+                val arrow = if ((diffs[idx] ?: 0) < 0) "▼" else "▲"
                 Text(
-                    text = "${if ((diffs[idx] ?: 0) < 0) "⇩" else "⇧"} ${attrs[idx] ?: "N/A"}",
+                    text = "$arrow ${attrs[idx] ?: "N/A"}",
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.background,
                     maxLines = 1,
@@ -423,7 +433,7 @@ private fun EmptyRow(cellSize: Dp) {
                     .size(cellSize)
                     .padding(2.dp)
                     .background(
-                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        color = MaterialTheme.colorScheme.surfaceDim,
                         shape = MaterialTheme.shapes.medium
                     ),
                 contentAlignment = Alignment.Center
@@ -436,8 +446,8 @@ private fun EmptyRow(cellSize: Dp) {
 private fun getColor(diff: Int, guess: Any): Color {
     if (diff == 0)
         return MaterialTheme.colorScheme.primary
-    else if (guess is Number && abs(diff).toDouble() / (guess as Number).toDouble() < 0.2) // guess within 20% of answer
+    else if (guess is Number && abs(diff).toDouble() / guess.toDouble() < 0.2) // guess is within 20% of answer
         return Color.Yellow
 
-    return Color.Red
+    return MaterialTheme.colorScheme.surfaceVariant
 }

@@ -18,11 +18,17 @@ import javax.inject.Inject
 
 
 interface GameVM {
+    val score: StateFlow<Int>
+    val gameWon: StateFlow<Boolean>
     val guessedCountries: StateFlow<List<CountryUiModel>>
     val searchResults: StateFlow<List<CountryUiModel>>
 
+    fun setGamemode(gamemode: String)
     fun searchCountries(searchQuery: String)
     fun guessCountry(country: String)
+    fun resetGameState()
+
+    fun getAnswer(): String // TODO: for debug purposes, remove later
 }
 
 @HiltViewModel
@@ -30,7 +36,14 @@ class GameVMImpl @Inject constructor(
     private val countryRepository: CountryRepository,
     private val gameRepository: GameRepository,
 ) : ViewModel(), GameVM {
+    private val _score = MutableStateFlow(0)
+    override val score: StateFlow<Int>
+        get() = _score
+    private val _gameWon = MutableStateFlow(false)
+    override val gameWon: StateFlow<Boolean>
+        get() = _gameWon
     private val targetCountry = MutableStateFlow<CountryModel?>(null)
+    private val _gamemode = MutableStateFlow<String>("daily")
 
     init {
         fetchCountry()
@@ -42,6 +55,11 @@ class GameVMImpl @Inject constructor(
             val result = countryRepository.getCountryByName(countryName)
             targetCountry.value = result
         }
+    }
+
+    override fun setGamemode(gamemode: String) {
+        _gamemode.value = gamemode
+        _score.value = if (gamemode == "daily") 12 else 0
     }
 
     private val _guessedCountries = MutableStateFlow<List<CountryUiModel>>(listOf())
@@ -67,7 +85,7 @@ class GameVMImpl @Inject constructor(
                 val comp = targetCountry.value?.compareAttributesTo(result)
 
                 if (targetCountry.value?.countryName == result.countryName) {
-                    // TODO: win ame
+                    _gameWon.value = true
                     Log.d("GameVM", "Correct guess")
                 }
 
@@ -76,11 +94,27 @@ class GameVMImpl @Inject constructor(
                     comp?.areaComparison?.comparison,
                     comp?.inceptionYearComparison?.comparison
                 )
+                _score.value = 12 - 2*_guessedCountries.value.size
+
                 Log.d("GameVM", "Guessed country: ${_guessedCountries.value}")
             } else {
                 Log.e("GameVM", "No country found with name $country")
             }
         }
+    }
+
+    override fun resetGameState() {
+        _guessedCountries.value = listOf()
+        _searchResults.value = listOf()
+        _gameWon.value = false
+        if (_gamemode.value == "endless") {
+            fetchCountry()
+            _score.value++
+        }
+    }
+
+    override fun getAnswer(): String { // TODO: for debug purposes, remove later
+        return targetCountry.value?.countryName.toString()
     }
 }
 
