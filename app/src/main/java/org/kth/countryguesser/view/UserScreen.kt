@@ -21,7 +21,6 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -35,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import org.kth.countryguesser.view.components.BottomBar
-import org.kth.countryguesser.view.components.Routes
+import org.kth.countryguesser.view.components.WIPAlert
 import org.kth.countryguesser.viewmodel.AuthVM
 
 @Composable
@@ -210,21 +209,5 @@ private fun Stat(
         colors = ListItemDefaults.colors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
         ),
-    )
-}
-
-@Composable
-private fun WIPAlert(  // TODO: remove when page is implemented
-    onPress: () -> Unit = {}
-) {
-    AlertDialog(
-        onDismissRequest = { },
-        title = { Text("Work in progress") },
-        text = { Text("This page is under construction, please come back later.") },
-        confirmButton = {
-            TextButton(onClick = { onPress() }) {
-                Text("OK")
-            }
-        }
     )
 }

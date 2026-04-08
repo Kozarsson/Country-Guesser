@@ -5,6 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import org.kth.countryguesser.view.HomeScreen
+import org.kth.countryguesser.view.LeaderboardScreen
 import org.kth.countryguesser.view.LoginScreen
 import org.kth.countryguesser.view.RegisterScreen
 import org.kth.countryguesser.view.StudyScreen
@@ -39,6 +40,9 @@ fun NavGraph(
                 mode = mode
             )
         }
+        composable(Routes.LEADERBOARD) {
+            LeaderboardScreen(navController, authVM)
+        }
         composable(Routes.PROFILE) {
             UserScreen(navController, authVM)
         }
@@ -54,6 +58,7 @@ object Routes {
     const val LOGIN = "login"
     const val REGISTER = "register"
     const val GAME = "game"
+    const val LEADERBOARD = "leaderboard"
     const val PROFILE = "profile"
 
     const val STUDY = "study"

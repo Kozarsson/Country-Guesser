@@ -12,7 +12,7 @@ import org.kth.countryguesser.viewmodel.AuthVM
 
 
 @Composable
-fun StudyScreen(
+fun LeaderboardScreen(
     navController: NavHostController,
     authViewModel: AuthVM,
 ) {
