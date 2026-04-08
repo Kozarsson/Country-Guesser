@@ -99,6 +99,11 @@ class GameVMImpl @Inject constructor(
                 if (targetCountry.value?.countryName == result.countryName) {
                     _gameWon.value = true
                     Log.d("GameVM", "Correct guess")
+
+                    if (_gamemode.value == "endless") {
+                        fetchCountry()
+                        _score.value++
+                    }
                 }
 
                 _guessedCountries.value += result.toUiModel(
@@ -106,7 +111,9 @@ class GameVMImpl @Inject constructor(
                     comp?.areaComparison?.comparison,
                     comp?.inceptionYearComparison?.comparison
                 )
-                _score.value = 12 - 2*_guessedCountries.value.size
+                if (_gamemode.value == "daily") {
+                    _score.value = 12 - 2 * _guessedCountries.value.size
+                }
 
                 Log.d("GameVM", "Guessed country: ${_guessedCountries.value}")
             } else {
@@ -119,10 +126,6 @@ class GameVMImpl @Inject constructor(
         _guessedCountries.value = listOf()
         _searchResults.value = listOf()
         _gameWon.value = false
-        if (_gamemode.value == "endless") {
-            fetchCountry()
-            _score.value++
-        }
     }
 
     override fun getAnswer(): String { // TODO: for debug purposes, remove later

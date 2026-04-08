@@ -74,7 +74,9 @@ fun GameScreen(
     val gameVM = hiltViewModel<GameVMImpl>()
     val isGameWon by gameVM.gameWon.collectAsState()
 
-    gameVM.setGamemode(mode)
+    LaunchedEffect(mode) {
+        gameVM.setGamemode(mode)
+    }
 
     if (isGameWon) {
         SuccessScreen(
