@@ -1,9 +1,7 @@
 package org.kth.countryguesser.view
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,7 +11,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -25,11 +22,14 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -44,8 +44,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -215,6 +213,7 @@ private fun Header(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Input(
     vm: GameVMImpl
@@ -243,21 +242,66 @@ private fun Input(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.Bottom,
         ) {
-            OutlinedTextField(
-                label = { Text("Guess") },
-                value = guess,
-                textStyle = MaterialTheme.typography.bodyMedium,
-                onValueChange = { input -> guess = input },
-                singleLine = true,
-                modifier = Modifier
-                    .weight(1f)
-                    .onFocusChanged { isFocused = it.isFocused },
-                shape = RoundedCornerShape(8.dp),
-            )
+            ExposedDropdownMenuBox(
+                expanded = isFocused && searchResults.isNotEmpty(),
+                onExpandedChange = { isFocused = it },
+                modifier = Modifier.weight(1f),
+            ) {
+                OutlinedTextField(
+                    label = { Text("Guess") },
+                    value = guess,
+                    textStyle = MaterialTheme.typography.bodyMedium,
+                    onValueChange = { input ->
+                        guess = input
+                        isFocused = true
+                    },
+                    singleLine = true,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(type = MenuAnchorType.PrimaryEditable, enabled = true), // only used for emulator with keyboard
+                    shape = RoundedCornerShape(8.dp),
+                )
+
+                ExposedDropdownMenu(
+                    expanded = isFocused && searchResults.isNotEmpty(),
+                    onDismissRequest = { isFocused = false },
+                ) {
+                    searchResults.forEach { country ->
+                        DropdownMenuItem(
+                            text = {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Flag,
+                                        contentDescription = "Flag",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.padding(end = 12.dp)
+                                    )
+                                    Text(
+                                        text = country,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onBackground
+                                    )
+                                }
+                            },
+                            onClick = {
+                                guess = country
+                                isFocused = false
+                            },
+                        )
+                    }
+                }
+            }
+
             OutlinedButton(
                 onClick = {
                     vm.guessCountry(guess)
                     focusManager.clearFocus()
+                    guess = ""
                 },
                 shape = RoundedCornerShape(8.dp),
                 modifier = Modifier.height(56.dp),
@@ -270,55 +314,55 @@ private fun Input(
             }
         }
         // Show suggestions dropdown
-        if (isFocused && searchResults.isNotEmpty()) {
-            SuggestionsDropdown(
-                results = searchResults,
-                onSuggestionClick = { country ->
-                    guess = country.countryName
-                    focusManager.clearFocus()
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .offset(y = 64.dp) // below the text field
-            )
-        }
+//        if (isFocused && searchResults.isNotEmpty()) {
+//            SuggestionsDropdown(
+//                results = searchResults,
+//                onSuggestionClick = { country ->
+//                    guess = country
+//                    focusManager.clearFocus()
+//                },
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .offset(y = 64.dp) // below the text field
+//            )
+//        }
     }
 }
 
-@Composable
-private fun SuggestionsDropdown(
-    results: List<CountryUiModel>,
-    onSuggestionClick: (CountryUiModel) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
-            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp))
-            .clip(RoundedCornerShape(8.dp))
-    ) {
-        results.forEach { country ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onSuggestionClick(country) }
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Flag,
-                    contentDescription = "Flag",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(end = 12.dp)
-                )
-                Text(
-                    text = country.countryName,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            }
-        }
-    }
-}
+//@Composable
+//private fun SuggestionsDropdown(
+//    results: List<String>,
+//    onSuggestionClick: (String) -> Unit,
+//    modifier: Modifier = Modifier
+//) {
+//    Column(
+//        modifier = modifier
+//            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp))
+//            .clip(RoundedCornerShape(8.dp))
+//    ) {
+//        results.forEach { country ->
+//            Row(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .clickable { onSuggestionClick(country) }
+//                    .padding(horizontal = 16.dp, vertical = 12.dp),
+//                verticalAlignment = Alignment.CenterVertically
+//            ) {
+//                Icon(
+//                    imageVector = Icons.Default.Flag,
+//                    contentDescription = "Flag",
+//                    tint = MaterialTheme.colorScheme.primary,
+//                    modifier = Modifier.padding(end = 12.dp)
+//                )
+//                Text(
+//                    text = country,
+//                    style = MaterialTheme.typography.bodyMedium,
+//                    color = MaterialTheme.colorScheme.onBackground
+//                )
+//            }
+//        }
+//    }
+//}
 
 @Composable
 private fun SuccessScreen(
@@ -435,7 +479,7 @@ private fun EmptyRow(cellSize: Dp) {
                     .size(cellSize)
                     .padding(2.dp)
                     .background(
-                        color = MaterialTheme.colorScheme.surfaceDim,
+                        color = MaterialTheme.colorScheme.inverseOnSurface,
                         shape = MaterialTheme.shapes.medium
                     ),
                 contentAlignment = Alignment.Center

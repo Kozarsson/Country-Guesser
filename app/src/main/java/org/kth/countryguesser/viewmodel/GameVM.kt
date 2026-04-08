@@ -7,9 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import org.kth.countryguesser.model.CountryModel
-import org.kth.countryguesser.model.CountryModelImpl
 import org.kth.countryguesser.model.repository.CountryRepository
 import org.kth.countryguesser.model.repository.GameRepository
 import org.kth.countryguesser.ui.model.CountryUiModel
@@ -24,7 +22,7 @@ interface GameVM {
     val score: StateFlow<Int>
     val gameWon: StateFlow<Boolean>
     val guessedCountries: StateFlow<List<CountryUiModel>>
-    val searchResults: StateFlow<List<CountryUiModel>>
+    val searchResults: StateFlow<List<String>>
 
     fun setGamemode(gamemode: String)
     fun searchCountries(searchQuery: String)
@@ -78,15 +76,18 @@ class GameVMImpl @Inject constructor(
     override val guessedCountries: StateFlow<List<CountryUiModel>>
         get() = _guessedCountries
 
-    private val _searchResults = MutableStateFlow<List<CountryUiModel>>(listOf())
-    override val searchResults: StateFlow<List<CountryUiModel>>
+    private val _searchResults = MutableStateFlow<List<String>>(listOf())
+    override val searchResults: StateFlow<List<String>>
         get() = _searchResults
 
     override fun searchCountries(searchQuery: String) {
         viewModelScope.launch {
-            val result = countryRepository.searchCountries(searchQuery)
+            val countries = countryRepository.getAllCountryNames()
+            val result = countries.filter {
+                it.contains(searchQuery, ignoreCase = true)
+            }
+//            val result = countryRepository.searchCountries(searchQuery)
             _searchResults.value = result
-            Log.d("GameVM", "Target Country: $result")
         }
     }
 

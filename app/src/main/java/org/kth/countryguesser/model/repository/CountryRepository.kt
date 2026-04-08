@@ -24,6 +24,10 @@ class CountryRepositoryImpl @Inject constructor(
     private val wikiDataApiService: WikiDataEndpoints,
     private val wikiDataParser: WikiDataParser
 ) : CountryRepository {
+
+    // In-memory cache
+    private var cachedCountryNames: List<String>? = null
+
     override suspend fun searchCountries(searchQuery: String): List<CountryUiModel> {
         return try {
             val result = restCountriesApiService.searchCountries(searchQuery)
@@ -64,9 +68,16 @@ class CountryRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getAllCountryNames(): List<String> {
+        // Return cached version if available
+        if (cachedCountryNames?.isNotEmpty() == true) {
+            return cachedCountryNames!!
+        }
+
         return try {
             val result = restCountriesApiService.getAllCountries()
-            result.mapNotNull { it.name?.common }
+            val names = result.mapNotNull { it.name?.common }
+            cachedCountryNames = names
+            names
         } catch (e: Exception) {
             Log.e("CountryRepository", "Error fetching all countries: ${e.message}")
             emptyList()
