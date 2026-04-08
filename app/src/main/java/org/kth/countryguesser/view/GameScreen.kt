@@ -85,7 +85,6 @@ fun GameScreen(
                 // stay here (do nothing) if 'endless' mode
                 gameVM.resetGameState()
             },
-            score = gameVM.score.collectAsState().value,
         )
     }
     GameScreenContent(
@@ -258,7 +257,10 @@ private fun Input(
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .menuAnchor(type = MenuAnchorType.PrimaryEditable, enabled = true), // only used for emulator with keyboard
+                        .menuAnchor(
+                            type = MenuAnchorType.PrimaryEditable,
+                            enabled = true
+                        ), // only used for emulator with keyboard
                     shape = RoundedCornerShape(8.dp),
                 )
 
@@ -313,67 +315,18 @@ private fun Input(
                 )
             }
         }
-        // Show suggestions dropdown
-//        if (isFocused && searchResults.isNotEmpty()) {
-//            SuggestionsDropdown(
-//                results = searchResults,
-//                onSuggestionClick = { country ->
-//                    guess = country
-//                    focusManager.clearFocus()
-//                },
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .offset(y = 64.dp) // below the text field
-//            )
-//        }
     }
 }
-
-//@Composable
-//private fun SuggestionsDropdown(
-//    results: List<String>,
-//    onSuggestionClick: (String) -> Unit,
-//    modifier: Modifier = Modifier
-//) {
-//    Column(
-//        modifier = modifier
-//            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp))
-//            .clip(RoundedCornerShape(8.dp))
-//    ) {
-//        results.forEach { country ->
-//            Row(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .clickable { onSuggestionClick(country) }
-//                    .padding(horizontal = 16.dp, vertical = 12.dp),
-//                verticalAlignment = Alignment.CenterVertically
-//            ) {
-//                Icon(
-//                    imageVector = Icons.Default.Flag,
-//                    contentDescription = "Flag",
-//                    tint = MaterialTheme.colorScheme.primary,
-//                    modifier = Modifier.padding(end = 12.dp)
-//                )
-//                Text(
-//                    text = country,
-//                    style = MaterialTheme.typography.bodyMedium,
-//                    color = MaterialTheme.colorScheme.onBackground
-//                )
-//            }
-//        }
-//    }
-//}
 
 @Composable
 private fun SuccessScreen(
     onConfirm: () -> Unit,
-    score: Int,
 ) {
     AlertDialog(
         onDismissRequest = { },
         title = { Text("Correct!") },
         text = {
-            Text("You found the correct country!\nScore: $score")
+            Text("You found the correct country!")
         },
         confirmButton = {
             TextButton( onClick = {
