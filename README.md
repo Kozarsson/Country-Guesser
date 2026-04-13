@@ -2,7 +2,13 @@
 ID2216 Final Project
 
 # Installation
+
+## Via Android Studio
 This project works best in [Android Studio](https://developer.android.com/studio), which can build and emulate the application on an Android phone.
+See [here](https://developer.android.com/studio/run) for detailed instuctions on how to run the emulator.
+
+## Via Android Device
+You can directly download the [APK](https://github.com/Kozarsson/Country-Guesser/releases/tag/v0.1.0) and run it locally on your own Android device.
 
 # File structure
 ```
