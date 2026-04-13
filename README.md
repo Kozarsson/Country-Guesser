@@ -1,5 +1,5 @@
 # Country-Guesser
-ID2216 Final Project
+An Android native game about figuring out the correct country based on statistics about it. Based on what the user guesses, they will get higer/lower indications for statistics about that country compared to the correct answer. The player will be awarded a score based on the number of guesses it took to figure out the correct country. Each day, a new country is randomly selected. There is also an 'endless' mode where the goal is to get the longest possible streak of correct guesses. Learn more about different countries while competing against friends!
 
 # Installation
 
@@ -9,6 +9,41 @@ See [here](https://developer.android.com/studio/run) for detailed instuctions on
 
 ## Via Android Device
 You can directly download the [APK](https://github.com/Kozarsson/Country-Guesser/releases/tag/v0.1.0) and run it locally on your own Android device.
+
+# Features
+- [x] sign-in screen
+  - [x] register account
+  - [x] sign in
+- [x] home page
+  - [x] chose gamemode to play
+  - [ ] leaderboard
+- [x] game screen
+  - [x] randomized country
+    - [x] 'daily' gamemode shares same conutry accross all users
+  - [x] gamemode dependent scoring
+    - [ ] update personal statistics
+  - [x] show country clues
+    - [x] show direction of correct guess
+    - [ ] clue based on country flag color
+  - [x] guess
+    - [x] guess suggestions
+  - [x] success alert
+    - [x] gamemode dependent handler
+  - [ ] failure alert
+- [ ] study screen
+  - [ ] list countries
+  - [ ] searchable countries
+  - [ ] view country statistics
+- [ ] profile screen
+  - [ ] view personal stats/information
+  - [ ] save personal stats/information
+  - [ ] cloud persistence
+  - [ ] personal settings
+- [x] navigation bar
+     
+### Additional features
+- temporary cheat button (show correct anwser)
+- WIP alert for unfinished screens
 
 # File structure
 ```
