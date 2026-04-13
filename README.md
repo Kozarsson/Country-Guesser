@@ -8,7 +8,7 @@ This project works best in [Android Studio](https://developer.android.com/studio
 See [here](https://developer.android.com/studio/run) for detailed instuctions on how to run the emulator.
 
 ## Via Android Device
-You can directly download the [APK](https://github.com/Kozarsson/Country-Guesser/releases/tag/v0.1.0) and run it locally on your own Android device.
+You can directly download the [APK](https://github.com/Kozarsson/Country-Guesser/releases/tag/v0.1.0) and run it locally on your own Android device or emulator of choice.
 
 # Features
 - [x] sign-in screen
