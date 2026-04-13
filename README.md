@@ -11,6 +11,10 @@ See [here](https://developer.android.com/studio/run) for detailed instuctions on
 You can directly download the [APK](https://github.com/Kozarsson/Country-Guesser/releases/tag/v0.1.0) and run it locally on your own Android device or emulator of choice.
 
 # Features
+- [x] fetch data from API
+  - [x] restcountries
+  - [x] wikidata
+  - [ ] image color extraction
 - [x] sign-in screen
   - [x] register account
   - [x] sign in
