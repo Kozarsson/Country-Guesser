@@ -11,17 +11,21 @@ app
     └ org.kth.countryguesser
       ├ model
       |  ├ api
-      |  |  ├ RestCouyntriesEndpoints.kt
+      |  |  ├ RestCountriesEndpoints.kt
       |  |  └ WikiDataEndpoints.kt
+      |  ├ dto
+      |  ├ entity
       |  ├ repository
       |  |  ├ ApiRepository.kt
-      |  |  ├ CoyuntryRepository.kt
-      |  |  ├ FirebaseARuthRepository.kt
-      |  |  └ FirebaseTokenRepository
+      |  |  ├ CountryRepository.kt
+      |  |  ├ FirebaseAuthRepository.kt
+      |  |  ├ FirebaseTokenRepository.kt
+      |  |  └ GameRepository.kt
       |  └ service
       |     ├ ApiService.kt
       |     ├ FirebaseMessagingService.kt
-      |     └ RestCountriesApiService.kt
+      |     ├ RestCountriesApiService.kt
+      |     └ RetrofitApiService.kt
       ├ ui
       |  └ model
       |     ├ CountryModelMapper.kt
@@ -41,25 +45,41 @@ app
       ├ viewmodel
       |  ├ AuthVM.kt
       |  └ GameVM.kt
+      ├ di
+      |  ├ NetworkModule.kt
+      |  ├ RepositoryModule.kt
+      |  └ UtilModule.kt
+      ├ util
+      |  ├ Constants.kt
+      |  ├ NetworkUtils.kt
+      |  └ WikiDataParser.kt
+      ├ Application.kt
       └ MainActivity.kt
 ```
 
->This Kotlin Project operates under the Model-View-Viewmodel (MVVM) structure which is very similar to the MVP structure used with React.
+>This Kotlin project follows the Model-View-ViewModel (MVVM) architecture, which is conceptually similar to the MVP structure.
 
 | MVVM concept | MVP concept |
 |--------------|-------------|
 |  Model       |  Model      |
 |  View        |  View       |
-|  Viewmodel   |  Presenter  |
+|  ViewModel   |  Presenter  |
 
 ### [`model`](/app/src/main/java/org/kth/countryguesser/model)
-Anything in the `repository` directory is responsible for storing local data relevant to the operation of the app. Directories `api` and `service` are responsible for interaction with internet-dependent services.
+Anything in the `repository` directory is responsible for managing app data sources and business logic. Directories `api` and `service` are responsible for interaction with internet-dependent services.
 
 ### [`ui`](/app/src/main/java/org/kth/countryguesser/ui)
-The direcotry contains files relevant to mapping the internal model to a more user-frieldly model used for display purposes.
+The directory contains files relevant to mapping internal models to user-friendly models used for display purposes.
 
 ### [`view`](/app/src/main/java/org/kth/countryguesser/view)
-The `view` direcotry contains any navigable screen that the user will be able to interact with.
+The `view` directory contains navigable screens that the user can interact with.
 
 ### [`viewmodel`](/app/src/main/java/org/kth/countryguesser/viewmodel)
-This direcotry contains the files bridging the model and view. The files handle all logic local to displayed screens.
+This directory contains files that bridge the model and view. These files handle logic local to displayed screens.
+
+### [`di`](/app/src/main/java/org/kth/countryguesser/di)
+This directory contains Hilt dependency-injection modules used to provide networking, repositories, and utility bindings.
+
+### [`util`](/app/src/main/java/org/kth/countryguesser/util)
+This directory contains shared utilities and constants that support networking and data parsing.
+
