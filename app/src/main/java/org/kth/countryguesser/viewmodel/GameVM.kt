@@ -86,8 +86,11 @@ class GameVMImpl @Inject constructor(
             val result = countries.filter {
                 it.contains(searchQuery, ignoreCase = true)
             }
-//            val result = countryRepository.searchCountries(searchQuery)
-            _searchResults.value = result
+            val sortedResult = result.sortedWith(
+                compareBy<String> { !it.startsWith(searchQuery, ignoreCase = true) }
+                    .thenBy { it.lowercase() }
+            )
+            _searchResults.value = sortedResult
         }
     }
 

@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -131,7 +132,10 @@ fun GameScreenContent(
             Spacer(modifier = Modifier.height(16.dp))
             Input(vm = vm)
             Spacer(modifier = Modifier.height(16.dp))
-            GuessedCountries(guessedCountries = vm.guessedCountries.collectAsState().value)
+                    GuessedCountries(
+                        guessedCountries = vm.guessedCountries.collectAsState().value,
+                        modifier = Modifier.weight(1f)
+                    )
         }
     }
 }
@@ -341,6 +345,7 @@ private fun SuccessScreen(
 @Composable
 private fun GuessedCountries(
     guessedCountries: List<CountryUiModel>,
+    modifier: Modifier = Modifier,
 ) {
     val cellSize = 96.dp
 
@@ -356,18 +361,13 @@ private fun GuessedCountries(
         Text(text = "Inception Year", modifier = Modifier.width(cellSize), textAlign = TextAlign.Center)
     }
     LazyColumn(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        items(5) { idx ->
-            if (idx < guessedCountries.size) {
-                val country = guessedCountries[idx]
-                CountryRow(country, cellSize)
-            } else {
-                EmptyRow(cellSize)
-            }
+        items(guessedCountries) { country ->
+            CountryRow(country, cellSize)
         }
     }
 }
@@ -415,28 +415,6 @@ private fun CountryRow(
                     maxLines = 1,
                 )
             }
-        }
-    }
-}
-@Composable
-private fun EmptyRow(cellSize: Dp) {
-    LazyRow(
-        modifier = Modifier
-            .width(cellSize * 4)
-            .height(cellSize),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        items(5) { idx ->
-            Box(
-                modifier = Modifier
-                    .size(cellSize)
-                    .padding(2.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.inverseOnSurface,
-                        shape = MaterialTheme.shapes.medium
-                    ),
-                contentAlignment = Alignment.Center
-            ) {}
         }
     }
 }
