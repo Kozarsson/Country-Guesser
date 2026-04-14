@@ -20,7 +20,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuItem
@@ -47,6 +50,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
@@ -60,8 +64,10 @@ import org.kth.countryguesser.ui.model.CountryUiModel
 import org.kth.countryguesser.view.components.BottomBar
 import org.kth.countryguesser.viewmodel.AuthVM
 import androidx.hilt.navigation.compose.hiltViewModel
+import org.kth.countryguesser.model.CountryAttributeResult
 import org.kth.countryguesser.viewmodel.GameVMImpl
 import kotlin.math.abs
+import androidx.compose.ui.graphics.lerp
 
 @Composable
 fun GameScreen(
@@ -77,17 +83,17 @@ fun GameScreen(
         gameVM.setGamemode(mode)
     }
 
-    if (isGameWon) {
-        SuccessScreen(
-            onConfirm = {
-                if (mode == "daily") {
-                    navController.popBackStack()
-                }
-                // stay here (do nothing) if 'endless' mode
-                gameVM.resetGameState()
-            },
-        )
-    }
+//    if (isGameWon) {
+//        SuccessScreen(
+//            onConfirm = {
+//                if (mode == "daily") {
+//                    navController.popBackStack()
+//                }
+//                // stay here (do nothing) if 'endless' mode
+//                gameVM.resetGameState()
+//            },
+//        )
+//    }
     GameScreenContent(
         navController = navController,
         bottomBar = {
@@ -391,25 +397,42 @@ private fun CountryRow(
             // TODO: add country flag
         )
         val diffs = listOf(
-            0,
+            null,
             country.populationDiff,
             country.areaDiff,
             country.inceptionYearDiff,
         )
         items(attrs.size) { idx ->
+            val cellColor = countryAttributeGuessColor(diffs[idx])
             Box(
                 modifier = Modifier
                     .size(cellSize)
                     .padding(2.dp)
                     .background(
-                        color = getColor(diffs[idx] ?: 0, attrs[idx] ?: 0),
+                        color = cellColor,
                         shape = MaterialTheme.shapes.medium
                     ),
                 contentAlignment = Alignment.Center,
             ) {
-                val arrow = if ((diffs[idx] ?: 0) < 0) "▼" else "▲"
+                if (diffs[idx] != null && diffs[idx]?.comparison != null && diffs[idx]?.comparison != 0) {
+                    var arrow: ImageVector
+                    if (diffs[idx]?.comparison == 1) {
+                        arrow = Icons.Default.ArrowUpward
+                    } else if (diffs[idx]?.comparison == -1) {
+                        arrow = Icons.Default.ArrowDownward
+                    } else {
+                        arrow = Icons.Default.ErrorOutline
+                    }
+                    Icon(
+                        imageVector = arrow,
+                        contentDescription = "Flag",
+                        tint = lerp(cellColor, Color.Black, 0.10f),
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+//                val arrow = if ((diffs[idx] ?: 0) < 0) "▼" else "▲"
                 Text(
-                    text = "$arrow ${attrs[idx] ?: "N/A"}",
+                    text = attrs[idx] ?: "N/A",
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.background,
                     maxLines = 1,
@@ -420,11 +443,18 @@ private fun CountryRow(
 }
 
 @Composable
-private fun getColor(diff: Int, guess: Any): Color {
-    if (diff == 0)
+private fun countryAttributeGuessColor(attrComparisonResult: CountryAttributeResult?): Color {
+    if (attrComparisonResult == null) {
         return MaterialTheme.colorScheme.primary
-    else if (guess is Number && abs(diff).toDouble() / guess.toDouble() < 0.2) // guess is within 20% of answer
-        return Color.Yellow
-
-    return MaterialTheme.colorScheme.surfaceVariant
+    } else {
+        if (attrComparisonResult.isClose == true && attrComparisonResult.comparison != 0) {
+            return Color.Yellow
+        }
+        return when (attrComparisonResult.comparison) {
+            -1 -> Color.Red
+            1 -> Color.Red
+            0 -> Color.Green
+            else -> MaterialTheme.colorScheme.primary
+        }
+    }
 }

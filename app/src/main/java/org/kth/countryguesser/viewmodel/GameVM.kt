@@ -98,7 +98,7 @@ class GameVMImpl @Inject constructor(
         viewModelScope.launch {
             val result = countryRepository.getCountryByName(country)
             if (result != null) {
-                val comp = targetCountry.value?.compareAttributesTo(result)
+                val comp = targetCountry.value?.compareAttributesTo(result, 0.10)
 
                 if (targetCountry.value?.countryName == result.countryName) {
                     _gameWon.value = true
@@ -112,9 +112,9 @@ class GameVMImpl @Inject constructor(
 
                 _guessedCountries.value = listOf(
                     result.toUiModel(
-                        comp?.populationComparison?.comparison,
-                        comp?.areaComparison?.comparison,
-                        comp?.inceptionYearComparison?.comparison
+                        comp?.populationComparison,
+                        comp?.areaComparison,
+                        comp?.inceptionYearComparison
                     )
                 ) + _guessedCountries.value
                 if (_gamemode.value == "daily") {

@@ -1,5 +1,6 @@
 package org.kth.countryguesser.ui.model
 
+import org.kth.countryguesser.model.CountryAttributeResult
 import org.kth.countryguesser.model.CountryModel
 import org.kth.countryguesser.model.dto.CountryResultDto
 
@@ -13,9 +14,9 @@ fun CountryModel.toUiModel(): CountryUiModel = CountryUiModel(
     inceptionYear = this.inceptionYear,
 )
 fun CountryModel.toUiModel(
-    populationDiff: Int?,
-    areaDiff: Int?,
-    inceptionYearDiff: Int?,
+    populationDiff: CountryAttributeResult?,
+    areaDiff: CountryAttributeResult?,
+    inceptionYearDiff: CountryAttributeResult?,
 ): CountryUiModel = CountryUiModel(
     countryName = this.countryName,
     population = this.population,
