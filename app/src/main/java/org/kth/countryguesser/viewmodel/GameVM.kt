@@ -110,11 +110,13 @@ class GameVMImpl @Inject constructor(
                     }
                 }
 
-                _guessedCountries.value += result.toUiModel(
-                    comp?.populationComparison?.comparison,
-                    comp?.areaComparison?.comparison,
-                    comp?.inceptionYearComparison?.comparison
-                )
+                _guessedCountries.value = listOf(
+                    result.toUiModel(
+                        comp?.populationComparison?.comparison,
+                        comp?.areaComparison?.comparison,
+                        comp?.inceptionYearComparison?.comparison
+                    )
+                ) + _guessedCountries.value
                 if (_gamemode.value == "daily") {
                     _score.value = 12 - 2 * _guessedCountries.value.size
                 }
