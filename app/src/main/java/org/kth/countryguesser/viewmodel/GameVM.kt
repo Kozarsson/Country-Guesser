@@ -23,11 +23,14 @@ interface GameVM {
     val gameWon: StateFlow<Boolean>
     val guessedCountries: StateFlow<List<CountryUiModel>>
     val searchResults: StateFlow<List<String>>
+    val popupState: StateFlow<PopupState>
+    val errorMessage: StateFlow<String?>
 
     fun setGamemode(gamemode: String)
     fun searchCountries(searchQuery: String)
     fun guessCountry(country: String)
     fun resetGameState()
+    fun resetPopupState()
 
     fun getAnswer(): String // TODO: for debug purposes, remove later
 }
@@ -45,12 +48,20 @@ class GameVMImpl @Inject constructor(
         get() = _gameWon
     private val targetCountry = MutableStateFlow<CountryModel?>(null)
     private val _gamemode = MutableStateFlow<String>("daily")
+    private val _popupState = MutableStateFlow(PopupState.NONE)
+    override val popupState: StateFlow<PopupState>
+        get() = _popupState
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    override val errorMessage: StateFlow<String?>
+        get() = _errorMessage
+
 
     init {
         fetchCountry()
     }
 
     fun fetchCountry() {
+        _popupState.value = PopupState.LOADING
         viewModelScope.launch {
             var countryName = ""
             val countries = countryRepository.getAllCountryNames()
@@ -64,6 +75,7 @@ class GameVMImpl @Inject constructor(
 
             val result = countryRepository.getCountryByName(countryName)
             targetCountry.value = result
+            _popupState.value = PopupState.NONE
         }
     }
 
@@ -83,8 +95,9 @@ class GameVMImpl @Inject constructor(
     override fun searchCountries(searchQuery: String) {
         viewModelScope.launch {
             val countries = countryRepository.getAllCountryNames()
+            val guessedCountries = _guessedCountries.value.map { it.countryName.lowercase() }
             val result = countries.filter {
-                it.contains(searchQuery, ignoreCase = true)
+                it.contains(searchQuery, ignoreCase = true) && !guessedCountries.contains(it.lowercase())
             }
             val sortedResult = result.sortedWith(
                 compareBy<String> { !it.startsWith(searchQuery, ignoreCase = true) }
@@ -95,6 +108,12 @@ class GameVMImpl @Inject constructor(
     }
 
     override fun guessCountry(country: String) {
+        val guessedCountries = _guessedCountries.value.map { it.countryName.lowercase() }
+        if (guessedCountries.contains(country.lowercase())) {
+            _popupState.value = PopupState.DUPLICATE_SEARCH
+            return
+        }
+        _popupState.value = PopupState.LOADING //TODO: Only show loading popup is search takes longer than x number of seconds
         viewModelScope.launch {
             val result = countryRepository.getCountryByName(country)
             if (result != null) {
@@ -122,7 +141,9 @@ class GameVMImpl @Inject constructor(
                 }
 
                 Log.d("GameVM", "Guessed country: ${_guessedCountries.value}")
+                _popupState.value = PopupState.NONE
             } else {
+                _popupState.value = PopupState.NO_RESULT
                 Log.e("GameVM", "No country found with name $country")
             }
         }
@@ -134,6 +155,11 @@ class GameVMImpl @Inject constructor(
         _gameWon.value = false
     }
 
+    override fun resetPopupState() {
+        _errorMessage.value = null
+        _popupState.value = PopupState.NONE
+    }
+
     override fun getAnswer(): String { // TODO: for debug purposes, remove later
         return targetCountry.value?.countryName.toString()
     }
@@ -142,7 +168,8 @@ class GameVMImpl @Inject constructor(
 
 enum class PopupState {
     NONE,
-    SEARCH,
     LOADING,
-    NO_RESULT
+    NO_RESULT,
+    ERROR,
+    DUPLICATE_SEARCH
 }

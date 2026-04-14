@@ -1,5 +1,7 @@
 package org.kth.countryguesser.view
 
+import android.app.AlertDialog
+import android.app.Dialog
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -77,6 +79,10 @@ import org.kth.countryguesser.model.CountryAttributeResult
 import org.kth.countryguesser.viewmodel.GameVMImpl
 import androidx.compose.ui.graphics.lerp
 import kotlinx.coroutines.delay
+import org.kth.countryguesser.view.components.Alert
+import org.kth.countryguesser.view.components.LoadingAlert
+import org.kth.countryguesser.view.components.WIPAlert
+import org.kth.countryguesser.viewmodel.PopupState
 
 @Composable
 fun GameScreen(
@@ -87,10 +93,20 @@ fun GameScreen(
     val user by authViewModel.userEntity.collectAsState()
     val gameVM = hiltViewModel<GameVMImpl>()
     val isGameWon by gameVM.gameWon.collectAsState()
+    val popupState by gameVM.popupState.collectAsState()
+    val errorMessage by gameVM.errorMessage.collectAsState()
 
     LaunchedEffect(mode) {
         gameVM.setGamemode(mode)
     }
+
+        when (popupState) {
+            PopupState.NONE -> {}
+            PopupState.NO_RESULT -> {Alert(onPress = {gameVM.resetPopupState()}, title = "No results", message = "No country with that name found")}
+            PopupState.LOADING -> {LoadingAlert("Loading...")}
+            PopupState.DUPLICATE_SEARCH -> {Alert(onPress = {gameVM.resetPopupState()}, title = "Country already guessed", message = "You cannot guess the same country twice")}
+            PopupState.ERROR -> {Alert(onPress = {gameVM.resetPopupState()}, title = "Error", message = errorMessage ?: "Unknown error, try again")}
+        }
 
     if (isGameWon) {
         SuccessScreen(
