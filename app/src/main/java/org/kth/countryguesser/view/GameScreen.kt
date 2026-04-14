@@ -18,6 +18,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.animateContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDownward
@@ -57,6 +65,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -66,8 +75,8 @@ import org.kth.countryguesser.viewmodel.AuthVM
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.kth.countryguesser.model.CountryAttributeResult
 import org.kth.countryguesser.viewmodel.GameVMImpl
-import kotlin.math.abs
 import androidx.compose.ui.graphics.lerp
+import kotlinx.coroutines.delay
 
 @Composable
 fun GameScreen(
@@ -83,17 +92,17 @@ fun GameScreen(
         gameVM.setGamemode(mode)
     }
 
-//    if (isGameWon) {
-//        SuccessScreen(
-//            onConfirm = {
-//                if (mode == "daily") {
-//                    navController.popBackStack()
-//                }
-//                // stay here (do nothing) if 'endless' mode
-//                gameVM.resetGameState()
-//            },
-//        )
-//    }
+    if (isGameWon) {
+        SuccessScreen(
+            onConfirm = {
+                if (mode == "daily") {
+                    navController.popBackStack()
+                }
+                // stay here (do nothing) if 'endless' mode
+                gameVM.resetGameState()
+            },
+        )
+    }
     GameScreenContent(
         navController = navController,
         bottomBar = {
@@ -354,26 +363,79 @@ private fun GuessedCountries(
     modifier: Modifier = Modifier,
 ) {
     val cellSize = 96.dp
+    var displayedCountries by remember { mutableStateOf(guessedCountries) }
+    var revealingCountryKey by remember { mutableStateOf<String?>(null) }
+    var revealCount by remember { mutableStateOf(4) }
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(text = "Country", modifier = Modifier.width(cellSize), textAlign = TextAlign.Center)
-        Text(text = "Population", modifier = Modifier.width(cellSize), textAlign = TextAlign.Center)
-        Text(text = "Area", modifier = Modifier.width(cellSize), textAlign = TextAlign.Center)
-        Text(text = "Inception Year", modifier = Modifier.width(cellSize), textAlign = TextAlign.Center)
+    LaunchedEffect(guessedCountries) {
+        if (guessedCountries.isEmpty()) {
+            displayedCountries = emptyList()
+            revealingCountryKey = null
+            revealCount = 4
+            return@LaunchedEffect
+        }
+
+        val newTop = guessedCountries.first()
+        val oldTop = displayedCountries.firstOrNull()
+        val isNewTop = oldTop?.countryName != newTop.countryName
+
+        if (!isNewTop) {
+            displayedCountries = guessedCountries
+            return@LaunchedEffect
+        }
+
+        // Phase 1: insert a blank top row so existing rows shift down first.
+        displayedCountries = listOf(newTop) + displayedCountries.filterNot { it.countryName == newTop.countryName }
+
+        // Let list movement finish before revealing cells.
+        revealingCountryKey = newTop.countryName
+        revealCount = 0
+        delay(220)
+
+        // Phase 2: reveal new row attributes from left to right.
+        repeat(4) {
+            revealCount = it + 1
+            delay(90)
+        }
+
+        // Keep VM list as source of truth after animation.
+        displayedCountries = guessedCountries
+        revealingCountryKey = null
+        revealCount = 4
     }
-    LazyColumn(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        items(guessedCountries) { country ->
-            CountryRow(country, cellSize)
+
+    Column(modifier = modifier.animateContentSize()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(text = "Country", modifier = Modifier.width(cellSize), textAlign = TextAlign.Center)
+            Text(text = "Population", modifier = Modifier.width(cellSize), textAlign = TextAlign.Center)
+            Text(text = "Area", modifier = Modifier.width(cellSize), textAlign = TextAlign.Center)
+            Text(text = "Inception Year", modifier = Modifier.width(cellSize), textAlign = TextAlign.Center)
+        }
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp)
+                .animateContentSize(
+                    animationSpec = tween<IntSize>(durationMillis = 1000)
+                ),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            items(
+                items = displayedCountries,
+                key = { it.countryName }
+            ) { country ->
+                val visibleAttributes = if (country.countryName == revealingCountryKey) revealCount else 4
+                CountryRow(
+                    country = country,
+                    cellSize = cellSize,
+                    visibleAttributes = visibleAttributes,
+                )
+            }
         }
     }
 }
@@ -382,6 +444,7 @@ private fun GuessedCountries(
 private fun CountryRow(
     country: CountryUiModel,
     cellSize: Dp,
+    visibleAttributes: Int = 4,
 ) {
     LazyRow(
         modifier = Modifier
@@ -414,29 +477,43 @@ private fun CountryRow(
                     ),
                 contentAlignment = Alignment.Center,
             ) {
-                if (diffs[idx] != null && diffs[idx]?.comparison != null && diffs[idx]?.comparison != 0) {
-                    var arrow: ImageVector
-                    if (diffs[idx]?.comparison == 1) {
-                        arrow = Icons.Default.ArrowUpward
-                    } else if (diffs[idx]?.comparison == -1) {
-                        arrow = Icons.Default.ArrowDownward
-                    } else {
-                        arrow = Icons.Default.ErrorOutline
+                AnimatedVisibility(
+                    visible = idx < visibleAttributes,
+                    enter = fadeIn(animationSpec = tween(1000)) +
+                        slideInHorizontally(
+                            initialOffsetX = { -it / 2 },
+                            animationSpec = tween(1000)
+                        ),
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        if (diffs[idx] != null && diffs[idx]?.comparison != null && diffs[idx]?.comparison != 0) {
+                            val arrow: ImageVector = if (diffs[idx]?.comparison == 1) {
+                                Icons.Default.ArrowUpward
+                            } else if (diffs[idx]?.comparison == -1) {
+                                Icons.Default.ArrowDownward
+                            } else {
+                                Icons.Default.ErrorOutline
+                            }
+                            Icon(
+                                imageVector = arrow,
+                                contentDescription = "Flag",
+                                tint = lerp(cellColor, Color.Black, 0.10f),
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                        Text(
+                            text = attrs[idx] ?: "N/A",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.background,
+                            textAlign = TextAlign.Center,
+                            maxLines = 1,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
                     }
-                    Icon(
-                        imageVector = arrow,
-                        contentDescription = "Flag",
-                        tint = lerp(cellColor, Color.Black, 0.10f),
-                        modifier = Modifier.fillMaxSize()
-                    )
                 }
-//                val arrow = if ((diffs[idx] ?: 0) < 0) "▼" else "▲"
-                Text(
-                    text = attrs[idx] ?: "N/A",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.background,
-                    maxLines = 1,
-                )
             }
         }
     }
