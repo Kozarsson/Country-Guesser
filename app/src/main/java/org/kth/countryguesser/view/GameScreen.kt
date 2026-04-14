@@ -362,6 +362,7 @@ private fun GuessedCountries(
     guessedCountries: List<CountryUiModel>,
     modifier: Modifier = Modifier,
 ) {
+    //TODO: Figure out a way to animate the movement of older guessed down to make space for the new guess
     val cellSize = 96.dp
     var displayedCountries by remember { mutableStateOf(guessedCountries) }
     var revealingCountryKey by remember { mutableStateOf<String?>(null) }
@@ -384,21 +385,17 @@ private fun GuessedCountries(
             return@LaunchedEffect
         }
 
-        // Phase 1: insert a blank top row so existing rows shift down first.
         displayedCountries = listOf(newTop) + displayedCountries.filterNot { it.countryName == newTop.countryName }
 
-        // Let list movement finish before revealing cells.
         revealingCountryKey = newTop.countryName
         revealCount = 0
         delay(220)
 
-        // Phase 2: reveal new row attributes from left to right.
         repeat(4) {
             revealCount = it + 1
             delay(90)
         }
 
-        // Keep VM list as source of truth after animation.
         displayedCountries = guessedCountries
         revealingCountryKey = null
         revealCount = 4
