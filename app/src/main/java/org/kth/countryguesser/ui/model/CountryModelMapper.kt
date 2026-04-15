@@ -12,6 +12,7 @@ fun CountryModel.toUiModel(): CountryUiModel = CountryUiModel(
     population = this.population,
     area = this.area,
     inceptionYear = this.inceptionYear,
+    flagUrl = this.flagUrl
 )
 fun CountryModel.toUiModel(
     populationDiff: CountryAttributeResult?,
@@ -25,6 +26,7 @@ fun CountryModel.toUiModel(
     areaDiff = areaDiff,
     inceptionYear = this.inceptionYear,
     inceptionYearDiff = inceptionYearDiff,
+    flagUrl = this.flagUrl
 )
 
 /**
@@ -34,7 +36,8 @@ fun CountryResultDto.toUiModel(): CountryUiModel = CountryUiModel(
     countryName = this.name?.common ?: "",
     population = this.population,
     area = this.area,
-    inceptionYear = null // Map if available
+    inceptionYear = null, // Map if available
+    flagUrl = this.flags?.png
 )
 
 /**

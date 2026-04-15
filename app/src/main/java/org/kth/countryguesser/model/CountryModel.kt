@@ -2,7 +2,6 @@ package org.kth.countryguesser.model
 
 import android.util.Log
 import org.kth.countryguesser.util.InceptionYear
-import org.kth.countryguesser.util.WikiDataParser
 import kotlin.math.abs
 
 
@@ -11,6 +10,7 @@ interface CountryModel {
     val population: Long?
     val area: Double?
     val inceptionYear: InceptionYear?
+    val flagUrl: String?
     
 //    fun compareTo(other: CountryModel): CountryComparisonResult
     fun compareAttributesTo(other: CountryModel, closenessCriteria: Double?): CountryComparisonResult
@@ -22,7 +22,8 @@ class CountryModelImpl(
     override var countryName: String = "",
     override var population: Long? = null,
     override var area: Double? = null,
-    override var inceptionYear: InceptionYear? = null
+    override var inceptionYear: InceptionYear? = null,
+    override var flagUrl: String? = null
 ) : CountryModel {
     override fun compareAttributesTo(other: CountryModel, closenessCriteria: Double?): CountryComparisonResult {
         return CountryComparisonResult(

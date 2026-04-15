@@ -78,6 +78,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import org.kth.countryguesser.model.CountryAttributeResult
 import org.kth.countryguesser.viewmodel.GameVMImpl
 import androidx.compose.ui.graphics.lerp
+import coil.compose.AsyncImage
 import kotlinx.coroutines.delay
 import org.kth.countryguesser.view.components.Alert
 import org.kth.countryguesser.view.components.LoadingAlert
@@ -257,7 +258,6 @@ private fun Input(
     val searchResults by vm.searchResults.collectAsState()
     val focusManager = LocalFocusManager.current
 
-    // Trigger search on every text change
     LaunchedEffect(guess) {
         if (guess.isNotBlank()) {
             vm.searchCountries(guess)
@@ -312,21 +312,22 @@ private fun Input(
                                         .padding(horizontal = 16.dp, vertical = 12.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Flag,
+                                    AsyncImage(
+                                        model = country.second,
                                         contentDescription = "Flag",
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.padding(end = 12.dp)
+                                        modifier = Modifier
+                                            .size(24.dp)
                                     )
                                     Text(
-                                        text = country,
+                                        text = country.first,
                                         style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onBackground
+                                        color = MaterialTheme.colorScheme.onBackground,
+                                        modifier = Modifier.padding(start = 8.dp)
                                     )
                                 }
                             },
                             onClick = {
-                                guess = country
+                                guess = country.first
                                 isFocused = false
                             },
                         )

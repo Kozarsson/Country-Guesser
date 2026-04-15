@@ -11,5 +11,5 @@ data class CountryUiModel(
     val areaDiff: CountryAttributeResult? = null,
     val inceptionYear: InceptionYear?,
     val inceptionYearDiff: CountryAttributeResult? = null,
-    //TODO: add Country flag image
+    val flagUrl: String? = null,
 )

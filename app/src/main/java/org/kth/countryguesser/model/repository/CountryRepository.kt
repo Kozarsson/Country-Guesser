@@ -7,7 +7,7 @@ import org.kth.countryguesser.model.api.RestCountriesEndpoints
 import org.kth.countryguesser.model.api.WikiDataEndpoints
 import org.kth.countryguesser.ui.model.CountryUiModel
 import org.kth.countryguesser.ui.model.toUiModel
-import org.kth.countryguesser.util.WikiDataParser
+import org.kth.countryguesser.util.extractYearFromWikiData
 import retrofit2.HttpException
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -15,18 +15,17 @@ import javax.inject.Singleton
 interface CountryRepository {
     suspend fun searchCountries(searchQuery: String): List<CountryUiModel>
     suspend fun getCountryByName(name: String): CountryModel?
-    suspend fun getAllCountryNames(): List<String>
+    suspend fun getAllCountrySearchResults(): List<Pair<String, String?>>
 }
 
 @Singleton
 class CountryRepositoryImpl @Inject constructor(
     private val restCountriesApiService: RestCountriesEndpoints,
     private val wikiDataApiService: WikiDataEndpoints,
-    private val wikiDataParser: WikiDataParser
 ) : CountryRepository {
 
     // In-memory cache
-    private var cachedCountryNames: List<String>? = null
+    private var cachedCountrySearchResults: List<Pair<String, String?>>? = null
 
     override suspend fun searchCountries(searchQuery: String): List<CountryUiModel> {
         return try {
@@ -54,7 +53,7 @@ class CountryRepositoryImpl @Inject constructor(
             val entityId = countryIdResult.search.firstOrNull()?.id ?: return null
             val entityResult = wikiDataApiService.wikiDataEntityById(entityId)
             val inceptionYearResult = entityResult.entities[entityId]?.claims?.inception?.firstOrNull()?.mainsnak?.datavalue?.value?.time
-            val inceptionYear = inceptionYearResult?.let { wikiDataParser.extractYearFromWikiData(it) }
+            val inceptionYear = inceptionYearResult?.let { extractYearFromWikiData(it) }
             return CountryModelImpl(
                 countryName = restCountriesResult.name?.common ?: name,
                 population = restCountriesResult.population,
@@ -67,17 +66,20 @@ class CountryRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getAllCountryNames(): List<String> {
+    override suspend fun getAllCountrySearchResults(): List<Pair<String, String?>> {
         // Return cached version if available
-        if (cachedCountryNames?.isNotEmpty() == true) {
-            return cachedCountryNames!!
+        if (cachedCountrySearchResults?.isNotEmpty() == true) {
+            return cachedCountrySearchResults!!
         }
 
         return try {
             val result = restCountriesApiService.getAllCountries()
-            val names = result.mapNotNull { it.name?.common }
-            cachedCountryNames = names
-            names
+            val countrySearchResults = result.mapNotNull { country ->
+                val name = country.name?.common ?: return@mapNotNull null
+                name to country.flags?.png
+            }
+            cachedCountrySearchResults = countrySearchResults
+            countrySearchResults
         } catch (e: Exception) {
             Log.e("CountryRepository", "Error fetching all countries: ${e.message}")
             emptyList()

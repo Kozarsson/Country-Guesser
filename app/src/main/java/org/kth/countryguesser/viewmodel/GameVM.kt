@@ -15,8 +15,8 @@ import org.kth.countryguesser.ui.model.CountryUiModel
 import org.kth.countryguesser.ui.model.toUiModel
 import java.time.LocalDate
 import java.time.ZoneOffset
-import java.util.concurrent.locks.Lock
 import javax.inject.Inject
+import kotlin.math.max
 import kotlin.random.Random
 
 
@@ -24,7 +24,7 @@ interface GameVM {
     val score: StateFlow<Int>
     val gameWon: StateFlow<Boolean>
     val guessedCountries: StateFlow<List<CountryUiModel>>
-    val searchResults: StateFlow<List<String>>
+    val searchResults: StateFlow<List<Pair<String, String?>>>
     val popupState: StateFlow<PopupState>
     val errorMessage: StateFlow<String?>
 
@@ -69,13 +69,13 @@ class GameVMImpl @Inject constructor(
         startTimerUntilLoadingPopup(3000)
         viewModelScope.launch {
             var countryName = ""
-            val countries = countryRepository.getAllCountryNames()
+            val countries = countryRepository.getAllCountrySearchResults()
 
             if (_gamemode.value == "daily") {
                 val seed = LocalDate.now(ZoneOffset.UTC).toEpochDay()
-                countryName = countries.random(Random(seed))
+                countryName = countries.random(Random(seed)).first
             } else {
-                countryName = countries.random()
+                countryName = countries.random().first
             }
 
             val result = countryRepository.getCountryByName(countryName)
@@ -104,22 +104,23 @@ class GameVMImpl @Inject constructor(
     override val guessedCountries: StateFlow<List<CountryUiModel>>
         get() = _guessedCountries
 
-    private val _searchResults = MutableStateFlow<List<String>>(listOf())
-    override val searchResults: StateFlow<List<String>>
+    private val _searchResults = MutableStateFlow<List<Pair<String, String?>>>(listOf())
+    override val searchResults: StateFlow<List<Pair<String, String?>>>
         get() = _searchResults
 
     override fun searchCountries(searchQuery: String) {
         viewModelScope.launch {
-            val countries = countryRepository.getAllCountryNames()
+            val countries = countryRepository.getAllCountrySearchResults()
             val guessedCountries = _guessedCountries.value.map { it.countryName.lowercase() }
             val result = countries.filter {
-                it.contains(searchQuery, ignoreCase = true) && !guessedCountries.contains(it.lowercase())
+                it.first.contains(searchQuery, ignoreCase = true) &&
+                    !guessedCountries.contains(it.first.lowercase())
             }
             val sortedResult = result.sortedWith(
-                compareBy<String> { !it.startsWith(searchQuery, ignoreCase = true) }
-                    .thenBy { it.lowercase() }
+                compareBy<Pair<String, String?>> { !it.first.startsWith(searchQuery, ignoreCase = true) }
+                    .thenBy { it.first.lowercase() }
             )
-            _searchResults.value = sortedResult
+            _searchResults.value = sortedResult.subList(0, 10.coerceAtMost(sortedResult.size))
         }
     }
 
