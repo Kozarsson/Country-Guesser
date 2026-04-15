@@ -2,6 +2,7 @@ package org.kth.countryguesser.view
 
 import android.app.AlertDialog
 import android.app.Dialog
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -35,6 +36,7 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Flag
+import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -78,6 +80,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import org.kth.countryguesser.model.CountryAttributeResult
 import org.kth.countryguesser.viewmodel.GameVMImpl
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.layout.ContentScale
 import coil.compose.AsyncImage
 import kotlinx.coroutines.delay
 import org.kth.countryguesser.view.components.Alert
@@ -428,7 +431,7 @@ private fun GuessedCountries(
             Text(text = "Country", modifier = Modifier.width(cellSize), textAlign = TextAlign.Center)
             Text(text = "Population", modifier = Modifier.width(cellSize), textAlign = TextAlign.Center)
             Text(text = "Area", modifier = Modifier.width(cellSize), textAlign = TextAlign.Center)
-            Text(text = "Inception Year", modifier = Modifier.width(cellSize), textAlign = TextAlign.Center)
+            Text(text = "Inception", modifier = Modifier.width(cellSize), textAlign = TextAlign.Center)
         }
         LazyColumn(
             modifier = Modifier
@@ -467,11 +470,12 @@ private fun CountryRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         val attrs = listOf(
-            country.countryName,
+            //country.countryName,
+            country.flagUrl,
             country.population?.toString(),
             country.area?.toString(),
             country.inceptionYear?.year?.toString(),
-            // TODO: add country flag
+            //country.flagUrl
         )
         val diffs = listOf(
             null,
@@ -481,6 +485,7 @@ private fun CountryRow(
         )
         items(attrs.size) { idx ->
             val cellColor = countryAttributeGuessColor(diffs[idx])
+            Log.d("GameScreen", attrs[idx].toString())
             Box(
                 modifier = Modifier
                     .size(cellSize)
@@ -513,19 +518,40 @@ private fun CountryRow(
                             }
                             Icon(
                                 imageVector = arrow,
-                                contentDescription = "Flag",
+                                contentDescription = "Arrow",
                                 tint = lerp(cellColor, Color.Black, 0.10f),
                                 modifier = Modifier.fillMaxSize()
                             )
                         }
-                        Text(
-                            text = attrs[idx] ?: "N/A",
-                            style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.background,
-                            textAlign = TextAlign.Center,
-                            maxLines = 1,
-                            modifier = Modifier.fillMaxWidth(),
-                        )
+                        if (idx == 0 ) {
+                            if (attrs[idx] != null) {
+                                //TODO: Round the corners of the image so it aligns with the rest of the attributes
+                                AsyncImage(
+                                    model = attrs[idx],
+                                    contentDescription = "Flag",
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop,
+                                )
+                            } else {
+                                Text(
+                                    text = "Flag N/A",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    color = MaterialTheme.colorScheme.background,
+                                    textAlign = TextAlign.Center,
+                                    maxLines = 1,
+                                    modifier = Modifier.fillMaxWidth(),
+                                )
+                            }
+                        } else {
+                            Text(
+                                text = attrs[idx] ?: "N/A",
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.background,
+                                textAlign = TextAlign.Center,
+                                maxLines = 1,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
                     }
                 }
             }

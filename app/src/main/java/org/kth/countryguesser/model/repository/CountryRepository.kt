@@ -58,7 +58,8 @@ class CountryRepositoryImpl @Inject constructor(
                 countryName = restCountriesResult.name?.common ?: name,
                 population = restCountriesResult.population,
                 area = restCountriesResult.area,
-                inceptionYear = inceptionYear
+                inceptionYear = inceptionYear,
+                flagUrl = restCountriesResult.flags?.png //TODO: Fix bug that when searching for a country before the guessing country is loaded, the app crashes due to this image url
             )
         } catch (e: HttpException) {
             Log.e("CountryRepository", "WikiData HTTP exception: ${e.message}")

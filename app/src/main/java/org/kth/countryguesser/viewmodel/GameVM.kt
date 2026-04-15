@@ -125,6 +125,11 @@ class GameVMImpl @Inject constructor(
     }
 
     override fun guessCountry(country: String) {
+        if (targetCountry.value == null) {
+            _errorMessage.value = "Try again later"
+            _popupState.value = PopupState.ERROR
+            return
+        }
         val guessedCountries = _guessedCountries.value.map { it.countryName.lowercase() }
         if (guessedCountries.contains(country.lowercase())) {
             _popupState.value = PopupState.DUPLICATE_SEARCH
