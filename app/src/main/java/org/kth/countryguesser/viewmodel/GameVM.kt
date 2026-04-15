@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,6 +15,7 @@ import org.kth.countryguesser.ui.model.CountryUiModel
 import org.kth.countryguesser.ui.model.toUiModel
 import java.time.LocalDate
 import java.time.ZoneOffset
+import java.util.concurrent.locks.Lock
 import javax.inject.Inject
 import kotlin.random.Random
 
@@ -55,13 +57,16 @@ class GameVMImpl @Inject constructor(
     override val errorMessage: StateFlow<String?>
         get() = _errorMessage
 
+    private var isFetching: Boolean = false
+
+
 
     init {
         fetchCountry()
     }
 
-    fun fetchCountry() {
-        _popupState.value = PopupState.LOADING
+    private fun fetchCountry() {
+        startTimerUntilLoadingPopup(3000)
         viewModelScope.launch {
             var countryName = ""
             val countries = countryRepository.getAllCountryNames()
@@ -75,7 +80,18 @@ class GameVMImpl @Inject constructor(
 
             val result = countryRepository.getCountryByName(countryName)
             targetCountry.value = result
-            _popupState.value = PopupState.NONE
+            isFetching = false
+        }
+    }
+
+    private fun startTimerUntilLoadingPopup(timeMillis: Long) {
+        isFetching = true
+        viewModelScope.launch {
+            delay(timeMillis)
+            while (isFetching) {
+                _popupState.value = PopupState.LOADING
+            }
+            _popupState.value = PopupState.NONE //This together with the while() prevents race conditions
         }
     }
 
@@ -113,7 +129,7 @@ class GameVMImpl @Inject constructor(
             _popupState.value = PopupState.DUPLICATE_SEARCH
             return
         }
-        _popupState.value = PopupState.LOADING //TODO: Only show loading popup is search takes longer than x number of seconds
+        startTimerUntilLoadingPopup(5000)
         viewModelScope.launch {
             val result = countryRepository.getCountryByName(country)
             if (result != null) {
@@ -146,6 +162,7 @@ class GameVMImpl @Inject constructor(
                 _popupState.value = PopupState.NO_RESULT
                 Log.e("GameVM", "No country found with name $country")
             }
+            isFetching = false
         }
     }
 
