@@ -1,37 +1,169 @@
 package org.kth.countryguesser.view.components
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonOutline
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import org.kth.countryguesser.model.entity.UserEntity
-import org.kth.countryguesser.viewmodel.AuthVM
+import kotlinx.coroutines.launch
+import org.kth.countryguesser.viewmodel.AuthVMImpl
+import org.kth.countryguesser.R
 
-//TODO: CREATE A TOPAPPBAR WITH USER LOGIN/REGISTER ON RIGHT SIDE AND SETTINGS ON LEFT
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AppModalNavigationDrawer(
+    navController: NavController,
+    drawerState: DrawerState,
+    content: @Composable () -> Unit
+) {
+    val authVM = hiltViewModel<AuthVMImpl>()
+    val user by authVM.userEntity.collectAsState()
+    val scope = rememberCoroutineScope()
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet(
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.background)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // App Logo
+                    Image(
+                        painter = painterResource(id = R.drawable.countryguesser),
+                        contentDescription = "App Logo",
+                        modifier = Modifier
+                            .size(80.dp)
+                            .padding(bottom = 16.dp)
+                    )
+
+                    // App Name
+                    Text(
+                        text = "Country Guesser",
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 24.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.padding(bottom = 24.dp)
+                    )
+
+                    // User Email or Status
+                    Text(
+                        text = user?.email ?: "No logged in user",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    //TODO: Add a settings page
+
+                    // Drawer Items
+                    if (user != null && !user!!.isAnonymous) {
+                        DrawerItem("Logout") {
+                            authVM.signOut()
+                            scope.launch { drawerState.close() }
+                        }
+                    } else {
+                        DrawerItem("Login") {
+                            navController.navigate(Routes.LOGIN)
+                            scope.launch { drawerState.close() }
+                        }
+                        DrawerItem("Register") {
+                            navController.navigate(Routes.REGISTER)
+                            scope.launch { drawerState.close() }
+                        }
+                    }
+                }
+            }
+        },
+        content = content,
+    )
+}
 
 @Composable
-fun BottomBar(navController: NavController, authVM: AuthVM, user: UserEntity?) {
+fun DrawerItem(label: String, onClick: () -> Unit) {
+    TextButton(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TopBar(onMenuClick: () -> Unit) {
+    TopAppBar(
+        title = {  Image(painter = painterResource(id = R.drawable.countryguesser), contentDescription = "Open Drawer") },
+        actions = {
+            IconButton(onClick = onMenuClick) {
+                Icon(Icons.Filled.AccountCircle, contentDescription = "Login", tint = MaterialTheme.colorScheme.background)
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor =  MaterialTheme.colorScheme.primary,
+        )
+    )
+}
+
+@Composable
+fun BottomBar(navController: NavController) {
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+    val authVM = hiltViewModel<AuthVMImpl>()
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium.copy(all = ZeroCornerSize),

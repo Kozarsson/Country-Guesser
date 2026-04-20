@@ -77,7 +77,7 @@ import coil.compose.AsyncImage
 import kotlinx.coroutines.delay
 import org.kth.countryguesser.view.components.Alert
 import org.kth.countryguesser.view.components.LoadingAlert
-import org.kth.countryguesser.viewmodel.AuthVMImpl
+import org.kth.countryguesser.view.components.TopBar
 import org.kth.countryguesser.viewmodel.PopupState
 import java.util.Locale
 import kotlin.math.abs
@@ -86,14 +86,12 @@ import kotlin.math.abs
 fun GameScreen(
     navController: NavHostController,
     mode: String, // 'daily' or 'endless'
+    onMenuClick: () -> Unit,
 ) {
-    val authVM = hiltViewModel<AuthVMImpl>()
-    val user by authVM.userEntity.collectAsState()
     val gameVM = hiltViewModel<GameVMImpl>()
     val isGameWon by gameVM.gameWon.collectAsState()
     val popupState by gameVM.popupState.collectAsState()
     val errorMessage by gameVM.errorMessage.collectAsState()
-
     LaunchedEffect(mode) {
         gameVM.setGamemode(mode)
     }
@@ -119,8 +117,11 @@ fun GameScreen(
     }
     GameScreenContent(
         navController = navController,
+        topBar = {
+            TopBar(onMenuClick = onMenuClick)
+        },
         bottomBar = {
-            BottomBar(navController = navController, authVM = authVM, user = user)
+            BottomBar(navController = navController)
         },
         mode = mode,
         vm = gameVM,
@@ -131,12 +132,14 @@ fun GameScreen(
 @Composable
 fun GameScreenContent(
     navController: NavHostController,
+    topBar: @Composable () -> Unit = {},
     bottomBar: @Composable () -> Unit = {},
     mode: String,
     vm: GameVMImpl
 ) {
     val context = LocalContext.current
     Scaffold(
+        topBar = topBar,
         bottomBar = bottomBar,
         floatingActionButton = {
             FloatingActionButton(
