@@ -150,12 +150,13 @@ class GameVMImpl @Inject constructor(
                         _score.value++
                     }
                 }
-
+                Log.d("GameVM", _guessedCountries.value.toString())
                 _guessedCountries.value = listOf(
                     result.toUiModel(
                         comp?.populationComparison,
                         comp?.areaComparison,
-                        comp?.inceptionYearComparison
+                        comp?.inceptionYearComparison,
+                        comp?.continentsComparison
                     )
                 ) + _guessedCountries.value
                 if (_gamemode.value == "daily") {

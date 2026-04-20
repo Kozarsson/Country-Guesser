@@ -1,5 +1,6 @@
 package org.kth.countryguesser.view
 
+import android.R
 import android.app.AlertDialog
 import android.app.Dialog
 import android.util.Log
@@ -7,6 +8,7 @@ import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -87,6 +89,10 @@ import org.kth.countryguesser.view.components.Alert
 import org.kth.countryguesser.view.components.LoadingAlert
 import org.kth.countryguesser.view.components.WIPAlert
 import org.kth.countryguesser.viewmodel.PopupState
+import java.util.Locale
+import kotlin.math.abs
+import kotlin.text.get
+import kotlin.toString
 
 @Composable
 fun GameScreen(
@@ -141,7 +147,6 @@ fun GameScreenContent(
     mode: String,
     vm: GameVMImpl
 ) {
-    // TODO: add loading icon until answer country is fetched
     val context = LocalContext.current
     Scaffold(
         bottomBar = bottomBar,
@@ -340,6 +345,7 @@ private fun Input(
 
             OutlinedButton(
                 onClick = {
+                    //TODO: Fix bug with Georgia defaulting to South Georgia instead (how?)
                     vm.guessCountry(guess)
                     focusManager.clearFocus()
                     guess = ""
@@ -382,17 +388,17 @@ private fun GuessedCountries(
     guessedCountries: List<CountryUiModel>,
     modifier: Modifier = Modifier,
 ) {
-    //TODO: Figure out a way to animate the movement of older guessed down to make space for the new guess
-    val cellSize = 96.dp
+    val headers = listOf("Country", "Population", "Area", "Continent", "Inception")
+    val attributeCount = headers.size
     var displayedCountries by remember { mutableStateOf(guessedCountries) }
     var revealingCountryKey by remember { mutableStateOf<String?>(null) }
-    var revealCount by remember { mutableStateOf(4) }
+    var revealCount by remember { mutableStateOf(attributeCount) }
 
     LaunchedEffect(guessedCountries) {
         if (guessedCountries.isEmpty()) {
             displayedCountries = emptyList()
             revealingCountryKey = null
-            revealCount = 4
+            revealCount = attributeCount
             return@LaunchedEffect
         }
 
@@ -411,47 +417,58 @@ private fun GuessedCountries(
         revealCount = 0
         delay(220)
 
-        repeat(4) {
+        repeat(attributeCount) {
             revealCount = it + 1
             delay(90)
         }
 
         displayedCountries = guessedCountries
         revealingCountryKey = null
-        revealCount = 4
+        revealCount = attributeCount
     }
 
-    Column(modifier = modifier.animateContentSize()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(text = "Country", modifier = Modifier.width(cellSize), textAlign = TextAlign.Center)
-            Text(text = "Population", modifier = Modifier.width(cellSize), textAlign = TextAlign.Center)
-            Text(text = "Area", modifier = Modifier.width(cellSize), textAlign = TextAlign.Center)
-            Text(text = "Inception", modifier = Modifier.width(cellSize), textAlign = TextAlign.Center)
-        }
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp)
-                .animateContentSize(
-                    animationSpec = tween<IntSize>(durationMillis = 1000)
-                ),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            items(
-                items = displayedCountries,
-                key = { it.countryName }
-            ) { country ->
-                val visibleAttributes = if (country.countryName == revealingCountryKey) revealCount else 4
-                CountryRow(
-                    country = country,
-                    cellSize = cellSize,
-                    visibleAttributes = visibleAttributes,
-                )
+    BoxWithConstraints(modifier = modifier.animateContentSize()) {
+        val horizontalPadding = 16.dp
+        val cellSize = ((maxWidth - horizontalPadding) / attributeCount).coerceIn(56.dp, 110.dp)
+        val attributeFontSize = (cellSize.value * 0.18f).coerceIn(10f, 18f).sp
+
+        Column {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                headers.forEach { header ->
+                    Text(
+                        text = header,
+                        modifier = Modifier.width(cellSize),
+                        textAlign = TextAlign.Center,
+                        fontSize = attributeFontSize,
+                    )
+                }
+            }
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp)
+                    .animateContentSize(
+                        animationSpec = tween<IntSize>(durationMillis = 1000)
+                    ),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                items(
+                    items = displayedCountries,
+                    key = { it.countryName }
+                ) { country ->
+                    val visibleAttributes = if (country.countryName == revealingCountryKey) revealCount else attributeCount
+                    CountryRow(
+                        country = country,
+                        cellSize = cellSize,
+                        attributeFontSize = attributeFontSize,
+                        visibleAttributes = visibleAttributes,
+                    )
+                }
             }
         }
     }
@@ -461,31 +478,33 @@ private fun GuessedCountries(
 private fun CountryRow(
     country: CountryUiModel,
     cellSize: Dp,
-    visibleAttributes: Int = 4,
+    attributeFontSize: androidx.compose.ui.unit.TextUnit,
+    visibleAttributes: Int,
 ) {
     LazyRow(
         modifier = Modifier
-            .width(cellSize * 4)
+            .width(cellSize * 5)
             .height(cellSize),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         val attrs = listOf(
             //country.countryName,
             country.flagUrl,
-            country.population?.toString(),
-            country.area?.toString(),
-            country.inceptionYear?.year?.toString(),
+            country.population,
+            country.area,
+            country.continents,
+            country.inceptionYear?.year,
             //country.flagUrl
         )
         val diffs = listOf(
             null,
             country.populationDiff,
             country.areaDiff,
+            country.continentsDiff,
             country.inceptionYearDiff,
         )
         items(attrs.size) { idx ->
-            val cellColor = countryAttributeGuessColor(diffs[idx])
-            Log.d("GameScreen", attrs[idx].toString())
+            val cellColor = lerp(countryAttributeGuessColor(diffs[idx]), Color.Black, 0.20f)
             Box(
                 modifier = Modifier
                     .size(cellSize)
@@ -508,7 +527,8 @@ private fun CountryRow(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center,
                     ) {
-                        if (diffs[idx] != null && diffs[idx]?.comparison != null && diffs[idx]?.comparison != 0) {
+//                        if (diffs[idx] != null && diffs[idx]?.comparison != null && diffs[idx]?.comparison != 0 && diffs[idx]?.comparison != false && diffs[idx]?.comparison != true) {
+                        if (diffs[idx]?.comparison == 1 || diffs[idx]?.comparison == -1) {
                             val arrow: ImageVector = if (diffs[idx]?.comparison == 1) {
                                 Icons.Default.ArrowUpward
                             } else if (diffs[idx]?.comparison == -1) {
@@ -535,7 +555,7 @@ private fun CountryRow(
                             } else {
                                 Text(
                                     text = "Flag N/A",
-                                    style = MaterialTheme.typography.titleSmall,
+                                    style = MaterialTheme.typography.titleSmall.copy(fontSize = attributeFontSize),
                                     color = MaterialTheme.colorScheme.background,
                                     textAlign = TextAlign.Center,
                                     maxLines = 1,
@@ -543,12 +563,19 @@ private fun CountryRow(
                                 )
                             }
                         } else {
+                            var text = ""
+                            text = when (val value = attrs[idx]) {
+                                is Number -> displayNumber(value)
+                                is List<*> -> value.filterNotNull().joinToString(separator = "\n") { it.toString() }
+                                null -> "N/A"
+                                else -> value.toString()
+                            }
                             Text(
-                                text = attrs[idx] ?: "N/A",
-                                style = MaterialTheme.typography.titleSmall,
+                                text = text,
+                                style = MaterialTheme.typography.titleSmall.copy(fontSize = attributeFontSize),
                                 color = MaterialTheme.colorScheme.background,
                                 textAlign = TextAlign.Center,
-                                maxLines = 1,
+                                maxLines = 2,
                                 modifier = Modifier.fillMaxWidth(),
                             )
                         }
@@ -570,8 +597,22 @@ private fun countryAttributeGuessColor(attrComparisonResult: CountryAttributeRes
         return when (attrComparisonResult.comparison) {
             -1 -> Color.Red
             1 -> Color.Red
+            false -> Color.Red
             0 -> Color.Green
+            true -> Color.Green
             else -> MaterialTheme.colorScheme.primary
         }
+    }
+}
+
+private fun displayNumber(attribute: Number?): String {
+    val value = attribute?.toDouble() ?: return "N/A"
+    val absValue = abs(value)
+
+    return when {
+        absValue >= 1_000_000_000 -> String.format(Locale.UK, "%.1fB", value / 1_000_000_000)
+        absValue >= 1_000_000     -> String.format(Locale.UK, "%.1fM", value / 1_000_000)
+        absValue >= 10_000         -> String.format(Locale.UK, "%.1fK", value / 10_000)
+        else                      -> value.toLong().toString()
     }
 }

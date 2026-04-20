@@ -11,6 +11,7 @@ interface CountryModel {
     val area: Double?
     val inceptionYear: InceptionYear?
     val flagUrl: String?
+    val continents: List<String>?
     
 //    fun compareTo(other: CountryModel): CountryComparisonResult
     fun compareAttributesTo(other: CountryModel, closenessCriteria: Double?): CountryComparisonResult
@@ -23,13 +24,15 @@ class CountryModelImpl(
     override var population: Long? = null,
     override var area: Double? = null,
     override var inceptionYear: InceptionYear? = null,
-    override var flagUrl: String? = null
+    override var flagUrl: String? = null,
+    override val continents: List<String>? = null
 ) : CountryModel {
     override fun compareAttributesTo(other: CountryModel, closenessCriteria: Double?): CountryComparisonResult {
         return CountryComparisonResult(
             populationComparison = compareAttribute(this.population, other.population, closenessCriteria),
             areaComparison = compareAttribute(this.area, other.area, closenessCriteria),
-            inceptionYearComparison = compareAttribute<InceptionYear>(this.inceptionYear, other.inceptionYear, closenessCriteria)
+            inceptionYearComparison = compareAttribute<InceptionYear>(this.inceptionYear, other.inceptionYear, closenessCriteria),
+            continentsComparison = compareAttribute(this.continents, other.continents)
         )
     }
 
@@ -40,10 +43,21 @@ class CountryModelImpl(
     override suspend fun saveToDatabase() {
         // TODO: Implement save logic
     }
+
+    private fun compareAttribute(value1: List<*>?, value2: List<*>?): CountryAttributeResult {
+        return if (value1 == null || value2 == null) {
+            CountryAttributeResult(comparison = null, isClose = null)
+        } else {
+            CountryAttributeResult(comparison = value1 == value2, isClose = null)
+        }
+    }
     
     private fun <T : Comparable<T>> compareAttribute(value1: T?, value2: T?, closenessCriteria: Double?): CountryAttributeResult {
         if (value1 == null || value2 == null) {
             return CountryAttributeResult(comparison = null, isClose = null)
+        }
+        if (value1 is List<*> && value2 is List<*>) {
+            return CountryAttributeResult(comparison = value1.compareTo(value2), isClose = null)
         }
         val comparison = value1.compareTo(value2)
         if (closenessCriteria == null) {
@@ -68,16 +82,17 @@ data class CountryComparisonResult(
     val populationComparison: CountryAttributeResult,
     val areaComparison: CountryAttributeResult,
     val inceptionYearComparison: CountryAttributeResult,
+    val continentsComparison: CountryAttributeResult,
 )
 
 /**
  * Represents the result of comparing a single country attribute between two countries.
  *
  * @property comparison The result of the comparison: -1 if the first value is less than the second,
- * 0 if they are equal, 1 if the first is greater, or null if either value is null.
+ * 0/true if they are equal, 1 if the first is greater, false if they are not equal and not comparable, or null if either value is null.
  * @property isClose Indicates whether the two values are considered "close" according to a given closeness criteria.
  */
 data class CountryAttributeResult(
-    val comparison: Int?, // -1, 0, 1, or null
+    val comparison: Any?,
     val isClose: Boolean?
 )

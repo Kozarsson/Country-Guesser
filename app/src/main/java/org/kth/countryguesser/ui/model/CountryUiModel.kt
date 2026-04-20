@@ -12,4 +12,6 @@ data class CountryUiModel(
     val inceptionYear: InceptionYear?,
     val inceptionYearDiff: CountryAttributeResult? = null,
     val flagUrl: String? = null,
+    val continents: List<String>?,
+    val continentsDiff: CountryAttributeResult? = null
 )
