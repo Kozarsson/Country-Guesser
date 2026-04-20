@@ -1,6 +1,8 @@
 package org.kth.countryguesser.view
 
 import android.annotation.SuppressLint
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,7 +38,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import org.kth.countryguesser.model.repository.FirebaseAuthRepository
 import org.kth.countryguesser.viewmodel.AuthVMImpl
 import org.kth.countryguesser.viewmodel.AuthVM
 
@@ -50,7 +51,9 @@ fun RegisterScreen(
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
     var isRegisterSuccessful by remember { mutableStateOf(false) }
-    val authVM = hiltViewModel<AuthVMImpl>()
+    val activity = LocalActivity.current as? ComponentActivity
+        ?: error("RegisterScreen requires a ComponentActivity host")
+    val authVM = hiltViewModel<AuthVMImpl>(activity)
 
     Scaffold(
         topBar = {

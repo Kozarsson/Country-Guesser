@@ -91,7 +91,7 @@ fun HomeScreen(
                 MenuActionButton(
                     label = "LEADERBOARDS",
                     icon = Icons.Filled.EmojiEvents,
-                    onClick = { },
+                    onClick = { navController.navigate(Routes.LEADERBOARD) },
                 )
                 Spacer(modifier = Modifier.height(4.dp))
             }

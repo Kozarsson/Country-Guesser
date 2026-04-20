@@ -1,5 +1,7 @@
 package org.kth.countryguesser.view.components
 
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -12,9 +14,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonOutline
@@ -45,8 +47,15 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import kotlinx.coroutines.launch
-import org.kth.countryguesser.viewmodel.AuthVMImpl
 import org.kth.countryguesser.R
+import org.kth.countryguesser.viewmodel.AuthVMImpl
+
+@Composable
+private fun rememberActivityAuthVm(): AuthVMImpl {
+    val activity = LocalActivity.current as? ComponentActivity
+        ?: error("Top/bottom bars require a ComponentActivity host")
+    return hiltViewModel(activity)
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,7 +64,7 @@ fun AppModalNavigationDrawer(
     drawerState: DrawerState,
     content: @Composable () -> Unit
 ) {
-    val authVM = hiltViewModel<AuthVMImpl>()
+    val authVM = rememberActivityAuthVm()
     val user by authVM.userEntity.collectAsState()
     val scope = rememberCoroutineScope()
     ModalNavigationDrawer(
@@ -147,15 +156,31 @@ fun DrawerItem(label: String, onClick: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBar(onMenuClick: () -> Unit) {
+    val authVM = rememberActivityAuthVm()
+    val user by authVM.userEntity.collectAsState()
+
     TopAppBar(
-        title = {  Image(painter = painterResource(id = R.drawable.countryguesser), contentDescription = "Open Drawer") },
+        title = {
+            Image(
+                painter = painterResource(id = R.drawable.countryguesser),
+                contentDescription = "Open Drawer"
+            )
+        },
         actions = {
             IconButton(onClick = onMenuClick) {
-                Icon(Icons.Filled.AccountCircle, contentDescription = "Login", tint = MaterialTheme.colorScheme.background)
+                Icon(
+                    imageVector = if (user != null && !user!!.isAnonymous) {
+                        Icons.Filled.AccountCircle
+                    } else {
+                        Icons.AutoMirrored.Filled.Login
+                    },
+                    contentDescription = "Login",
+                    tint = MaterialTheme.colorScheme.background
+                )
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor =  MaterialTheme.colorScheme.primary,
+            containerColor = MaterialTheme.colorScheme.primary,
         )
     )
 }
@@ -163,7 +188,9 @@ fun TopBar(onMenuClick: () -> Unit) {
 @Composable
 fun BottomBar(navController: NavController) {
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
-    val authVM = hiltViewModel<AuthVMImpl>()
+    val authVM = rememberActivityAuthVm()
+    val user by authVM.userEntity.collectAsState()
+
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium.copy(all = ZeroCornerSize),
@@ -195,7 +222,7 @@ fun BottomBar(navController: NavController) {
             TextButton(onClick = { if (currentRoute != Routes.HOME) navController.navigate(Routes.HOME) }) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(
-                        if (currentRoute == Routes.HOME) Icons.Filled.Bookmark else Icons.Default.BookmarkBorder,
+                        Icons.Filled.Home,
                         contentDescription = "Home",
                         modifier = Modifier.size(32.dp),
                         tint = MaterialTheme.colorScheme.background
@@ -204,8 +231,7 @@ fun BottomBar(navController: NavController) {
                 }
             }
 
-
-            if (authVM.authenticated()) {
+            if (user != null && !user!!.isAnonymous) {
                 TextButton(onClick = { if (currentRoute != Routes.PROFILE) navController.navigate(Routes.PROFILE) }) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(

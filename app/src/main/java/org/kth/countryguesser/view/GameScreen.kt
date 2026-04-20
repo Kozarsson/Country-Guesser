@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -44,12 +45,14 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -78,6 +81,7 @@ import kotlinx.coroutines.delay
 import org.kth.countryguesser.view.components.Alert
 import org.kth.countryguesser.view.components.LoadingAlert
 import org.kth.countryguesser.view.components.TopBar
+import org.kth.countryguesser.viewmodel.AuthVMImpl
 import org.kth.countryguesser.viewmodel.PopupState
 import java.util.Locale
 import kotlin.math.abs
@@ -86,12 +90,16 @@ import kotlin.math.abs
 fun GameScreen(
     navController: NavHostController,
     mode: String, // 'daily' or 'endless'
-    onMenuClick: () -> Unit,
 ) {
+    val authVM = hiltViewModel<AuthVMImpl>()
+    val user by authVM.userEntity.collectAsState()
     val gameVM = hiltViewModel<GameVMImpl>()
     val isGameWon by gameVM.gameWon.collectAsState()
     val popupState by gameVM.popupState.collectAsState()
     val errorMessage by gameVM.errorMessage.collectAsState()
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+
     LaunchedEffect(mode) {
         gameVM.setGamemode(mode)
     }
@@ -118,7 +126,7 @@ fun GameScreen(
     GameScreenContent(
         navController = navController,
         topBar = {
-            TopBar(onMenuClick = onMenuClick)
+            TopBar(navController = navController, drawerState = drawerState, scope = scope)
         },
         bottomBar = {
             BottomBar(navController = navController)

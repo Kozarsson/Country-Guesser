@@ -21,6 +21,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,22 +31,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import org.kth.countryguesser.view.components.BottomBar
-import org.kth.countryguesser.view.components.TopBar
 import org.kth.countryguesser.view.components.WIPAlert
+import org.kth.countryguesser.viewmodel.AuthVMImpl
 
 @Composable
 fun UserScreen(
     navController: NavHostController,
-    onMenuClick: () -> Unit,
 ) {
+    val authVM = hiltViewModel<AuthVMImpl>()
+    val user by authVM.userEntity.collectAsState()
+
     WIPAlert(onPress = { navController.popBackStack() })  // TODO: remove when page is implemented
 
     UserScreenContent(
-        topBar = {
-            TopBar(onMenuClick = onMenuClick)
-        },
         bottomBar = {
             BottomBar(navController = navController)
         },
@@ -55,11 +57,9 @@ fun UserScreen(
 @Preview(showBackground = true)
 @Composable
 private fun UserScreenContent(
-    topBar: @Composable () -> Unit = {},
     bottomBar: @Composable () -> Unit = {},
 ) {
     Scaffold(
-        topBar = topBar,
         bottomBar = bottomBar,
     ) { padding ->
         Column(
