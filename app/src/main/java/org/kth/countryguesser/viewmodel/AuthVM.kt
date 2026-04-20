@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -12,6 +13,7 @@ import org.kth.countryguesser.model.entity.UserEntity
 import org.kth.countryguesser.model.repository.FirebaseAuthRepository
 import org.kth.countryguesser.model.service.MyFirebaseMessagingService
 import org.kth.countryguesser.util.NetworkUtils
+import javax.inject.Inject
 
 
 interface AuthVM {
@@ -33,7 +35,8 @@ interface AuthVM {
     fun signInAnonymously()
 }
 
-class AuthVMImpl(
+@HiltViewModel
+class AuthVMImpl @Inject constructor(
     private val authRepository: FirebaseAuthRepository
 ) : ViewModel(), AuthVM {
 

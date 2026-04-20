@@ -30,7 +30,7 @@ import org.kth.countryguesser.viewmodel.AuthVM
 //TODO: CREATE A TOPAPPBAR WITH USER LOGIN/REGISTER ON RIGHT SIDE AND SETTINGS ON LEFT
 
 @Composable
-fun BottomBar(navController: NavController, authViewModel: AuthVM, user: UserEntity?) {
+fun BottomBar(navController: NavController, authVM: AuthVM, user: UserEntity?) {
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -73,7 +73,7 @@ fun BottomBar(navController: NavController, authViewModel: AuthVM, user: UserEnt
             }
 
 
-            if (authViewModel.authenticated()) {
+            if (authVM.authenticated()) {
                 TextButton(onClick = { if (currentRoute != Routes.PROFILE) navController.navigate(Routes.PROFILE) }) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(

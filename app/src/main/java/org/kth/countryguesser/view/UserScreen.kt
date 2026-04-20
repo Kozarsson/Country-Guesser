@@ -1,7 +1,6 @@
 package org.kth.countryguesser.view
 
 
-import androidx.compose.material3.AlertDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -32,23 +31,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import org.kth.countryguesser.view.components.BottomBar
 import org.kth.countryguesser.view.components.WIPAlert
-import org.kth.countryguesser.viewmodel.AuthVM
+import org.kth.countryguesser.viewmodel.AuthVMImpl
 
 @Composable
 fun UserScreen(
     navController: NavHostController,
-    authViewModel: AuthVM,
 ) {
-    val user by authViewModel.userEntity.collectAsState()
+    val authVM = hiltViewModel<AuthVMImpl>()
+    val user by authVM.userEntity.collectAsState()
 
     WIPAlert(onPress = { navController.popBackStack() })  // TODO: remove when page is implemented
 
     UserScreenContent(
         bottomBar = {
-            BottomBar(navController = navController, authViewModel = authViewModel, user = user)
+            BottomBar(navController = navController, authVM = authVM, user = user)
         },
     )
 }

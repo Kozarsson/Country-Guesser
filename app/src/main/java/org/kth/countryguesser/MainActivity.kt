@@ -21,14 +21,13 @@ import org.kth.countryguesser.viewmodel.AuthVMImpl
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private lateinit var authViewModel: AuthVMImpl
 
     @SuppressLint("StateFlowValueCalledInComposition")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         enableEdgeToEdge()
-        initializeViewModels()
+//        initializeViewModels()
 //        handleIncomingNotification()
 
         setContent {
@@ -40,7 +39,6 @@ class MainActivity : ComponentActivity() {
                     val navController = rememberNavController()
                     NavGraph(
                         navController = navController,
-                        authVM = authViewModel
                     )
                 }
             }
@@ -54,15 +52,15 @@ class MainActivity : ComponentActivity() {
 //        }
 //    }
 
-    private fun initializeViewModels() {
-        val firebaseAuthRepository = FirebaseAuthRepository()
-        val tokenRepository = FirebaseTokenRepository()
-
-        val authViewModelFactory = AuthVMImpl.Factory(firebaseAuthRepository)
-
-
-        authViewModel = ViewModelProvider(this, authViewModelFactory)[AuthVMImpl::class.java]
-    }
+//    private fun initializeViewModels() {
+//        //val firebaseAuthRepository = FirebaseAuthRepository()
+//        val tokenRepository = FirebaseTokenRepository()
+//
+////        val authViewModelFactory = AuthVMImpl.Factory(firebaseAuthRepository)
+////
+////
+////        authViewModel = ViewModelProvider(this, authViewModelFactory)[AuthVMImpl::class.java]
+//    }
 
     override fun onRequestPermissionsResult(
         requestCode: Int,

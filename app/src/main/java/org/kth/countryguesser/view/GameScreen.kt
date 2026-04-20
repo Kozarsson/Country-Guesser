@@ -1,9 +1,5 @@
 package org.kth.countryguesser.view
 
-import android.R
-import android.app.AlertDialog
-import android.app.Dialog
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -25,10 +21,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.animateContentSize
 import androidx.compose.material.icons.Icons
@@ -37,8 +30,6 @@ import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material.icons.filled.Flag
-import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -77,7 +68,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import org.kth.countryguesser.ui.model.CountryUiModel
 import org.kth.countryguesser.view.components.BottomBar
-import org.kth.countryguesser.viewmodel.AuthVM
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.kth.countryguesser.model.CountryAttributeResult
 import org.kth.countryguesser.viewmodel.GameVMImpl
@@ -87,20 +77,18 @@ import coil.compose.AsyncImage
 import kotlinx.coroutines.delay
 import org.kth.countryguesser.view.components.Alert
 import org.kth.countryguesser.view.components.LoadingAlert
-import org.kth.countryguesser.view.components.WIPAlert
+import org.kth.countryguesser.viewmodel.AuthVMImpl
 import org.kth.countryguesser.viewmodel.PopupState
 import java.util.Locale
 import kotlin.math.abs
-import kotlin.text.get
-import kotlin.toString
 
 @Composable
 fun GameScreen(
     navController: NavHostController,
-    authViewModel: AuthVM,
     mode: String, // 'daily' or 'endless'
 ) {
-    val user by authViewModel.userEntity.collectAsState()
+    val authVM = hiltViewModel<AuthVMImpl>()
+    val user by authVM.userEntity.collectAsState()
     val gameVM = hiltViewModel<GameVMImpl>()
     val isGameWon by gameVM.gameWon.collectAsState()
     val popupState by gameVM.popupState.collectAsState()
@@ -132,7 +120,7 @@ fun GameScreen(
     GameScreenContent(
         navController = navController,
         bottomBar = {
-            BottomBar(navController = navController, authViewModel = authViewModel, user = user)
+            BottomBar(navController = navController, authVM = authVM, user = user)
         },
         mode = mode,
         vm = gameVM,

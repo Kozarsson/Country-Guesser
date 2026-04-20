@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import org.kth.countryguesser.model.repository.FirebaseAuthRepository
@@ -44,12 +45,12 @@ import org.kth.countryguesser.viewmodel.AuthVM
 @Composable
 fun RegisterScreen(
     navController: NavController,
-    authVM: AuthVM
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
     var isRegisterSuccessful by remember { mutableStateOf(false) }
+    val authVM = hiltViewModel<AuthVMImpl>()
 
     Scaffold(
         topBar = {
@@ -170,12 +171,12 @@ fun RegisterScreen(
     )
 }
 
-@SuppressLint("ViewModelConstructorInComposable")
-@Preview
-@Composable
-fun RegisterScreenPreview() {
-    Surface() {
-        val navController = rememberNavController()
-        RegisterScreen(navController = navController, AuthVMImpl(FirebaseAuthRepository()))
-    }
-}
+//@SuppressLint("ViewModelConstructorInComposable")
+//@Preview
+//@Composable
+//fun RegisterScreenPreview() {
+//    Surface() {
+//        val navController = rememberNavController()
+//        RegisterScreen(navController = navController, AuthVMImpl(FirebaseAuthRepository()))
+//    }
+//}

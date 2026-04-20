@@ -1,6 +1,7 @@
 package org.kth.countryguesser.view.components
 
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -11,43 +12,43 @@ import org.kth.countryguesser.view.RegisterScreen
 import org.kth.countryguesser.view.StudyScreen
 import org.kth.countryguesser.view.UserScreen
 import org.kth.countryguesser.viewmodel.AuthVM
+import org.kth.countryguesser.viewmodel.AuthVMImpl
 import org.kth.countryguesser.viewmodel.GameVM
+import org.kth.countryguesser.viewmodel.GameVMImpl
 
 @Composable
 fun NavGraph(
     navController: NavHostController,
-    authVM: AuthVM,
 ) {
     NavHost(
         navController = navController,
         startDestination = Routes.LOGIN
     ) {
         composable(Routes.HOME) {
-            HomeScreen(navController, authVM)
+            HomeScreen(navController)
         }
         composable(Routes.LOGIN) {
-            LoginScreen(navController, authVM)
+            LoginScreen(navController)
         }
         composable(Routes.REGISTER) {
-            RegisterScreen(navController, authVM)
+            RegisterScreen(navController)
         }
 
         composable("${Routes.GAME}/{mode}") { stackEntry ->
             val mode = stackEntry.arguments?.getString("mode") ?: "daily"
             org.kth.countryguesser.view.GameScreen(
                 navController = navController,
-                authViewModel = authVM,
                 mode = mode
             )
         }
         composable(Routes.LEADERBOARD) {
-            LeaderboardScreen(navController, authVM)
+            LeaderboardScreen(navController)
         }
         composable(Routes.PROFILE) {
-            UserScreen(navController, authVM)
+            UserScreen(navController)
         }
         composable(Routes.STUDY) {
-            StudyScreen(navController, authVM)
+            StudyScreen(navController)
         }
     }
 

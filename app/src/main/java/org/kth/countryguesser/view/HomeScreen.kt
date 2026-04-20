@@ -30,21 +30,22 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import org.kth.countryguesser.view.components.BottomBar
 import org.kth.countryguesser.view.components.Routes
-import org.kth.countryguesser.viewmodel.AuthVM
+import org.kth.countryguesser.viewmodel.AuthVMImpl
 
 @Composable
 fun HomeScreen(
     navController: NavHostController,
-    authViewModel: AuthVM,
 ) {
-    val user by authViewModel.userEntity.collectAsState()
+    val authVM = hiltViewModel<AuthVMImpl>()
+    val user by authVM.userEntity.collectAsState()
 
     Scaffold(
         bottomBar = {
-            BottomBar(navController = navController, authViewModel = authViewModel, user = user)
+            BottomBar(navController = navController, authVM = authVM, user = user)
         },
     ) { padding ->
         Box(

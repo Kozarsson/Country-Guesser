@@ -5,12 +5,21 @@ import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.tasks.await
 import org.kth.countryguesser.model.entity.UserEntity
 import org.kth.countryguesser.model.service.MyFirebaseMessagingService
+import javax.inject.Inject
 
-class FirebaseAuthRepository {
+interface FirebaseAuthRepository {
+    suspend fun signInAnonymously(): Boolean
+    suspend fun login(email: String, password: String): Boolean
+    suspend fun register(email: String, password: String): Boolean
+    fun getCurrentUser(): UserEntity?
+    fun signOut()
+}
+
+class FirebaseAuthRepositoryImpl @Inject constructor() : FirebaseAuthRepository {
 
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
-    suspend fun signInAnonymously(): Boolean {
+    override suspend fun signInAnonymously(): Boolean {
         return try {
             MyFirebaseMessagingService.disableTokenAutoInit()
             val result = auth.signInAnonymously().await()
@@ -21,7 +30,7 @@ class FirebaseAuthRepository {
         }
     }
 
-    suspend fun login(email: String, password: String): Boolean {
+    override suspend fun login(email: String, password: String): Boolean {
         val authResult = auth.signInWithEmailAndPassword(email.trim(), password.trim()).await()
         if (authResult.user != null) {
             MyFirebaseMessagingService.enableTokenAutoInit()
@@ -29,7 +38,7 @@ class FirebaseAuthRepository {
         return authResult != null
     }
 
-    suspend fun register(email: String, password: String): Boolean {
+    override suspend fun register(email: String, password: String): Boolean {
         val authResult = auth.createUserWithEmailAndPassword(email.trim(), password.trim()).await()
         if (authResult.user != null) {
             MyFirebaseMessagingService.enableTokenAutoInit()
@@ -37,11 +46,11 @@ class FirebaseAuthRepository {
         return authResult != null
     }
 
-    fun getCurrentUser(): UserEntity? {
+    override fun getCurrentUser(): UserEntity? {
         return auth.currentUser?.toUser()
     }
 
-    fun signOut() {
+    override fun signOut() {
         auth.signOut()
         MyFirebaseMessagingService.disableTokenAutoInit()
     }
