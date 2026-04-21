@@ -39,11 +39,12 @@ class CountryRepositoryImpl @Inject constructor(
 
     override suspend fun getCountryByName(name: String): CountryModel? {
         val restCountriesResult = try {
-            restCountriesApiService.searchCountries(name)
-                .firstOrNull { country ->
-                    country.name?.common?.equals(name, ignoreCase = true) == true ||
-                        country.name?.official?.equals(name, ignoreCase = true) == true
-                }
+//            restCountriesApiService.searchCountries(name)
+//                .firstOrNull { country ->
+//                    country.name?.common?.equals(name, ignoreCase = true) == true ||
+//                        country.name?.official?.equals(name, ignoreCase = true) == true
+//                }
+            restCountriesApiService.searchCountry(name).firstOrNull()
         } catch (e: HttpException) {
             Log.e("CountryRepository", "HTTP exception: ${e.message}")
             if (e.code() == 404) return null else throw e

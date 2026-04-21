@@ -10,6 +10,9 @@ interface RestCountriesEndpoints {
     @GET("name/{name}")
     suspend fun searchCountries(@Path("name") name: String): List<CountryResultDto>
 
+    @GET("name/{name}")
+    suspend fun searchCountry(@Path("name") name: String, @Query("fullText") fullText: String = "true"): List<CountryResultDto>
+
     @GET("all")
     suspend fun getAllCountries(@Query("fields") fields: String = "name,flags"): List<CountryResultDto>
 
