@@ -21,7 +21,7 @@ object NetworkModule {
         OkHttpClient.Builder()
             .addInterceptor { chain ->
                 val request = chain.request().newBuilder()
-                    .header("User-Agent", "CountryGuesserApp/1.0 (kozar@kth.se)") // Required to bypass HTTP 403
+                    .header("User-Agent", "CountryGuesserApp/1.0; User:kozar@kth.se") // Required to bypass HTTP 403, see more at https://foundation.wikimedia.org/wiki/Policy:Wikimedia_Foundation_User-Agent_Policy
                     .build()
                 chain.proceed(request)
             }

@@ -147,7 +147,7 @@ class GameVMImpl @Inject constructor(
             if (!NetworkUtils.isNetworkAvailable(Application.APPLICATION.applicationContext)) {
                 setPopupState(PopupState.NO_INTERNET)
             } else {
-                startTimerUntilLoadingPopup(1000)
+                startTimerUntilLoadingPopup(2000)
                 val result = countryRepository.getCountryByName(country)
                 if (result != null) {
                     val comp = targetCountry.value?.compareAttributesTo(result, 0.10)
