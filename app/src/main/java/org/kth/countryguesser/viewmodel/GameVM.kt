@@ -88,8 +88,9 @@ class GameVMImpl @Inject constructor(
         isFetching = true
         timerJob = viewModelScope.launch {
             delay(timeMillis)
-            if (isFetching) {
+            while (isFetching) {
                 setPopupState(PopupState.LOADING)
+                delay(100)
             }
         }
     }
@@ -146,7 +147,7 @@ class GameVMImpl @Inject constructor(
             if (!NetworkUtils.isNetworkAvailable(Application.APPLICATION.applicationContext)) {
                 setPopupState(PopupState.NO_INTERNET)
             } else {
-                startTimerUntilLoadingPopup(2000)
+                startTimerUntilLoadingPopup(1000)
                 val result = countryRepository.getCountryByName(country)
                 if (result != null) {
                     val comp = targetCountry.value?.compareAttributesTo(result, 0.10)
