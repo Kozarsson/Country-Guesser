@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.kth.countryguesser.Application
@@ -50,6 +51,7 @@ class GameVMImpl @Inject constructor(
     private val _gamemode = MutableStateFlow<String>("daily")
 
     private var isFetching: Boolean = false
+    private var timerJob: Job? = null
 
 
 
@@ -62,7 +64,7 @@ class GameVMImpl @Inject constructor(
             if (!NetworkUtils.isNetworkAvailable(Application.APPLICATION.applicationContext)) {
                 setPopupState(PopupState.NO_INTERNET)
             } else {
-                startTimerUntilLoadingPopup(3000)
+                startTimerUntilLoadingPopup(1000)
                 var countryName = ""
                 val countries = countryRepository.getAllCountrySearchResults()
 
@@ -76,18 +78,19 @@ class GameVMImpl @Inject constructor(
                 val result = countryRepository.getCountryByName(countryName)
                 targetCountry.value = result
                 isFetching = false
+                setPopupState(PopupState.NONE)
             }
         }
     }
 
     private fun startTimerUntilLoadingPopup(timeMillis: Long) {
+        timerJob?.cancel()
         isFetching = true
-        viewModelScope.launch {
+        timerJob = viewModelScope.launch {
             delay(timeMillis)
-            while (isFetching) {
+            if (isFetching) {
                 setPopupState(PopupState.LOADING)
             }
-            setPopupState(PopupState.NONE) //This together with the while() prevents race conditions
         }
     }
 
@@ -143,7 +146,7 @@ class GameVMImpl @Inject constructor(
             if (!NetworkUtils.isNetworkAvailable(Application.APPLICATION.applicationContext)) {
                 setPopupState(PopupState.NO_INTERNET)
             } else {
-                startTimerUntilLoadingPopup(5000)
+                startTimerUntilLoadingPopup(2000)
                 val result = countryRepository.getCountryByName(country)
                 if (result != null) {
                     val comp = targetCountry.value?.compareAttributesTo(result, 0.10)
@@ -177,6 +180,7 @@ class GameVMImpl @Inject constructor(
                     Log.e("GameVM", "No country found with name $country")
                 }
                 isFetching = false
+                setPopupState(PopupState.NONE)
             }
         }
     }
