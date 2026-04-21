@@ -339,7 +339,6 @@ private fun Input(
 
             OutlinedButton(
                 onClick = {
-                    //TODO: Fix bug with Georgia defaulting to South Georgia instead (how?)
                     vm.guessCountry(guess)
                     focusManager.clearFocus()
                     guess = ""
