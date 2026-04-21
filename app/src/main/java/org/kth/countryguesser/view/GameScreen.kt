@@ -547,7 +547,7 @@ private fun CountryRow(
                                 )
                             } else {
                                 Text(
-                                    text = "Flag N/A",
+                                    text = country.countryName.toString(),
                                     style = MaterialTheme.typography.titleSmall.copy(fontSize = attributeFontSize),
                                     color = MaterialTheme.colorScheme.background,
                                     textAlign = TextAlign.Center,
@@ -558,6 +558,7 @@ private fun CountryRow(
                         } else {
                             var text = ""
                             text = when (val value = attrs[idx]) {
+                                country.area -> displayNumber(value as Double) + " km²"
                                 is Number -> displayNumber(value)
                                 is List<*> -> value.filterNotNull().joinToString(separator = "\n") { it.toString() }
                                 null -> "N/A"
