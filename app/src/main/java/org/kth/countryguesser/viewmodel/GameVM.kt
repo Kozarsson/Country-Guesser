@@ -16,6 +16,7 @@ import org.kth.countryguesser.ui.model.CountryUiModel
 import org.kth.countryguesser.ui.model.toUiModel
 import org.kth.countryguesser.util.NetworkUtils
 import org.kth.countryguesser.util.PopupState
+import org.kth.countryguesser.util.getCurrentDateFromFirebase
 import java.time.LocalDate
 import java.time.ZoneOffset
 import javax.inject.Inject
@@ -69,7 +70,8 @@ class GameVMImpl @Inject constructor(
                 val countries = countryRepository.getAllCountrySearchResults()
 
                 if (_gamemode.value == "daily") {
-                    val seed = LocalDate.now(ZoneOffset.UTC).toEpochDay()
+                    //val seed = LocalDate.now(ZoneOffset.UTC).toEpochDay()
+                    val seed = getCurrentDateFromFirebase().toEpochDay()
                     countryName = countries.random(Random(seed)).first
                 } else {
                     countryName = countries.random().first
