@@ -73,3 +73,19 @@ fun LoadingAlert(
         }
     }
 }
+
+@Composable
+fun NoInternetAlert(
+    onPress: () -> Unit = {},
+) {
+    AlertDialog(
+        onDismissRequest = { },
+        title = { Text("No Internet Connection")},
+        text = { Text("Please ensure that Wi-Fi or mobile data is turned on, then try again.")},
+        confirmButton = {
+            TextButton(onClick = { onPress() }) {
+                Text("OK")
+            }
+        }
+    )
+}

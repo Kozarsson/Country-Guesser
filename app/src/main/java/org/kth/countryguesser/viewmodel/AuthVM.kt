@@ -13,6 +13,7 @@ import org.kth.countryguesser.model.entity.UserEntity
 import org.kth.countryguesser.model.repository.FirebaseAuthRepository
 import org.kth.countryguesser.model.service.MyFirebaseMessagingService
 import org.kth.countryguesser.util.NetworkUtils
+import org.kth.countryguesser.util.PopupState
 import javax.inject.Inject
 
 
@@ -38,7 +39,7 @@ interface AuthVM {
 @HiltViewModel
 class AuthVMImpl @Inject constructor(
     private val authRepository: FirebaseAuthRepository
-) : ViewModel(), AuthVM {
+) : BaseVM(), AuthVM {
 
     companion object {
         const val TAG: String = "[Authentication]"
@@ -79,7 +80,7 @@ class AuthVMImpl @Inject constructor(
         viewModelScope.launch {
             try {
                 if (!NetworkUtils.isNetworkAvailable(Application.APPLICATION.applicationContext)) {
-                    throw Exception("No internet connection!")
+                    setPopupState(PopupState.NO_INTERNET)
                 }
                 if (authRepository.login(email, password)) {
                     Log.d(TAG, "Signed in successfully!")
@@ -104,7 +105,7 @@ class AuthVMImpl @Inject constructor(
         viewModelScope.launch {
             try {
                 if (!NetworkUtils.isNetworkAvailable(Application.APPLICATION.applicationContext)) {
-                    throw Exception("No internet connection!")
+                    setPopupState(PopupState.NO_INTERNET)
                 }
                 if (authRepository.register(email, password)) {
                     Log.d(TAG, "Registered successfully!")

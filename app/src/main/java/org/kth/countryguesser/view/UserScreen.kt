@@ -23,6 +23,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,7 +36,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import org.kth.countryguesser.util.PopupState
+import org.kth.countryguesser.view.components.Alert
 import org.kth.countryguesser.view.components.BottomBar
+import org.kth.countryguesser.view.components.LoadingAlert
+import org.kth.countryguesser.view.components.NoInternetAlert
 import org.kth.countryguesser.view.components.TopBar
 import org.kth.countryguesser.view.components.WIPAlert
 import org.kth.countryguesser.viewmodel.AuthVMImpl
@@ -45,6 +52,17 @@ fun UserScreen(
 ) {
     val authVM = hiltViewModel<AuthVMImpl>()
     val user by authVM.userEntity.collectAsState()
+    val popupState by authVM.popupState.collectAsState()
+    var errorMessage by remember { mutableStateOf("") }
+
+    when (popupState) {
+        PopupState.NONE -> {}
+        PopupState.NO_RESULT -> {Alert(onPress = {authVM.resetPopupState()}, title = "No results", message = "No country with that name found")}
+        PopupState.LOADING -> {LoadingAlert("Loading...")}
+        PopupState.DUPLICATE_SEARCH -> {Alert(onPress = {authVM.resetPopupState()}, title = "Country already guessed", message = "You cannot guess the same country twice")}
+        PopupState.ERROR -> {Alert(onPress = {authVM.resetPopupState()}, title = "Error", message = errorMessage ?: "Unknown error, try again")}
+        PopupState.NO_INTERNET ->{NoInternetAlert(onPress = {authVM.resetPopupState()})}
+    }
 
     WIPAlert(onPress = { navController.popBackStack() })  // TODO: remove when page is implemented
 

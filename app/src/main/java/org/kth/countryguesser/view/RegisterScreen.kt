@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +39,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import org.kth.countryguesser.util.PopupState
+import org.kth.countryguesser.view.components.Alert
+import org.kth.countryguesser.view.components.LoadingAlert
+import org.kth.countryguesser.view.components.NoInternetAlert
 import org.kth.countryguesser.viewmodel.AuthVMImpl
 import org.kth.countryguesser.viewmodel.AuthVM
 
@@ -54,6 +59,16 @@ fun RegisterScreen(
     val activity = LocalActivity.current as? ComponentActivity
         ?: error("RegisterScreen requires a ComponentActivity host")
     val authVM = hiltViewModel<AuthVMImpl>(activity)
+    val popupState by authVM.popupState.collectAsState()
+
+    when (popupState) {
+        PopupState.NONE -> {}
+        PopupState.NO_RESULT -> {Alert(onPress = {authVM.resetPopupState()}, title = "No results", message = "No country with that name found")}
+        PopupState.LOADING -> {LoadingAlert("Loading...")}
+        PopupState.DUPLICATE_SEARCH -> {Alert(onPress = {authVM.resetPopupState()}, title = "Country already guessed", message = "You cannot guess the same country twice")}
+        PopupState.ERROR -> {Alert(onPress = {authVM.resetPopupState()}, title = "Error", message = errorMessage ?: "Unknown error, try again")}
+        PopupState.NO_INTERNET ->{NoInternetAlert(onPress = {authVM.resetPopupState()})}
+    }
 
     Scaffold(
         topBar = {

@@ -75,10 +75,11 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
 import coil.compose.AsyncImage
 import kotlinx.coroutines.delay
+import org.kth.countryguesser.util.PopupState
 import org.kth.countryguesser.view.components.Alert
 import org.kth.countryguesser.view.components.LoadingAlert
+import org.kth.countryguesser.view.components.NoInternetAlert
 import org.kth.countryguesser.view.components.TopBar
-import org.kth.countryguesser.viewmodel.PopupState
 import java.util.Locale
 import kotlin.math.abs
 
@@ -103,6 +104,7 @@ fun GameScreen(
             PopupState.LOADING -> {LoadingAlert("Loading...")}
             PopupState.DUPLICATE_SEARCH -> {Alert(onPress = {gameVM.resetPopupState()}, title = "Country already guessed", message = "You cannot guess the same country twice")}
             PopupState.ERROR -> {Alert(onPress = {gameVM.resetPopupState()}, title = "Error", message = errorMessage ?: "Unknown error, try again")}
+            PopupState.NO_INTERNET ->{NoInternetAlert(onPress = {gameVM.resetPopupState()})}
         }
 
     if (isGameWon) {

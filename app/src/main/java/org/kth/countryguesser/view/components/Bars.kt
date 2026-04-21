@@ -155,6 +155,7 @@ fun DrawerItem(label: String, onClick: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+//TODO: Add a no internet indicator when device is not connected to the internet
 fun TopBar(onMenuClick: () -> Unit) {
     val authVM = rememberActivityAuthVm()
     val user by authVM.userEntity.collectAsState()
