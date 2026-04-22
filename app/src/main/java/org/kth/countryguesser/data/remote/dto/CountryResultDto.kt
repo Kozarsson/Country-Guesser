@@ -1,4 +1,4 @@
-package org.kth.countryguesser.model.dto
+package org.kth.countryguesser.data.remote.dto
 
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
@@ -28,7 +28,7 @@ data class CountryResultDto(
 	val fifa: String? = null,
 	val car: Car? = null,
 	val timezones: List<String>? = null,
-	val continents: List<String>? = null, //TODO: Add this in CountryModel
+	val continents: List<String>? = null,
 	val flag: String? = null,
 	val name: CountryName? = null,
 	val currencies: Map<String, CurrencyInfo>? = null, //Potential attribute; structured with either $, € or others

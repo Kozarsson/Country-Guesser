@@ -1,6 +1,6 @@
 package org.kth.countryguesser.model.api
 
-import org.kth.countryguesser.model.dto.CountryResultDto
+import org.kth.countryguesser.data.remote.dto.CountryResultDto
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query

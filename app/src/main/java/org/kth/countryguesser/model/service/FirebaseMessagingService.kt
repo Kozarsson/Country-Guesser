@@ -7,7 +7,7 @@ import com.google.firebase.messaging.messaging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.kth.countryguesser.model.repository.FirebaseTokenRepository
+import org.kth.countryguesser.data.repository.FirebaseTokenRepository
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
 

@@ -74,7 +74,7 @@ class GameVMImpl @Inject constructor(
                     val seed = getCurrentDateFromFirebase().toEpochDay()
                     countryName = countries.random(Random(seed)).first
                 } else {
-                    countryName = countries.random().first
+                    countryName = countries.random().first //TODO: Make actually random
                 }
 
                 val result = countryRepository.getCountryByName(countryName)

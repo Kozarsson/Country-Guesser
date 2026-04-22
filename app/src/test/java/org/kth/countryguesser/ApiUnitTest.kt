@@ -6,7 +6,7 @@ import org.kth.countryguesser.model.api.RestCountriesEndpoints
 import org.kth.countryguesser.model.service.RestCountriesApiService
 import kotlinx.coroutines.runBlocking
 import org.kth.countryguesser.model.api.WikiDataEndpoints
-import org.kth.countryguesser.model.dto.CountryResultDto
+import org.kth.countryguesser.data.remote.dto.CountryResultDto
 import org.kth.countryguesser.model.service.WikiDataApiService
 
 /**

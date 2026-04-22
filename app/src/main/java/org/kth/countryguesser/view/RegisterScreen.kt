@@ -52,6 +52,7 @@ import org.kth.countryguesser.viewmodel.AuthVM
 fun RegisterScreen(
     navController: NavController,
 ) {
+    var nickname by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
@@ -141,6 +142,16 @@ fun RegisterScreen(
                         Spacer(modifier = Modifier.height(16.dp))
 
                         OutlinedTextField(
+                            value = nickname,
+                            onValueChange = { nickname = it },
+                            label = { Text("Nickname") },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        OutlinedTextField(
                             value = email,
                             onValueChange = { email = it },
                             label = { Text("Email") },
@@ -168,6 +179,7 @@ fun RegisterScreen(
                         Button(
                             onClick = {
                                 authVM.registerWithEmailPassword(
+                                    nickname,
                                     email,
                                     password
                                 ) { success, error ->

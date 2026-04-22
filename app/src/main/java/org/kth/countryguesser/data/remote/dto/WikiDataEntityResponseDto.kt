@@ -1,4 +1,4 @@
-package org.kth.countryguesser.model.dto
+package org.kth.countryguesser.data.remote.dto
 
 import com.google.gson.annotations.SerializedName
 

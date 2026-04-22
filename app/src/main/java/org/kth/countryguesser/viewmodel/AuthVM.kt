@@ -9,9 +9,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.kth.countryguesser.Application
+import org.kth.countryguesser.data.repository.FirebaseAuthRepository
+import org.kth.countryguesser.data.repository.RegistrationResult
 import org.kth.countryguesser.model.entity.UserEntity
-import org.kth.countryguesser.model.repository.FirebaseAuthRepository
-import org.kth.countryguesser.model.service.MyFirebaseMessagingService
 import org.kth.countryguesser.util.NetworkUtils
 import org.kth.countryguesser.util.PopupState
 import javax.inject.Inject
@@ -26,6 +26,7 @@ interface AuthVM {
     )
 
     fun registerWithEmailPassword(
+        nickname: String,
         email: String,
         password: String,
         onResult: (Boolean, String?) -> Unit
@@ -88,7 +89,7 @@ class AuthVMImpl @Inject constructor(
                     onResult(true, null)
                 } else {
                     Log.d(TAG, "Failed to sign in with email and password!")
-                    onResult(false, "Unknown error occurred.")
+                    onResult(false, "Incorrect email or password.")
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Authentication error: ${e.localizedMessage}", e)
@@ -98,6 +99,7 @@ class AuthVMImpl @Inject constructor(
     }
 
     override fun registerWithEmailPassword(
+        nickname: String,
         email: String,
         password: String,
         onResult: (Boolean, String?) -> Unit
@@ -107,14 +109,24 @@ class AuthVMImpl @Inject constructor(
                 if (!NetworkUtils.isNetworkAvailable(Application.APPLICATION.applicationContext)) {
                     setPopupState(PopupState.NO_INTERNET)
                 }
-                if (authRepository.register(email, password)) {
-                    Log.d(TAG, "Registered successfully!")
-                    MyFirebaseMessagingService.enableTokenAutoInit()
-                    _userEntity.value = authRepository.getCurrentUser()
-                    onResult(true, null)
-                } else {
-                    Log.d(TAG, "Failed to register with email and password!!")
-                    onResult(false, "Registration failed!")
+                when (val result = authRepository.register(nickname, email, password)) {
+                    RegistrationResult.Success -> {
+                        Log.d(TAG, "Registered successfully!")
+                        _userEntity.value = authRepository.getCurrentUser()
+                        onResult(true, null)
+                    }
+
+                    RegistrationResult.EmailTaken -> {
+                        onResult(false, "This email is already in use.")
+                    }
+
+                    RegistrationResult.NicknameTaken -> {
+                        onResult(false, "This nickname is already taken.")
+                    }
+
+                    is RegistrationResult.Error -> {
+                        onResult(false, result.message)
+                    }
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Authentication error: ${e.localizedMessage}", e)

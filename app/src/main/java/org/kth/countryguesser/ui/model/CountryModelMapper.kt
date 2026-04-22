@@ -2,7 +2,7 @@ package org.kth.countryguesser.ui.model
 
 import org.kth.countryguesser.model.CountryAttributeResult
 import org.kth.countryguesser.model.CountryModel
-import org.kth.countryguesser.model.dto.CountryResultDto
+import org.kth.countryguesser.data.remote.dto.CountryResultDto
 
 /**
  * Maps a [CountryModel] to a [CountryUiModel] for UI display purposes.

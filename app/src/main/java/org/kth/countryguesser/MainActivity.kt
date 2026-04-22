@@ -9,14 +9,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
-import org.kth.countryguesser.model.repository.FirebaseAuthRepository
-import org.kth.countryguesser.model.repository.FirebaseTokenRepository
 import org.kth.countryguesser.ui.theme.DefaultTheme
 import org.kth.countryguesser.view.components.NavGraph
-import org.kth.countryguesser.viewmodel.AuthVMImpl
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {

@@ -1,7 +1,8 @@
-package org.kth.countryguesser.model.repository
+package org.kth.countryguesser.data.repository
 
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.tasks.await
@@ -17,18 +18,20 @@ class FirebaseTokenRepository {
             Log.e("Firestore", "User is null")
             return
         }
-        user.let {
-            val tokenMap = mapOf("token" to token)
-            store.collection("users")
-                .document(user.email!!)
-                .set(tokenMap, SetOptions.merge())
-        }
+        val tokenMap = mapOf(
+            "uid" to user.uid,
+            "token" to token,
+            "updatedAt" to FieldValue.serverTimestamp()
+        )
+        store.collection("userTokens")
+            .document(user.uid)
+            .set(tokenMap, SetOptions.merge())
     }
 
-    suspend fun getRecipientToken(email: String): String? {
+    suspend fun getRecipientToken(uid: String): String? {
         return try {
-            val document = store.collection("users")
-                .document(email)
+            val document = store.collection("userTokens")
+                .document(uid)
                 .get()
                 .await()
             document.getString("token")
