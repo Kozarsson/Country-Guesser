@@ -118,7 +118,6 @@ class FirestoreRemoteDataSourceImpl @Inject constructor() : FirestoreRemoteDataS
 			nickname = data[NICKNAME_FIELD] as? String ?: "",
 			stats = UserStatsEntity(
 				gamesPlayed = statsMap.intValue(GAMES_PLAYED_FIELD),
-				wins = statsMap.intValue(WINS_FIELD),
 				currentStreak = statsMap.intValue(CURRENT_STREAK_FIELD),
 				bestStreak = statsMap.intValue(BEST_STREAK_FIELD)
 			),
@@ -182,7 +181,6 @@ class FirestoreRemoteDataSourceImpl @Inject constructor() : FirestoreRemoteDataS
 	private fun UserStatsEntity.toFirestoreMap(): Map<String, Any> {
 		return mapOf(
 			GAMES_PLAYED_FIELD to gamesPlayed,
-			WINS_FIELD to wins,
 			CURRENT_STREAK_FIELD to currentStreak,
 			BEST_STREAK_FIELD to bestStreak
 		)
@@ -210,7 +208,6 @@ class FirestoreRemoteDataSourceImpl @Inject constructor() : FirestoreRemoteDataS
 		const val SETTINGS_FIELD = "settings"
 
 		const val GAMES_PLAYED_FIELD = "gamesPlayed"
-		const val WINS_FIELD = "wins"
 		const val CURRENT_STREAK_FIELD = "currentStreak"
 		const val BEST_STREAK_FIELD = "bestStreak"
 

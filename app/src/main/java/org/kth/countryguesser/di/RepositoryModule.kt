@@ -12,6 +12,8 @@ import org.kth.countryguesser.model.repository.CountryRepository
 import org.kth.countryguesser.model.repository.CountryRepositoryImpl
 import org.kth.countryguesser.data.repository.FirebaseAuthRepository
 import org.kth.countryguesser.data.repository.FirebaseAuthRepositoryImpl
+import org.kth.countryguesser.data.repository.FirestoreRepository
+import org.kth.countryguesser.data.repository.FirestoreRepositoryImpl
 import org.kth.countryguesser.model.repository.GameRepository
 import org.kth.countryguesser.model.repository.GameRepositoryImpl
 import javax.inject.Singleton
@@ -48,4 +50,10 @@ abstract class RepositoryModule {
     abstract fun bindFirebaseAuthRepository(
         impl: FirebaseAuthRepositoryImpl
     ): FirebaseAuthRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindFirestoreRepository(
+        impl: FirestoreRepositoryImpl
+    ): FirestoreRepository
 }

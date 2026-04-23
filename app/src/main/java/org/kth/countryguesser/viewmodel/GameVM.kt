@@ -9,6 +9,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.kth.countryguesser.Application
+import org.kth.countryguesser.data.repository.FirestoreRepository
 import org.kth.countryguesser.model.CountryModel
 import org.kth.countryguesser.model.repository.CountryRepository
 import org.kth.countryguesser.model.repository.GameRepository
@@ -40,6 +41,7 @@ interface GameVM {
 @HiltViewModel
 class GameVMImpl @Inject constructor(
     private val countryRepository: CountryRepository,
+    private val firestoreRepository: FirestoreRepository,
     private val gameRepository: GameRepository,
 ) : BaseVM(), GameVM {
     private val _score = MutableStateFlow(0)
@@ -192,6 +194,13 @@ class GameVMImpl @Inject constructor(
         _guessedCountries.value = listOf()
         _searchResults.value = listOf()
         _gameWon.value = false
+        viewModelScope.launch {
+            if (!NetworkUtils.isNetworkAvailable(Application.APPLICATION.applicationContext)) {
+                setPopupState(PopupState.NO_INTERNET)
+            } else {
+                firestoreRepository.updateGamesPlayed()
+            }
+        }
     }
 
     override fun getAnswer(): String { // TODO: for debug purposes, remove later
