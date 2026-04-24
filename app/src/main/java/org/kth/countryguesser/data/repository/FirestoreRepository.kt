@@ -3,6 +3,7 @@ package org.kth.countryguesser.data.repository
 import org.kth.countryguesser.data.remote.firebase.AuthRemoteDataSource
 import org.kth.countryguesser.data.remote.firebase.FirestoreRemoteDataSource
 import org.kth.countryguesser.model.entity.UserEntity
+import org.kth.countryguesser.model.entity.UserProfileEntity
 import org.kth.countryguesser.model.entity.UserStatsEntity
 import javax.inject.Inject
 
@@ -11,6 +12,7 @@ interface FirestoreRepository {
     suspend fun updateStats(stats: UserStatsEntity): Boolean
     suspend fun updateGamesPlayed(): Boolean
     suspend fun updateGamesPlayed(gamesPlayed: Int): Boolean
+    suspend fun getUserProfile(): UserProfileEntity?
 }
 
 class FirestoreRepositoryImpl @Inject constructor(
@@ -46,6 +48,11 @@ class FirestoreRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             false
         }
+    }
+
+    override suspend fun getUserProfile(): UserProfileEntity? {
+        val user = getCurrentUser() ?: return null
+        return firestoreRemoteDataSource.getProfile(user.uid)
     }
 
 }

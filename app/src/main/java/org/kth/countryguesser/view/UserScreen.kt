@@ -44,6 +44,7 @@ import org.kth.countryguesser.view.components.NoInternetAlert
 import org.kth.countryguesser.view.components.TopBar
 import org.kth.countryguesser.view.components.WIPAlert
 import org.kth.countryguesser.viewmodel.AuthVMImpl
+import org.kth.countryguesser.viewmodel.ProfileStatsVMImpl
 
 @Composable
 fun UserScreen(
@@ -54,17 +55,23 @@ fun UserScreen(
     val user by authVM.userEntity.collectAsState()
     val popupState by authVM.popupState.collectAsState()
     var errorMessage by remember { mutableStateOf("") }
+    val profileStatsVM = hiltViewModel<ProfileStatsVMImpl>()
+    val nickname = profileStatsVM.nickname.collectAsState()
+    val gamesPlayed = profileStatsVM.gamesPlayed.collectAsState()
+    val currentStreak = profileStatsVM.currentStreak.collectAsState()
+    val bestStreak = profileStatsVM.bestStreak.collectAsState()
+
 
     when (popupState) {
         PopupState.NONE -> {}
-        PopupState.NO_RESULT -> {Alert(onPress = {authVM.resetPopupState()}, title = "No results", message = "No country with that name found")}
+        PopupState.NO_RESULT -> {}
         PopupState.LOADING -> {LoadingAlert("Loading...")}
-        PopupState.DUPLICATE_SEARCH -> {Alert(onPress = {authVM.resetPopupState()}, title = "Country already guessed", message = "You cannot guess the same country twice")}
-        PopupState.ERROR -> {Alert(onPress = {authVM.resetPopupState()}, title = "Error", message = errorMessage ?: "Unknown error, try again")}
-        PopupState.NO_INTERNET ->{NoInternetAlert(onPress = {authVM.resetPopupState()})}
+        PopupState.DUPLICATE_SEARCH -> {}
+        PopupState.ERROR -> {Alert(onPress = {profileStatsVM.resetPopupState()}, title = "Error", message = errorMessage ?: "Unknown error, try again")}
+        PopupState.NO_INTERNET ->{NoInternetAlert(onPress = {profileStatsVM.resetPopupState()})}
     }
 
-    WIPAlert(onPress = { navController.popBackStack() })  // TODO: remove when page is implemented
+    //WIPAlert(onPress = { navController.popBackStack() })  // TODO: remove when page is implemented
 
     UserScreenContent(
         topBar = {
@@ -73,15 +80,22 @@ fun UserScreen(
         bottomBar = {
             BottomBar(navController = navController)
         },
+        nickname = nickname.value,
+        gamesPlayed = gamesPlayed.value,
+        currentStreak = currentStreak.value,
+        bestStreak = bestStreak.value
     )
 }
 
 
-@Preview(showBackground = true)
 @Composable
 private fun UserScreenContent(
     topBar: @Composable () -> Unit = {},
     bottomBar: @Composable () -> Unit = {},
+    nickname: String,
+    gamesPlayed: Int,
+    currentStreak: Int,
+    bestStreak: Int,
 ) {
     Scaffold(
         topBar = topBar,
@@ -93,16 +107,16 @@ private fun UserScreenContent(
                 .padding(padding),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Header()
+            Header(nickname)
 
-            Stats()
+            Stats(gamesPlayed, currentStreak, bestStreak)
         }
     }
 }
 
 
 @Composable
-private fun Header() {
+private fun Header(nickname: String) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy((-50).dp),
@@ -147,7 +161,7 @@ private fun Header() {
 
             // username
             Text(
-                text = "John Doe", // TODO: replace
+                text = "$nickname", // TODO: replace
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -161,7 +175,9 @@ private fun Header() {
 
 @Composable
 private fun Stats(
-    // TODO: take stats from model
+    gamesPlayed: Int,
+    currentStreak: Int,
+    bestStreak: Int,
 ) {
     Column(
         modifier = Modifier
@@ -180,13 +196,17 @@ private fun Stats(
         }
 
         // max day's in a row
-        Stat(label = "Longest Streak", stat = "10d")
+        Stat(label = "Total games played", stat = "$gamesPlayed")
+
+        Stat(label = "Current Streak", stat = "$currentStreak")
+
+        Stat(label = "Longest Streak", stat = "$bestStreak")
 
         // total score
-        Stat(label = "Total Score", stat = "1,872")
+        //Stat(label = "Total Score", stat = )
 
         // average score
-        Stat(label = "Avg. Score", stat = "4.2")
+        //Stat(label = "Avg. Score", stat = "4.2")
 
 
         // COUNTRY STREAK STATS
@@ -199,11 +219,11 @@ private fun Stats(
             )
         }
 
-        // highest streak
-        Stat(label = "Longest Streak", stat = "7")
-
-        // average streak
-        Stat(label = "Avg. Streak", stat = "2.3")
+//        // highest streak
+//        Stat(label = "Longest Streak", stat = "7")
+//
+//        // average streak
+//        Stat(label = "Avg. Streak", stat = "2.3")
     }
 }
 
