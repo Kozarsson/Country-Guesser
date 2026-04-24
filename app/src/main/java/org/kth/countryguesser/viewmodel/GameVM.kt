@@ -189,7 +189,8 @@ class GameVMImpl @Inject constructor(
             }
         }
     }
-
+    //TODO: Reset current streak if a day was missed
+    //TODO: Ensure that you cannot do more than one daily country per day (check with firebase date and prevent user from entering daily mode in homescreen)
     override fun resetGameState() {
         _guessedCountries.value = listOf()
         _searchResults.value = listOf()
@@ -198,6 +199,10 @@ class GameVMImpl @Inject constructor(
             if (!NetworkUtils.isNetworkAvailable(Application.APPLICATION.applicationContext)) {
                 setPopupState(PopupState.NO_INTERNET)
             } else {
+                if(_gamemode.value == "daily") {
+                    //TODO: maybe another function in firestoreRepository to make only one update to database instead of two
+                    firestoreRepository.updateStreak()
+                }
                 firestoreRepository.updateGamesPlayed()
             }
         }

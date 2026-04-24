@@ -12,6 +12,8 @@ interface FirestoreRepository {
     suspend fun updateStats(stats: UserStatsEntity): Boolean
     suspend fun updateGamesPlayed(): Boolean
     suspend fun updateGamesPlayed(gamesPlayed: Int): Boolean
+    suspend fun updateStreak(): Boolean
+    suspend fun resetStreak(): Boolean
     suspend fun getUserProfile(): UserProfileEntity?
 }
 
@@ -42,6 +44,35 @@ class FirestoreRepositoryImpl @Inject constructor(
         val user = getCurrentUser() ?: return false
         val profile = firestoreRemoteDataSource.getProfile(user.uid) ?: return false //TODO: Rewrite to remove duplication of code
         val newStats = profile.stats.copy(gamesPlayed = gamesPlayed)
+        return try {
+            firestoreRemoteDataSource.updateStats(user.uid, newStats)
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    override suspend fun updateStreak(): Boolean {
+        val user = getCurrentUser() ?: return false
+        val profile = firestoreRemoteDataSource.getProfile(user.uid) ?: return false //TODO: Rewrite to remove duplication of code
+        val newStats: UserStatsEntity
+        if (profile.stats.bestStreak < profile.stats.currentStreak + 1) {
+            newStats = profile.stats.copy(bestStreak = profile.stats.currentStreak + 1, currentStreak = profile.stats.currentStreak + 1)
+        } else {
+            newStats = profile.stats.copy(currentStreak = profile.stats.currentStreak + 1)
+        }
+        return try {
+            firestoreRemoteDataSource.updateStats(user.uid, newStats)
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    override suspend fun resetStreak(): Boolean {
+        val user = getCurrentUser() ?: return false
+        val profile = firestoreRemoteDataSource.getProfile(user.uid) ?: return false
+        val newStats = profile.stats.copy(currentStreak = 0)
         return try {
             firestoreRemoteDataSource.updateStats(user.uid, newStats)
             true
