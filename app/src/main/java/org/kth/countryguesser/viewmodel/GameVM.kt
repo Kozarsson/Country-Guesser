@@ -1,6 +1,9 @@
 package org.kth.countryguesser.viewmodel
 
 import android.util.Log
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -57,7 +60,6 @@ class GameVMImpl @Inject constructor(
     private var timerJob: Job? = null
 
 
-
     init {
         fetchCountry()
     }
@@ -101,7 +103,15 @@ class GameVMImpl @Inject constructor(
 
     override fun setGamemode(gamemode: String) {
         _gamemode.value = gamemode
-        _score.value = if (gamemode == "daily") 12 else 0 // TODO: show currentStreakEndless instead of 0
+
+        viewModelScope.launch {
+            if (gamemode == "daily") {
+                _score.value = 12
+            } else {
+                val profile = firestoreRepository.getUserProfile()
+                _score.value = profile?.stats?.currentStreakEndless ?: 0
+            }
+        }
     }
 
     private val _guessedCountries = MutableStateFlow<List<CountryUiModel>>(listOf())
@@ -189,8 +199,6 @@ class GameVMImpl @Inject constructor(
             }
         }
     }
-    //TODO: Reset current streak if a day was missed
-    //TODO: Ensure that you cannot do more than one daily country per day (check with firebase date and prevent user from entering daily mode in homescreen)
     override fun resetGameState() {
         _guessedCountries.value = listOf()
         _searchResults.value = listOf()

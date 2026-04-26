@@ -6,6 +6,8 @@ import org.kth.countryguesser.model.entity.UserEntity
 import org.kth.countryguesser.model.entity.UserProfileEntity
 import org.kth.countryguesser.model.entity.UserStatsEntity
 import org.kth.countryguesser.util.getCurrentDateFromFirebase
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
 interface FirestoreRepository {
@@ -56,29 +58,36 @@ class FirestoreRepositoryImpl @Inject constructor(
     override suspend fun updateStreak(mode: String): Boolean {
         val user = getCurrentUser() ?: return false
         val profile = firestoreRemoteDataSource.getProfile(user.uid) ?: return false //TODO: Rewrite to remove duplication of code
-        val todayDate = getCurrentDateFromFirebase().toString()
         val newStats: UserStatsEntity
         if (mode == "daily") {
-            if (profile.stats.bestStreakDaily < profile.stats.currentStreakDaily + 1) {
-                newStats = profile.stats.copy(
-                    bestStreakDaily = profile.stats.currentStreakDaily + 1,
-                    currentStreakDaily = profile.stats.currentStreakDaily + 1,
-                    lastGuessedDaily = todayDate,
+            val todayDate = getCurrentDateFromFirebase()
+            val lastDate = LocalDate.parse(profile.stats.lastGuessedDaily)
+            val streak = if (ChronoUnit.DAYS.between(lastDate, todayDate) > 1) {
+                0
+            } else {
+                profile.stats.currentStreakDaily
+            }
+
+            newStats = if (profile.stats.bestStreakDaily < streak + 1) {
+                profile.stats.copy(
+                    bestStreakDaily = streak + 1,
+                    currentStreakDaily = streak + 1,
+                    lastGuessedDaily = todayDate.toString(),
                 )
             } else {
-                newStats = profile.stats.copy(
-                    currentStreakDaily = profile.stats.currentStreakDaily + 1,
-                    lastGuessedDaily = todayDate,
+                profile.stats.copy(
+                    currentStreakDaily = streak + 1,
+                    lastGuessedDaily = todayDate.toString(),
                 )
             }
         } else { // ENDLESS mode
-            if (profile.stats.bestStreakEndless < profile.stats.currentStreakEndless + 1) {
-                newStats = profile.stats.copy(
+            newStats = if (profile.stats.bestStreakEndless < profile.stats.currentStreakEndless + 1) {
+                profile.stats.copy(
                     bestStreakEndless = profile.stats.currentStreakEndless + 1,
                     currentStreakEndless = profile.stats.currentStreakEndless + 1,
                 )
             } else {
-                newStats = profile.stats.copy(
+                profile.stats.copy(
                     currentStreakEndless = profile.stats.currentStreakEndless + 1,
                 )
             }
@@ -94,7 +103,12 @@ class FirestoreRepositoryImpl @Inject constructor(
     override suspend fun resetStreak(mode: String): Boolean {
         val user = getCurrentUser() ?: return false
         val profile = firestoreRemoteDataSource.getProfile(user.uid) ?: return false
-        val newStats = profile.stats.copy(currentStreakDaily = 0)
+        val newStats: UserStatsEntity
+        if (mode == "daily") {
+            newStats = profile.stats.copy(currentStreakDaily = 0)
+        } else { // ENDLESS mode
+            newStats = profile.stats.copy(currentStreakEndless = 0)
+        }
         return try {
             firestoreRemoteDataSource.updateStats(user.uid, newStats)
             true
