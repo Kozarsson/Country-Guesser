@@ -57,11 +57,13 @@ fun UserScreen(
     var errorMessage by remember { mutableStateOf("") }
     val profileStatsVM = hiltViewModel<ProfileStatsVMImpl>()
     val nickname = profileStatsVM.nickname.collectAsState()
-    val gamesPlayed = profileStatsVM.gamesPlayed.collectAsState()
+    val gamesPlayedDaily = profileStatsVM.gamesPlayedDaily.collectAsState()
     // DAILY mode
     val currentStreakDaily = profileStatsVM.currentStreakDaily.collectAsState()
     val bestStreakDaily = profileStatsVM.bestStreakDaily.collectAsState()
+    val totalScore = profileStatsVM.totalScore.collectAsState()
     // ENDLESS mode
+    val gamesPlayedEndless = profileStatsVM.gamesPlayedEndless.collectAsState()
     val currentStreakEndless = profileStatsVM.currentStreakEndless.collectAsState()
     val bestStreakEndless = profileStatsVM.bestStreakEndless.collectAsState()
 
@@ -85,9 +87,11 @@ fun UserScreen(
             BottomBar(navController = navController)
         },
         nickname = nickname.value,
-        gamesPlayed = gamesPlayed.value,
+        gamesPlayedDaily = gamesPlayedDaily.value,
         currentStreakDaily = currentStreakDaily.value,
         bestStreakDaily = bestStreakDaily.value,
+        totalScore = totalScore.value,
+        gamesPlayedEndless = gamesPlayedEndless.value,
         currentStreakEndless = currentStreakEndless.value,
         bestStreakEndless = bestStreakEndless.value,
     )
@@ -99,9 +103,11 @@ private fun UserScreenContent(
     topBar: @Composable () -> Unit = {},
     bottomBar: @Composable () -> Unit = {},
     nickname: String,
-    gamesPlayed: Int,
+    gamesPlayedDaily: Int,
     currentStreakDaily: Int,
     bestStreakDaily: Int,
+    totalScore: Int,
+    gamesPlayedEndless: Int,
     currentStreakEndless: Int,
     bestStreakEndless: Int,
 ) {
@@ -117,7 +123,15 @@ private fun UserScreenContent(
         ) {
             Header(nickname)
 
-            Stats(gamesPlayed, currentStreakDaily, bestStreakDaily, currentStreakEndless, bestStreakEndless)
+            Stats(
+                gamesPlayedDaily,
+                currentStreakDaily,
+                bestStreakDaily,
+                totalScore,
+                gamesPlayedEndless,
+                currentStreakEndless,
+                bestStreakEndless
+            )
         }
     }
 }
@@ -183,9 +197,11 @@ private fun Header(nickname: String) {
 
 @Composable
 private fun Stats(
-    gamesPlayed: Int,
+    gamesPlayedDaily: Int,
     currentStreakDaily: Int,
     bestStreakDaily: Int,
+    totalScore: Int,
+    gamesPlayedEndless: Int,
     currentStreakEndless: Int,
     bestStreakEndless: Int,
 ) {
@@ -195,7 +211,6 @@ private fun Stats(
             .padding(horizontal = 8.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Stat(label = "Total games played", stat = "$gamesPlayed")
 
         // DAILY CHALLENGE STATS
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -207,16 +222,17 @@ private fun Stats(
             )
         }
 
+        Stat(label = "Games Played", stat = "$gamesPlayedDaily")
         // max day's in a row
         Stat(label = "Current Streak", stat = "$currentStreakDaily")
 
         Stat(label = "Longest Streak", stat = "$bestStreakDaily")
 
         // total score
-        //Stat(label = "Total Score", stat = )
+        Stat(label = "Total Score", stat = "$totalScore")
 
         // average score
-        //Stat(label = "Avg. Score", stat = "4.2")
+        Stat(label = "Avg. Score", stat = "${totalScore/maxOf(gamesPlayedDaily,1)}")
 
 
         // COUNTRY STREAK STATS
@@ -228,7 +244,7 @@ private fun Stats(
                 color = MaterialTheme.colorScheme.surfaceVariant,
             )
         }
-
+        Stat(label = "Games Played", stat = "$gamesPlayedEndless")
         Stat(label = "Current Streak", stat = "$currentStreakEndless")
 
         Stat(label = "Longest Streak", stat = "$bestStreakEndless")

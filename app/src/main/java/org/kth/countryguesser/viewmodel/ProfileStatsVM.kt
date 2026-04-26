@@ -14,14 +14,16 @@ import javax.inject.Inject
 
 interface ProfileStatsVM {
     val nickname: StateFlow<String>
-    val gamesPlayed: StateFlow<Int>
 
     // DAILY mode
+    val gamesPlayedDaily: StateFlow<Int>
     val currentStreakDaily: StateFlow<Int>
     val bestStreakDaily: StateFlow<Int>
     val lastGuessedDaily: StateFlow<String>
+    val totalScore: StateFlow<Int>
 
     // ENDLESS mode
+    val gamesPlayedEndless: StateFlow<Int>
     val currentStreakEndless: StateFlow<Int>
     val bestStreakEndless: StateFlow<Int>
 }
@@ -35,11 +37,11 @@ class ProfileStatsVMImpl @Inject constructor(
     override val nickname: StateFlow<String>
         get() = _nickname
 
-    private val _gamesPlayed = MutableStateFlow(0)
-    override val gamesPlayed: StateFlow<Int>
-        get() = _gamesPlayed
-
     // DAILY mode
+    private val _gamesPlayedDaily = MutableStateFlow(0)
+    override val gamesPlayedDaily: StateFlow<Int>
+        get() = _gamesPlayedDaily
+
     private val _currentStreakDaily = MutableStateFlow(0)
     override val currentStreakDaily: StateFlow<Int>
         get() = _currentStreakDaily
@@ -52,7 +54,15 @@ class ProfileStatsVMImpl @Inject constructor(
     override val lastGuessedDaily: StateFlow<String>
         get() = _lastGuessedDaily
 
+    private val _totalScore = MutableStateFlow(0)
+    override val totalScore: StateFlow<Int>
+        get() = _totalScore
+
     // ENDLESS mode
+    private val _gamesPlayedEndless = MutableStateFlow(0)
+    override val gamesPlayedEndless: StateFlow<Int>
+        get() = _gamesPlayedEndless
+
     private val _currentStreakEndless = MutableStateFlow(0)
     override val currentStreakEndless: StateFlow<Int>
         get() = _currentStreakEndless
@@ -79,12 +89,15 @@ class ProfileStatsVMImpl @Inject constructor(
                 val playerInfo = firestoreRepository.getUserProfile()
                 if (playerInfo != null) {
                     _nickname.value = playerInfo.nickname
-                    _gamesPlayed.value = playerInfo.stats.gamesPlayed
                     // DAILY mode
+                    _gamesPlayedDaily.value = playerInfo.stats.gamesPlayedDaily
                     _currentStreakDaily.value = playerInfo.stats.currentStreakDaily
                     _bestStreakDaily.value = playerInfo.stats.bestStreakDaily
                     _lastGuessedDaily.value = playerInfo.stats.lastGuessedDaily
+                    _totalScore.value = playerInfo.stats.totalScore
+
                     // ENDLESS mode
+                    _gamesPlayedEndless.value = playerInfo.stats.gamesPlayedEndless
                     _currentStreakEndless.value = playerInfo.stats.currentStreakEndless
                     _bestStreakEndless.value = playerInfo.stats.bestStreakEndless
                 }

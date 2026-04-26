@@ -13,10 +13,10 @@ import javax.inject.Inject
 interface FirestoreRepository {
     fun getCurrentUser(): UserEntity?
     suspend fun updateStats(stats: UserStatsEntity): Boolean
-    suspend fun updateGamesPlayed(): Boolean
-    suspend fun updateGamesPlayed(gamesPlayed: Int): Boolean
+    suspend fun updateGamesPlayed(mode: String, gamesPlayed: Int = -1): Boolean
     suspend fun updateStreak(mode: String): Boolean
     suspend fun resetStreak(mode: String): Boolean
+    suspend fun updateScore(score: Int): Boolean
     suspend fun getUserProfile(): UserProfileEntity?
 }
 
@@ -37,16 +37,22 @@ class FirestoreRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateGamesPlayed(): Boolean {
+    override suspend fun updateGamesPlayed(mode: String, gamesPlayed: Int): Boolean {
         val user = getCurrentUser() ?: return false
         val profile = firestoreRemoteDataSource.getProfile(user.uid) ?: return false
-        return updateGamesPlayed(profile.stats.gamesPlayed + 1)
-    }
 
-    override suspend fun updateGamesPlayed(gamesPlayed: Int): Boolean {
-        val user = getCurrentUser() ?: return false
-        val profile = firestoreRemoteDataSource.getProfile(user.uid) ?: return false //TODO: Rewrite to remove duplication of code
-        val newStats = profile.stats.copy(gamesPlayed = gamesPlayed)
+        val gamesCount = if (gamesPlayed == -1) {
+            if (mode == "daily")
+                profile.stats.gamesPlayedDaily + 1
+            else
+                profile.stats.gamesPlayedEndless + 1
+        } else {
+            gamesPlayed
+        }
+
+        val newStats = if (mode == "daily")
+            profile.stats.copy(gamesPlayedDaily = gamesCount)
+        else profile.stats.copy(gamesPlayedEndless = gamesCount)
         return try {
             firestoreRemoteDataSource.updateStats(user.uid, newStats)
             true
@@ -61,11 +67,16 @@ class FirestoreRepositoryImpl @Inject constructor(
         val newStats: UserStatsEntity
         if (mode == "daily") {
             val todayDate = getCurrentDateFromFirebase()
-            val lastDate = LocalDate.parse(profile.stats.lastGuessedDaily)
-            val streak = if (ChronoUnit.DAYS.between(lastDate, todayDate) > 1) {
-                0
+            val lastDateStr = profile.stats.lastGuessedDaily
+            val streak = if (lastDateStr.isNotEmpty()) {
+                val lastDate = LocalDate.parse(lastDateStr)
+                if (ChronoUnit.DAYS.between(lastDate, todayDate) > 1) {
+                    0
+                } else {
+                    profile.stats.currentStreakDaily
+                }
             } else {
-                profile.stats.currentStreakDaily
+                0
             }
 
             newStats = if (profile.stats.bestStreakDaily < streak + 1) {
@@ -109,6 +120,19 @@ class FirestoreRepositoryImpl @Inject constructor(
         } else { // ENDLESS mode
             newStats = profile.stats.copy(currentStreakEndless = 0)
         }
+        return try {
+            firestoreRemoteDataSource.updateStats(user.uid, newStats)
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    override suspend fun updateScore(score: Int): Boolean {
+        val user = getCurrentUser() ?: return false
+        val profile = firestoreRemoteDataSource.getProfile(user.uid) ?: return false
+        val newStats = profile.stats.copy(totalScore = profile.stats.totalScore + score)
+
         return try {
             firestoreRemoteDataSource.updateStats(user.uid, newStats)
             true

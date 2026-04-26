@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import hilt_aggregated_deps._dagger_hilt_android_internal_managers_ActivityComponentManager_ActivityComponentBuilderEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Job
@@ -184,7 +185,7 @@ class GameVMImpl @Inject constructor(
                             comp?.continentsComparison
                         )
                     ) + _guessedCountries.value
-                    if (_gamemode.value == "daily") {
+                    if (_gamemode.value == "daily" && !_gameWon.value) {
                         _score.value = 12 - 2 * _guessedCountries.value.size
                     }
 
@@ -198,6 +199,8 @@ class GameVMImpl @Inject constructor(
                 setPopupState(PopupState.NONE)
             }
         }
+
+        // TODO: run check if user has guessed too many times
     }
     override fun resetGameState() {
         _guessedCountries.value = listOf()
@@ -208,7 +211,10 @@ class GameVMImpl @Inject constructor(
                 setPopupState(PopupState.NO_INTERNET)
             } else {
                 firestoreRepository.updateStreak(_gamemode.value)
-                firestoreRepository.updateGamesPlayed()
+                firestoreRepository.updateGamesPlayed(_gamemode.value)
+                if (_gamemode.value == "daily") {
+                    firestoreRepository.updateScore(_score.value) // TODO: score is not updating correctly in database
+                }
             }
         }
     }

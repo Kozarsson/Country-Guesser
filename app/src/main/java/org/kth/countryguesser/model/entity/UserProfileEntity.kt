@@ -10,10 +10,12 @@ data class UserProfileEntity(
 )
 
 data class UserStatsEntity(
-    val gamesPlayed: Int = 0,
+    val gamesPlayedDaily: Int = 0,
     val currentStreakDaily: Int = 0,
     val bestStreakDaily: Int = 0,
     val lastGuessedDaily: String = "",
+    val totalScore: Int = 0,
+    val gamesPlayedEndless: Int = 0,
     val currentStreakEndless: Int = 0,
     val bestStreakEndless: Int = 0,
 )

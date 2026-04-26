@@ -117,12 +117,14 @@ class FirestoreRemoteDataSourceImpl @Inject constructor() : FirestoreRemoteDataS
 			uid = uid,
 			nickname = data[NICKNAME_FIELD] as? String ?: "",
 			stats = UserStatsEntity(
-				gamesPlayed = statsMap.intValue(GAMES_PLAYED_FIELD),
+				gamesPlayedDaily = statsMap.intValue(GAMES_PLAYED_DAILY_FIELD),
 				// DAILY mode
 				currentStreakDaily = statsMap.intValue(CURRENT_STREAK_DAILY_FIELD),
 				bestStreakDaily = statsMap.intValue(BEST_STREAK_DAILY_FIELD),
 				lastGuessedDaily = statsMap[LAST_GUESSED_DAILY_FIELD].toString(),
+				totalScore = statsMap.intValue(TOTAL_SCORE_FIELD),
 				// ENDLESS mode
+				gamesPlayedEndless = statsMap.intValue(GAMES_PLAYED_ENDLESS_FIELD),
 				currentStreakEndless = statsMap.intValue(CURRENT_STREAK_ENDLESS_FIELD),
 				bestStreakEndless = statsMap.intValue(BEST_STREAK_ENDLESS_FIELD),
 			),
@@ -185,12 +187,14 @@ class FirestoreRemoteDataSourceImpl @Inject constructor() : FirestoreRemoteDataS
 
 	private fun UserStatsEntity.toFirestoreMap(): Map<String, Any> {
 		return mapOf(
-			GAMES_PLAYED_FIELD to gamesPlayed,
+			GAMES_PLAYED_DAILY_FIELD to gamesPlayedDaily,
 			// DAILY mode
 			CURRENT_STREAK_DAILY_FIELD to currentStreakDaily,
 			BEST_STREAK_DAILY_FIELD to bestStreakDaily,
 			LAST_GUESSED_DAILY_FIELD to lastGuessedDaily,
+			TOTAL_SCORE_FIELD to totalScore,
 			// ENDLESS mode
+			GAMES_PLAYED_ENDLESS_FIELD to gamesPlayedEndless,
 			CURRENT_STREAK_ENDLESS_FIELD to currentStreakEndless,
 			BEST_STREAK_ENDLESS_FIELD to bestStreakEndless,
 		)
@@ -217,12 +221,14 @@ class FirestoreRemoteDataSourceImpl @Inject constructor() : FirestoreRemoteDataS
 		const val STATS_FIELD = "stats"
 		const val SETTINGS_FIELD = "settings"
 
-		const val GAMES_PLAYED_FIELD = "gamesPlayed"
+		const val GAMES_PLAYED_DAILY_FIELD = "gamesPlayedDaily"
 		// DAILY mode
 		const val CURRENT_STREAK_DAILY_FIELD = "currentStreakDaily"
 		const val BEST_STREAK_DAILY_FIELD = "bestStreakDaily"
 		const val LAST_GUESSED_DAILY_FIELD = "lastGuessedDaily"
+		const val TOTAL_SCORE_FIELD = "totalScore"
 		// ENDLESS mode
+		const val GAMES_PLAYED_ENDLESS_FIELD = "gamesPlayedEndless"
 		const val CURRENT_STREAK_ENDLESS_FIELD = "currentStreakEndless"
 		const val BEST_STREAK_ENDLESS_FIELD = "bestStreakEndless"
 
