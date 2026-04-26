@@ -25,10 +25,11 @@ You can directly download the [APK](https://github.com/Kozarsson/Country-Guesser
   - [x] randomised country
     - [x] 'daily' gamemode shares same conutry across all users
   - [x] gamemode dependent scoring
-    - [ ] update personal statistics
+    - [x] update personal statistics
   - [x] show country clues
     - [x] show direction of correct guess
     - [ ] clue based on country flag color
+    - [ ] show distance to correct country
   - [x] guess
     - [x] guess suggestions
   - [x] success alert
@@ -38,10 +39,10 @@ You can directly download the [APK](https://github.com/Kozarsson/Country-Guesser
   - [ ] list countries
   - [ ] searchable countries
   - [ ] view country statistics
-- [ ] profile screen
-  - [ ] view personal stats/information
-  - [ ] save personal stats/information
-  - [ ] cloud persistence
+- [x] profile screen
+  - [x] view personal stats/information
+  - [x] save personal stats/information
+  - [x] cloud persistence
   - [ ] personal settings
 - [x] navigation bar
      
