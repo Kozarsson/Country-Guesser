@@ -101,7 +101,7 @@ class GameVMImpl @Inject constructor(
 
     override fun setGamemode(gamemode: String) {
         _gamemode.value = gamemode
-        _score.value = if (gamemode == "daily") 12 else 0
+        _score.value = if (gamemode == "daily") 12 else 0 // TODO: show currentStreakEndless instead of 0
     }
 
     private val _guessedCountries = MutableStateFlow<List<CountryUiModel>>(listOf())
@@ -199,10 +199,7 @@ class GameVMImpl @Inject constructor(
             if (!NetworkUtils.isNetworkAvailable(Application.APPLICATION.applicationContext)) {
                 setPopupState(PopupState.NO_INTERNET)
             } else {
-                if(_gamemode.value == "daily") {
-                    //TODO: maybe another function in firestoreRepository to make only one update to database instead of two
-                    firestoreRepository.updateStreak()
-                }
+                firestoreRepository.updateStreak(_gamemode.value)
                 firestoreRepository.updateGamesPlayed()
             }
         }

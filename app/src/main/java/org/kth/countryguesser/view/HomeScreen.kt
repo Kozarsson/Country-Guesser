@@ -22,22 +22,39 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import org.kth.countryguesser.util.getCurrentDateFromFirebase
 import org.kth.countryguesser.view.components.BottomBar
 import org.kth.countryguesser.view.components.Routes
 import org.kth.countryguesser.view.components.TopBar
+import org.kth.countryguesser.viewmodel.ProfileStatsVMImpl
 
 @Composable
 fun HomeScreen(
     navController: NavHostController,
     onMenuClick: () -> Unit,
 ) {
+    val profileStatsVM = hiltViewModel<ProfileStatsVMImpl>()
+    val lastGuessedDaily by profileStatsVM.lastGuessedDaily.collectAsState()
+    val currentStreakEndless by profileStatsVM.currentStreakEndless.collectAsState()
+
+    LaunchedEffect(Unit) {
+        profileStatsVM.refreshStats()
+    }
+
+    val today = getCurrentDateFromFirebase().toString()
+    val isDailyDone = lastGuessedDaily == today
+
     Scaffold(
         topBar = {
             TopBar(onMenuClick = onMenuClick)
@@ -71,18 +88,16 @@ fun HomeScreen(
                     color = MaterialTheme.colorScheme.onBackground,
                 )
 
-				//TODO: ADD A "TODAY'S COUNTRY" WITH A ? IF NOT GUESSED,
-				// OTHERWISE SHOW COUNTRY (RETRIEVE FROM LOCAL STORAGE)
-
 				MenuActionButton(
-					label = "DAILY",
+					label = "DAILY ${if (isDailyDone) "(Completed)" else ""}",
 					icon = Icons.Filled.SportsEsports,
+                    enabled = !isDailyDone,
 					onClick = {
                         navController.navigate("${Routes.GAME}/daily")
                     },
 				)
                 MenuActionButton(
-                    label = "ENDLESS",
+                    label = "ENDLESS ${ if (currentStreakEndless > 2 ) "(${currentStreakEndless} streak)" else ""}",
                     icon = Icons.Filled.AllInclusive,
                     onClick = {
                         navController.navigate("${Routes.GAME}/endless")

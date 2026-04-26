@@ -15,8 +15,15 @@ import javax.inject.Inject
 interface ProfileStatsVM {
     val nickname: StateFlow<String>
     val gamesPlayed: StateFlow<Int>
-    val currentStreak: StateFlow<Int>
-    val bestStreak: StateFlow<Int>
+
+    // DAILY mode
+    val currentStreakDaily: StateFlow<Int>
+    val bestStreakDaily: StateFlow<Int>
+    val lastGuessedDaily: StateFlow<String>
+
+    // ENDLESS mode
+    val currentStreakEndless: StateFlow<Int>
+    val bestStreakEndless: StateFlow<Int>
 }
 
 @HiltViewModel
@@ -32,27 +39,54 @@ class ProfileStatsVMImpl @Inject constructor(
     override val gamesPlayed: StateFlow<Int>
         get() = _gamesPlayed
 
-    private val _currentStreak = MutableStateFlow(0)
-    override val currentStreak: StateFlow<Int>
-        get() = _currentStreak
+    // DAILY mode
+    private val _currentStreakDaily = MutableStateFlow(0)
+    override val currentStreakDaily: StateFlow<Int>
+        get() = _currentStreakDaily
 
-    private val _bestStreak = MutableStateFlow(0)
-    override val bestStreak: StateFlow<Int>
-        get() = _bestStreak
+    private val _bestStreakDaily = MutableStateFlow(0)
+    override val bestStreakDaily: StateFlow<Int>
+        get() = _bestStreakDaily
+
+    private val _lastGuessedDaily = MutableStateFlow("")
+    override val lastGuessedDaily: StateFlow<String>
+        get() = _lastGuessedDaily
+
+    // ENDLESS mode
+    private val _currentStreakEndless = MutableStateFlow(0)
+    override val currentStreakEndless: StateFlow<Int>
+        get() = _currentStreakEndless
+    private val _bestStreakEndless = MutableStateFlow(0)
+    override val bestStreakEndless: StateFlow<Int>
+        get() = _bestStreakEndless
 
 
+    fun refreshStats() { // used in home screen
+        viewModelScope.launch {
+            val profile = firestoreRepository.getUserProfile()
+            _lastGuessedDaily.value = profile?.stats?.lastGuessedDaily ?: ""
+            _currentStreakDaily.value = profile?.stats?.currentStreakDaily ?: 0
+            _currentStreakEndless.value = profile?.stats?.currentStreakEndless ?: 0
+            // best streak does not need to be refreshed
+        }
+    }
 
     init {
         var playerInfo: UserProfileEntity? = null
         setPopupState(PopupState.LOADING)
         viewModelScope.launch {
             try {
-                playerInfo = firestoreRepository.getUserProfile()
+                val playerInfo = firestoreRepository.getUserProfile()
                 if (playerInfo != null) {
                     _nickname.value = playerInfo.nickname
                     _gamesPlayed.value = playerInfo.stats.gamesPlayed
-                    _currentStreak.value = playerInfo.stats.currentStreak
-                    _bestStreak.value = playerInfo.stats.bestStreak
+                    // DAILY mode
+                    _currentStreakDaily.value = playerInfo.stats.currentStreakDaily
+                    _bestStreakDaily.value = playerInfo.stats.bestStreakDaily
+                    _lastGuessedDaily.value = playerInfo.stats.lastGuessedDaily
+                    // ENDLESS mode
+                    _currentStreakEndless.value = playerInfo.stats.currentStreakEndless
+                    _bestStreakEndless.value = playerInfo.stats.bestStreakEndless
                 }
             } finally {
                 if (playerInfo == null) {

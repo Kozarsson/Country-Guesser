@@ -118,8 +118,13 @@ class FirestoreRemoteDataSourceImpl @Inject constructor() : FirestoreRemoteDataS
 			nickname = data[NICKNAME_FIELD] as? String ?: "",
 			stats = UserStatsEntity(
 				gamesPlayed = statsMap.intValue(GAMES_PLAYED_FIELD),
-				currentStreak = statsMap.intValue(CURRENT_STREAK_FIELD),
-				bestStreak = statsMap.intValue(BEST_STREAK_FIELD)
+				// DAILY mode
+				currentStreakDaily = statsMap.intValue(CURRENT_STREAK_DAILY_FIELD),
+				bestStreakDaily = statsMap.intValue(BEST_STREAK_DAILY_FIELD),
+				lastGuessedDaily = statsMap[LAST_GUESSED_DAILY_FIELD].toString(),
+				// ENDLESS mode
+				currentStreakEndless = statsMap.intValue(CURRENT_STREAK_ENDLESS_FIELD),
+				bestStreakEndless = statsMap.intValue(BEST_STREAK_ENDLESS_FIELD),
 			),
 			settings = UserSettingsEntity(
 				notificationsEnabled = settingsMap.booleanValue(NOTIFICATIONS_ENABLED_FIELD, true),
@@ -181,8 +186,13 @@ class FirestoreRemoteDataSourceImpl @Inject constructor() : FirestoreRemoteDataS
 	private fun UserStatsEntity.toFirestoreMap(): Map<String, Any> {
 		return mapOf(
 			GAMES_PLAYED_FIELD to gamesPlayed,
-			CURRENT_STREAK_FIELD to currentStreak,
-			BEST_STREAK_FIELD to bestStreak
+			// DAILY mode
+			CURRENT_STREAK_DAILY_FIELD to currentStreakDaily,
+			BEST_STREAK_DAILY_FIELD to bestStreakDaily,
+			LAST_GUESSED_DAILY_FIELD to lastGuessedDaily,
+			// ENDLESS mode
+			CURRENT_STREAK_ENDLESS_FIELD to currentStreakEndless,
+			BEST_STREAK_ENDLESS_FIELD to bestStreakEndless,
 		)
 	}
 
@@ -208,8 +218,14 @@ class FirestoreRemoteDataSourceImpl @Inject constructor() : FirestoreRemoteDataS
 		const val SETTINGS_FIELD = "settings"
 
 		const val GAMES_PLAYED_FIELD = "gamesPlayed"
-		const val CURRENT_STREAK_FIELD = "currentStreak"
-		const val BEST_STREAK_FIELD = "bestStreak"
+		// DAILY mode
+		const val CURRENT_STREAK_DAILY_FIELD = "currentStreakDaily"
+		const val BEST_STREAK_DAILY_FIELD = "bestStreakDaily"
+		const val LAST_GUESSED_DAILY_FIELD = "lastGuessedDaily"
+		// ENDLESS mode
+		const val CURRENT_STREAK_ENDLESS_FIELD = "currentStreakEndless"
+		const val BEST_STREAK_ENDLESS_FIELD = "bestStreakEndless"
+
 
 		const val NOTIFICATIONS_ENABLED_FIELD = "notificationsEnabled"
 		const val DARK_MODE_ENABLED_FIELD = "darkModeEnabled"
