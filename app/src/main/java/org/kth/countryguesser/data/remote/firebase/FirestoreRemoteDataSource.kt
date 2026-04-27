@@ -121,7 +121,7 @@ class FirestoreRemoteDataSourceImpl @Inject constructor() : FirestoreRemoteDataS
 				// DAILY mode
 				currentStreakDaily = statsMap.intValue(CURRENT_STREAK_DAILY_FIELD),
 				bestStreakDaily = statsMap.intValue(BEST_STREAK_DAILY_FIELD),
-				lastGuessedDaily = statsMap[LAST_GUESSED_DAILY_FIELD].toString(),
+				lastGuessedDaily = statsMap[LAST_GUESSED_DAILY_FIELD] as? String ?: "",
 				totalScore = statsMap.intValue(TOTAL_SCORE_FIELD),
 				// ENDLESS mode
 				gamesPlayedEndless = statsMap.intValue(GAMES_PLAYED_ENDLESS_FIELD),
