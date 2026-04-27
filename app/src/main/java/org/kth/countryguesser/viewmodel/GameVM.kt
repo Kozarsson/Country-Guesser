@@ -182,7 +182,8 @@ class GameVMImpl @Inject constructor(
                             comp?.populationComparison,
                             comp?.areaComparison,
                             comp?.inceptionYearComparison,
-                            comp?.continentsComparison
+                            comp?.continentsComparison,
+                            comp?.bordersComparison
                         )
                     ) + _guessedCountries.value
                     if (_gamemode.value == "daily" && !_gameWon.value) {

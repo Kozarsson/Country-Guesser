@@ -53,6 +53,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -381,7 +382,7 @@ private fun GuessedCountries(
     guessedCountries: List<CountryUiModel>,
     modifier: Modifier = Modifier,
 ) {
-    val headers = listOf("Country", "Population", "Area", "Continent", "Inception")
+    val headers = listOf("Country", "Population", "Area", "Continent", "Inception", "Bordering")
     val attributeCount = headers.size
     var displayedCountries by remember { mutableStateOf(guessedCountries) }
     var revealingCountryKey by remember { mutableStateOf<String?>(null) }
@@ -476,7 +477,7 @@ private fun CountryRow(
 ) {
     LazyRow(
         modifier = Modifier
-            .width(cellSize * 5)
+            .fillMaxWidth()
             .height(cellSize),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -488,6 +489,7 @@ private fun CountryRow(
             country.continents,
             country.inceptionYear?.year,
             //country.flagUrl
+            if (country.bordersDiff?.comparison as Boolean) "Yes" else "No",
         )
         val diffs = listOf(
             null,
@@ -495,6 +497,7 @@ private fun CountryRow(
             country.areaDiff,
             country.continentsDiff,
             country.inceptionYearDiff,
+            country.bordersDiff,
         )
         items(attrs.size) { idx ->
             val cellColor = lerp(countryAttributeGuessColor(diffs[idx]), Color.Black, 0.20f)
@@ -538,11 +541,12 @@ private fun CountryRow(
                         }
                         if (idx == 0 ) {
                             if (attrs[idx] != null) {
-                                //TODO: Round the corners of the image so it aligns with the rest of the attributes
                                 AsyncImage(
                                     model = attrs[idx],
                                     contentDescription = "Flag",
-                                    modifier = Modifier.fillMaxSize(),
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clip(MaterialTheme.shapes.medium),
                                     contentScale = ContentScale.Crop,
                                 )
                             } else {

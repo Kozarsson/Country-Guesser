@@ -12,6 +12,8 @@ interface CountryModel {
     val inceptionYear: InceptionYear?
     val flagUrl: String?
     val continents: List<String>?
+    val borders: List<String>?
+    val cioc: String?
     
 //    fun compareTo(other: CountryModel): CountryComparisonResult
     fun compareAttributesTo(other: CountryModel, closenessCriteria: Double?): CountryComparisonResult
@@ -25,14 +27,17 @@ class CountryModelImpl(
     override var area: Double? = null,
     override var inceptionYear: InceptionYear? = null,
     override var flagUrl: String? = null,
-    override val continents: List<String>? = null
+    override val continents: List<String>? = null,
+    override val borders: List<String>? = null,
+    override val cioc: String? = null,
 ) : CountryModel {
     override fun compareAttributesTo(other: CountryModel, closenessCriteria: Double?): CountryComparisonResult {
         return CountryComparisonResult(
             populationComparison = compareAttribute(this.population, other.population, closenessCriteria),
             areaComparison = compareAttribute(this.area, other.area, closenessCriteria),
             inceptionYearComparison = compareAttribute<InceptionYear>(this.inceptionYear, other.inceptionYear, closenessCriteria),
-            continentsComparison = compareAttribute(this.continents, other.continents)
+            continentsComparison = compareAttribute(this.continents, other.continents),
+            bordersComparison = checkMember(this.cioc, other.borders),
         )
     }
 
@@ -76,6 +81,13 @@ class CountryModelImpl(
         }
         return CountryAttributeResult(comparison = comparison, isClose = isClose)
     }
+
+    private fun <T : Comparable<T>> checkMember(member: T?, list: List<T>?): CountryAttributeResult {
+        if (member == null || list == null) {
+            return CountryAttributeResult(comparison = null, isClose = null)
+        }
+        return CountryAttributeResult(comparison = list.contains(member), isClose = null)
+    }
 }
 
 data class CountryComparisonResult(
@@ -83,6 +95,7 @@ data class CountryComparisonResult(
     val areaComparison: CountryAttributeResult,
     val inceptionYearComparison: CountryAttributeResult,
     val continentsComparison: CountryAttributeResult,
+    val bordersComparison: CountryAttributeResult,
 )
 
 /**
