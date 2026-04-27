@@ -1,12 +1,8 @@
 package org.kth.countryguesser.viewmodel
 
 import android.util.Log
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import hilt_aggregated_deps._dagger_hilt_android_internal_managers_ActivityComponentManager_ActivityComponentBuilderEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Job
@@ -22,8 +18,6 @@ import org.kth.countryguesser.ui.model.toUiModel
 import org.kth.countryguesser.util.NetworkUtils
 import org.kth.countryguesser.util.PopupState
 import org.kth.countryguesser.util.getCurrentDateFromFirebase
-import java.time.LocalDate
-import java.time.ZoneOffset
 import javax.inject.Inject
 import kotlin.random.Random
 
@@ -71,7 +65,7 @@ class GameVMImpl @Inject constructor(
                 setPopupState(PopupState.NO_INTERNET)
             } else {
                 startTimerUntilLoadingPopup(1000)
-                var countryName = ""
+                var countryName: String
                 val countries = countryRepository.getAllCountrySearchResults()
 
                 if (_gamemode.value == "daily") {

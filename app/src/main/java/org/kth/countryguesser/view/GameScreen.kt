@@ -551,7 +551,7 @@ private fun CountryRow(
                                 )
                             } else {
                                 Text(
-                                    text = country.countryName.toString(),
+                                    text = country.countryName,
                                     style = MaterialTheme.typography.titleSmall.copy(fontSize = attributeFontSize),
                                     color = MaterialTheme.colorScheme.background,
                                     textAlign = TextAlign.Center,

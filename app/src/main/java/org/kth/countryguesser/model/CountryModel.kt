@@ -1,6 +1,5 @@
 package org.kth.countryguesser.model
 
-import android.util.Log
 import org.kth.countryguesser.util.InceptionYear
 import kotlin.math.abs
 
