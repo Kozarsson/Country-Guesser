@@ -118,6 +118,10 @@ fun AppModalNavigationDrawer(
 
                     // Drawer Items
                     if (user != null && !user!!.isAnonymous) {
+                        DrawerItem("Change Password") {
+                            navController.navigate(Routes.CHANGE_PASSWORD)
+                            scope.launch { drawerState.close() }
+                        }
                         DrawerItem("Logout") {
                             authVM.signOut()
                             scope.launch { drawerState.close() }

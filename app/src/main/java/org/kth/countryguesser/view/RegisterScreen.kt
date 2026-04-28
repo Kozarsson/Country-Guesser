@@ -1,6 +1,5 @@
 package org.kth.countryguesser.view
 
-import android.annotation.SuppressLint
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
@@ -13,14 +12,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -29,22 +30,21 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import org.kth.countryguesser.util.PopupState
 import org.kth.countryguesser.view.components.Alert
 import org.kth.countryguesser.view.components.LoadingAlert
 import org.kth.countryguesser.view.components.NoInternetAlert
 import org.kth.countryguesser.viewmodel.AuthVMImpl
-import org.kth.countryguesser.viewmodel.AuthVM
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,6 +55,8 @@ fun RegisterScreen(
     var nickname by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var passwordConfirm by remember { mutableStateOf("") }
+    var passwordVisible by rememberSaveable { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
     var isRegisterSuccessful by remember { mutableStateOf(false) }
     val activity = LocalActivity.current as? ComponentActivity
@@ -161,14 +163,55 @@ fun RegisterScreen(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
+                        //TODO: Maybe add password restrictions, like at least 8 characters, one uppercase, number etc.
                         OutlinedTextField(
                             value = password,
                             onValueChange = { password = it },
                             label = { Text("Password") },
-                            visualTransformation = PasswordVisualTransformation(),
+                            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                             singleLine = true,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            trailingIcon = {
+                                val image = if (passwordVisible)
+                                    Icons.Filled.Visibility
+                                else Icons.Filled.VisibilityOff
+
+                                val description = if (passwordVisible) "Hide password" else "Show password"
+
+                                IconButton(onClick = {passwordVisible = !passwordVisible}){
+                                    Icon(imageVector  = image, description)
+                                }
+                            }
                         )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        OutlinedTextField(
+                            value = passwordConfirm,
+                            onValueChange = { passwordConfirm = it },
+                            label = { Text("Confirm New Password") },
+                            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
+                            trailingIcon = {
+                                val image = if (passwordVisible)
+                                    Icons.Filled.Visibility
+                                else Icons.Filled.VisibilityOff
+
+                                val description = if (passwordVisible) "Hide password" else "Show password"
+
+                                IconButton(onClick = {passwordVisible = !passwordVisible}){
+                                    Icon(imageVector  = image, description)
+                                }
+                            },
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = if (password != passwordConfirm && passwordConfirm.isNotEmpty()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                                unfocusedBorderColor = if (password != passwordConfirm && passwordConfirm.isNotEmpty()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                            )
+                        )
+                        if (password != passwordConfirm && passwordConfirm.isNotEmpty()) {
+                            Text("Passwords do not match", color = MaterialTheme.colorScheme.error)
+                        }
 
                         if (errorMessage.isNotEmpty()) {
                             Text(errorMessage, color = MaterialTheme.colorScheme.error)
@@ -190,7 +233,13 @@ fun RegisterScreen(
                                     }
                                 }
                             },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled =
+                                    password != passwordConfirm &&
+                                    nickname.isNotEmpty() &&
+                                    email.isNotEmpty() &&
+                                    password.isNotEmpty() &&
+                                    passwordConfirm.isNotEmpty()
                         ) {
                             Text("Register")
                         }
@@ -200,13 +249,3 @@ fun RegisterScreen(
         }
     )
 }
-
-//@SuppressLint("ViewModelConstructorInComposable")
-//@Preview
-//@Composable
-//fun RegisterScreenPreview() {
-//    Surface() {
-//        val navController = rememberNavController()
-//        RegisterScreen(navController = navController, AuthVMImpl(FirebaseAuthRepository()))
-//    }
-//}

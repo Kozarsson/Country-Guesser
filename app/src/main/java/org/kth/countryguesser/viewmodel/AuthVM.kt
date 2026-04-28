@@ -32,6 +32,12 @@ interface AuthVM {
         onResult: (Boolean, String?) -> Unit
     )
 
+    fun changePassword(
+        oldPassword: String,
+        newPassword: String,
+        onResult: (Boolean, String?) -> Unit
+    )
+
     fun authenticated(): Boolean
     fun signOut()
     fun signInAnonymously()
@@ -130,6 +136,30 @@ class AuthVMImpl @Inject constructor(
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Authentication error: ${e.localizedMessage}", e)
+                onResult(false, e.localizedMessage ?: "An unknown error occurred.")
+            }
+        }
+    }
+
+    override fun changePassword(
+        oldPassword: String,
+        newPassword: String,
+        onResult: (Boolean, String?) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                if (!NetworkUtils.isNetworkAvailable(Application.APPLICATION.applicationContext)) {
+                    setPopupState(PopupState.NO_INTERNET)
+                }
+                if (authRepository.updatePassword(oldPassword, newPassword)) {
+                    Log.d(TAG, "Password updated successfully!")
+                    onResult(true, null)
+                } else {
+                    Log.d(TAG, "Failed to update password!")
+                    onResult(false, "Incorrect current password.")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Password update error: ${e.localizedMessage}", e)
                 onResult(false, e.localizedMessage ?: "An unknown error occurred.")
             }
         }

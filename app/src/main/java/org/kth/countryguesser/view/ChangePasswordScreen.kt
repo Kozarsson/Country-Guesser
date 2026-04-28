@@ -1,6 +1,5 @@
 package org.kth.countryguesser.view
 
-import android.annotation.SuppressLint
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
@@ -21,10 +20,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -40,31 +39,29 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import org.kth.countryguesser.util.PopupState
 import org.kth.countryguesser.view.components.Alert
 import org.kth.countryguesser.view.components.LoadingAlert
 import org.kth.countryguesser.view.components.NoInternetAlert
 import org.kth.countryguesser.viewmodel.AuthVMImpl
-import org.kth.countryguesser.viewmodel.AuthVM
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(
+fun ChangePasswordScreen(
     navController: NavController,
 ) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    var oldPassword by remember { mutableStateOf("") }
+    var newPassword by remember { mutableStateOf("") }
+    var newPasswordConfirm by remember { mutableStateOf("") }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
-    var isLoginSuccessful by remember { mutableStateOf(false) }
+    var isChangeSuccessful by remember { mutableStateOf(false) }
     val activity = LocalActivity.current as? ComponentActivity
-        ?: error("LoginScreen requires a ComponentActivity host")
+        ?: error("ChangePasswordScreen requires a ComponentActivity host")
     val authVM = hiltViewModel<AuthVMImpl>(activity)
     val popupState by authVM.popupState.collectAsState()
 
@@ -80,7 +77,7 @@ fun LoginScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Country Guesser - Login") },
+                title = { Text(text = "Country Guesser - Change Password") },
                 navigationIcon = {
                     IconButton(onClick = {
                         navController.navigate("home") {
@@ -107,7 +104,7 @@ fun LoginScreen(
                     .padding(16.dp),
                 contentAlignment = Alignment.Center
             ) {
-                if (isLoginSuccessful) {
+                if (isChangeSuccessful) {
                     LaunchedEffect(Unit) {
                         navController.navigate("home") {
                             popUpTo(navController.graph.startDestinationId) { inclusive = true }
@@ -119,26 +116,16 @@ fun LoginScreen(
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            "Login",
+                            "Change Your Password",
                             style = MaterialTheme.typography.headlineLarge,
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.height(24.dp))
 
                         OutlinedTextField(
-                            value = email,
-                            onValueChange = { email = it },
-                            label = { Text("Email") },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        OutlinedTextField(
-                            value = password,
-                            onValueChange = { password = it },
-                            label = { Text("Password") },
+                            value = oldPassword,
+                            onValueChange = { oldPassword = it },
+                            label = { Text("Old Password") },
                             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                             singleLine = true,
                             modifier = Modifier.fillMaxWidth(),
@@ -155,6 +142,64 @@ fun LoginScreen(
                             }
                         )
 
+                        Spacer(modifier = Modifier.height(32.dp))
+
+                        OutlinedTextField(
+                            value = newPassword,
+                            onValueChange = { newPassword = it },
+                            label = { Text("New Password") },
+                            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
+                            trailingIcon = {
+                                val image = if (passwordVisible)
+                                    Icons.Filled.Visibility
+                                else Icons.Filled.VisibilityOff
+
+                                val description = if (passwordVisible) "Hide password" else "Show password"
+
+                                IconButton(onClick = {passwordVisible = !passwordVisible}){
+                                    Icon(imageVector  = image, description)
+                                }
+                            },
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = if (oldPassword == newPassword && newPassword.isNotEmpty()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                                unfocusedBorderColor = if (oldPassword == newPassword && newPassword.isNotEmpty()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                            )
+                        )
+                        if (oldPassword == newPassword && newPassword.isNotEmpty()) {
+                            Text("New password cannot be the same as old password", color = MaterialTheme.colorScheme.error)
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        OutlinedTextField(
+                            value = newPasswordConfirm,
+                            onValueChange = { newPasswordConfirm = it },
+                            label = { Text("Confirm New Password") },
+                            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
+                            trailingIcon = {
+                                val image = if (passwordVisible)
+                                    Icons.Filled.Visibility
+                                else Icons.Filled.VisibilityOff
+
+                                val description = if (passwordVisible) "Hide password" else "Show password"
+
+                                IconButton(onClick = {passwordVisible = !passwordVisible}){
+                                    Icon(imageVector  = image, description)
+                                }
+                            },
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = if (oldPassword == newPassword && newPassword.isNotEmpty()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                                unfocusedBorderColor = if (oldPassword == newPassword && newPassword.isNotEmpty()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                            )
+                        )
+                        if (newPassword != newPasswordConfirm && newPasswordConfirm.isNotEmpty()) {
+                            Text("Passwords do not match", color = MaterialTheme.colorScheme.error)
+                        }
+
                         if (errorMessage.isNotEmpty()) {
                             Text(errorMessage, color = MaterialTheme.colorScheme.error)
                         }
@@ -163,26 +208,21 @@ fun LoginScreen(
 
                         Button(
                             onClick = {
-                                authVM.signInWithEmailPassword(
-                                    email,
-                                    password
+                                authVM.changePassword(
+                                    oldPassword,
+                                    newPassword
                                 ) { success, error ->
                                     if (success) {
-                                        isLoginSuccessful = true
+                                        isChangeSuccessful = true
                                     } else {
-                                        errorMessage = error ?: "Login failed"
+                                        errorMessage = error ?: "Password change failed"
                                     }
                                 }
                             },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = newPassword == newPasswordConfirm && oldPassword != newPassword && newPassword.isNotEmpty()
                         ) {
-                            Text("Login")
-                        }
-
-                        TextButton(onClick = {
-                            navController.navigate("register")
-                        }) {
-                            Text("Don't have an account? Register")
+                            Text("Change Password")
                         }
                     }
                 }
@@ -190,16 +230,3 @@ fun LoginScreen(
         }
     )
 }
-
-//@SuppressLint("ViewModelConstructorInComposable")
-//@Preview
-//@Composable
-//fun LoginScreenPreview() {
-//    Surface {
-//        val navController = rememberNavController()
-//        LoginScreen(
-//            navController = navController,
-//            authVM = AuthVMImpl(FirebaseAuthRepository())
-//        )
-//    }
-//}

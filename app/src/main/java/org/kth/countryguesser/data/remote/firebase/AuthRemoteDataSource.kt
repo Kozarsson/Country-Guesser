@@ -14,6 +14,7 @@ interface AuthRemoteDataSource {
     suspend fun login(email: String, password: String): Boolean
     suspend fun isEmailTaken(email: String): Boolean
     suspend fun register(nickname: String, email: String, password: String): Boolean
+    suspend fun updatePassword(oldPassword: String, newPassword: String): Boolean
     fun getCurrentUser(): UserEntity?
     fun signOut()
 }
@@ -76,6 +77,20 @@ class AuthRemoteDataSourceImpl @Inject constructor() : AuthRemoteDataSource {
             }
 
             user != null
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    override suspend fun updatePassword(oldPassword: String, newPassword: String): Boolean {
+        val user = auth.currentUser ?: return false
+        val email = user.email ?: return false
+        val credential = EmailAuthProvider.getCredential(email, oldPassword.trim())
+
+        return try {
+            user.reauthenticate(credential).await()
+            user.updatePassword(newPassword.trim()).await()
+            true
         } catch (e: Exception) {
             false
         }

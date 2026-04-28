@@ -16,6 +16,7 @@ interface FirebaseAuthRepository {
     suspend fun getUserProfile(): UserProfileEntity?
     suspend fun updateNickname(nickname: String): Boolean
     suspend fun updateSettings(settings: UserSettingsEntity): Boolean
+    suspend fun updatePassword(oldPassword: String, newPassword: String): Boolean
     fun signOut()
 }
 
@@ -119,6 +120,16 @@ class FirebaseAuthRepositoryImpl @Inject constructor(
         val user = getCurrentUser() ?: return false
         return try {
             firestoreRemoteDataSource.updateSettings(user.uid, settings)
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    override suspend fun updatePassword(oldPassword: String, newPassword: String): Boolean {
+        val user = getCurrentUser() ?: return false
+        return try {
+            authRemoteDataSource.updatePassword(oldPassword, newPassword)
             true
         } catch (e: Exception) {
             false

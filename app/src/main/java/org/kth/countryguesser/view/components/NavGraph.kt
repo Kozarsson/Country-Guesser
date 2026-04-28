@@ -8,6 +8,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import kotlinx.coroutines.launch
+import org.kth.countryguesser.view.ChangePasswordScreen
 import org.kth.countryguesser.view.HomeScreen
 import org.kth.countryguesser.view.LeaderboardScreen
 import org.kth.countryguesser.view.LoginScreen
@@ -43,6 +44,9 @@ fun NavGraph(
             composable(Routes.REGISTER) {
                 RegisterScreen(navController)
             }
+            composable(Routes.CHANGE_PASSWORD) {
+                ChangePasswordScreen(navController)
+            }
 
             composable("${Routes.GAME}/{mode}") { stackEntry ->
                 val mode = stackEntry.arguments?.getString("mode") ?: "daily"
@@ -73,6 +77,7 @@ object Routes {
     const val GAME = "game"
     const val LEADERBOARD = "leaderboard"
     const val PROFILE = "profile"
+    const val CHANGE_PASSWORD = "changePassword"
 
     const val STUDY = "study"
 
