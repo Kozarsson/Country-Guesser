@@ -26,6 +26,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +42,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import org.kth.countryguesser.util.getCurrentDateFromFirebase
+import org.kth.countryguesser.util.getTimeUntilNextDay
+import org.kth.countryguesser.util.formatCountdownTime
 import org.kth.countryguesser.view.components.BottomBar
 import org.kth.countryguesser.view.components.Routes
 import org.kth.countryguesser.view.components.TopBar
@@ -52,6 +58,9 @@ fun HomeScreen(
     val profileStatsVM = hiltViewModel<ProfileStatsVMImpl>()
     val lastGuessedDaily by profileStatsVM.lastGuessedDaily.collectAsState()
     val currentStreakEndless by profileStatsVM.currentStreakEndless.collectAsState()
+    var timeUntilNextDay by remember { mutableLongStateOf(getTimeUntilNextDay()) }
+    
+    
 
     //TODO: Properly refresh the screen after winning a daily game to show the daily country
     LaunchedEffect(Unit) {
@@ -60,6 +69,13 @@ fun HomeScreen(
 
     val today = getCurrentDateFromFirebase().toString()
     val isDailyDone = lastGuessedDaily.date == today
+
+    LaunchedEffect(Unit) {
+        while (timeUntilNextDay > 0) {
+            delay(1000)
+            timeUntilNextDay -= 1000
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -97,7 +113,7 @@ fun HomeScreen(
                 TodaysCountry(isDailyDone, lastGuessedDaily)
 
 				MenuActionButton(
-					label = "DAILY ${if (isDailyDone) "(Completed)" else ""}",
+					label = "DAILY ${if (isDailyDone) "(time until next country: " + formatCountdownTime(timeUntilNextDay) + ")" else ""}",
 					icon = Icons.Filled.SportsEsports,
                     enabled = !isDailyDone,
 					onClick = {
@@ -158,6 +174,7 @@ private fun TodaysCountry(
     isDailyDone: Boolean,
     lastGuessedDaily: LastGuessedDaily,
 ) {
+
     OutlinedCard(
         modifier = Modifier
             .fillMaxWidth()
