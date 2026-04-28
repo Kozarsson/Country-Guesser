@@ -209,7 +209,6 @@ private fun TodaysCountry(
                     }
                 }
             }
-
         }
     }
 }

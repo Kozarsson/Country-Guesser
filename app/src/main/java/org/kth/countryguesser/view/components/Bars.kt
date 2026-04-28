@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonOutline
+import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -223,7 +224,7 @@ fun BottomBar(navController: NavController) {
             TextButton(onClick = { if (currentRoute != Routes.HOME) navController.navigate(Routes.HOME) }) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(
-                        Icons.Filled.Home,
+                        if (currentRoute == Routes.HOME) Icons.Filled.Home else Icons.Outlined.Home,
                         contentDescription = "Home",
                         modifier = Modifier.size(32.dp),
                         tint = MaterialTheme.colorScheme.background
