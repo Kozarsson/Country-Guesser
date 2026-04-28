@@ -60,6 +60,7 @@ class GameVMImpl @Inject constructor(
     }
 
     private fun fetchCountry() {
+        //TODO: Refetch after internet establishment
         viewModelScope.launch {
             if (!NetworkUtils.isNetworkAvailable(Application.APPLICATION.applicationContext)) {
                 setPopupState(PopupState.NO_INTERNET)
@@ -208,6 +209,10 @@ class GameVMImpl @Inject constructor(
                 firestoreRepository.updateStreak(_gamemode.value)
                 firestoreRepository.updateGamesPlayed(_gamemode.value)
                 if (_gamemode.value == "daily") {
+                    firestoreRepository.updateLastDailyGuess(
+                        targetCountry.value?.countryName ?: "",
+                        targetCountry.value?.flagUrl ?: ""
+                    )
                     firestoreRepository.updateScore(_score.value) // TODO: score is not updating correctly in database
                 }
             }

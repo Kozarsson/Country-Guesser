@@ -16,7 +16,8 @@ service cloud.firestore {
         'nickname',
         'nicknameNormalized',
         'stats',
-        'settings'
+        'settings',
+        'lastGuessedDaily'
       ]);
     }
 
