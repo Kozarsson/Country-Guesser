@@ -29,7 +29,9 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ErrorOutline
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -74,6 +76,8 @@ import org.kth.countryguesser.model.CountryAttributeResult
 import org.kth.countryguesser.viewmodel.GameVMImpl
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import kotlinx.coroutines.delay
 import org.kth.countryguesser.util.PopupState
@@ -83,6 +87,7 @@ import org.kth.countryguesser.view.components.NoInternetAlert
 import org.kth.countryguesser.view.components.TopBar
 import java.util.Locale
 import kotlin.math.abs
+import org.kth.countryguesser.view.components.Map
 
 @Composable
 fun GameScreen(
@@ -94,6 +99,7 @@ fun GameScreen(
     val isGameWon by gameVM.gameWon.collectAsState()
     val popupState by gameVM.popupState.collectAsState()
     val errorMessage by gameVM.errorMessage.collectAsState()
+    var showMap by remember { mutableStateOf(false) }
 
     LaunchedEffect(mode) {
         gameVM.setGamemode(mode)
@@ -118,6 +124,28 @@ fun GameScreen(
                 gameVM.resetGameState()
             },
         )
+    } else if (showMap) {
+        Dialog(
+            onDismissRequest = { showMap = false },
+            properties = DialogProperties(usePlatformDefaultWidth = false),
+        ) {
+            Scaffold(
+                floatingActionButton = {
+                    FloatingActionButton(
+                        onClick = { showMap = false },
+                        modifier = Modifier
+                            .padding(16.dp),
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                    ) {
+                        Icon(Icons.Default.Close, contentDescription = "Close")
+                    }
+                },
+            ) {
+                Map()
+            }
+
+        }
     }
     GameScreenContent(
         navController = navController,
@@ -129,6 +157,7 @@ fun GameScreen(
         },
         mode = mode,
         vm = gameVM,
+        onToggleMap = { showMap = true },
     )
 }
 
@@ -139,22 +168,37 @@ fun GameScreenContent(
     topBar: @Composable () -> Unit = {},
     bottomBar: @Composable () -> Unit = {},
     mode: String,
-    vm: GameVMImpl
+    vm: GameVMImpl,
+    onToggleMap: () -> Unit,
 ) {
     val context = LocalContext.current
     Scaffold(
         topBar = topBar,
         bottomBar = bottomBar,
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    val answer = vm.getAnswer()
-                    Toast.makeText(context, "Answer: $answer", Toast.LENGTH_SHORT).show()
-                },
-                containerColor = MaterialTheme.colorScheme.errorContainer,
-                contentColor = MaterialTheme.colorScheme.onErrorContainer,
-            ) {
-                Icon(imageVector = Icons.Default.BugReport, contentDescription = "Reveal Answer")
+            Column() {
+                FloatingActionButton(
+                    onClick = {
+                        val answer = vm.getAnswer()
+                        Toast.makeText(context, "Answer: $answer", Toast.LENGTH_SHORT).show()
+                    },
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.BugReport,
+                        contentDescription = "Reveal Answer"
+                    )
+                }
+
+                FloatingActionButton(
+                    onClick = { onToggleMap() },
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                ) {
+                    Icon(imageVector = Icons.Default.Map, contentDescription = "Map")
+                }
             }
         }
     ) { padding ->
