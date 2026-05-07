@@ -68,6 +68,7 @@ class CountryRepositoryImpl @Inject constructor(
                 continents = restCountriesResult.continents,
                 borders = restCountriesResult.borders,
                 cioc = restCountriesResult.cioc,
+                cca2 = restCountriesResult.cca2,
             )
         } catch (e: HttpException) {
             Log.e("CountryRepository", "WikiData HTTP exception: ${e.message}")

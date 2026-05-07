@@ -99,6 +99,7 @@ fun GameScreen(
     val isGameWon by gameVM.gameWon.collectAsState()
     val popupState by gameVM.popupState.collectAsState()
     val errorMessage by gameVM.errorMessage.collectAsState()
+    val guessedCountries by gameVM.guessedCountries.collectAsState()
     var showMap by remember { mutableStateOf(false) }
 
     LaunchedEffect(mode) {
@@ -141,8 +142,10 @@ fun GameScreen(
                         Icon(Icons.Default.Close, contentDescription = "Close")
                     }
                 },
-            ) {
-                Map()
+            ) { _ ->
+                Map(
+                    guessedCountries = guessedCountries.map { it.cca2?.lowercase() }
+                )
             }
 
         }

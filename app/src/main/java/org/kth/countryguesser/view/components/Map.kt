@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -22,14 +23,26 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.IntSize
+import com.caverock.androidsvg.RenderOptions
 import com.caverock.androidsvg.SVG
 import org.kth.countryguesser.R
 
 
 @Composable
-fun Map() {
+fun Map(
+   guessedCountries: List<String?>
+) {
+    val fillColor: Color = MaterialTheme.colorScheme.onErrorContainer
+    val strokeColor: Color = MaterialTheme.colorScheme.errorContainer
+    fun Color.toCssHex(): String {
+        return String.format("#%06X", (0xFFFFFF and this.toArgb()))
+    }
+
+    Log.v("Map", "guessedCountries: $guessedCountries")
+
     val context = LocalContext.current
 
     val svg = remember {
@@ -45,7 +58,6 @@ fun Map() {
     var scale by remember(minScale) { mutableFloatStateOf(minScale) }
     var offset by remember { mutableStateOf(Offset.Zero) }
     var hasCentered by remember { mutableStateOf(false) }
-
 
     Box(
         modifier = Modifier
@@ -102,8 +114,25 @@ fun Map() {
 
                 svg.documentWidth = baseWidth
                 svg.documentHeight = baseHeight
-                svg.renderToCanvas(nativeCanvas)
 
+                // color highlight logic
+                if (guessedCountries.filterNotNull().isNotEmpty()) {
+                    val renderOptions = RenderOptions.create()
+                    val countryHighlight = guessedCountries.joinToString(" ") { id ->
+                        """
+                    #$id, #$id path { 
+                        fill: ${fillColor.toCssHex()};
+                        stroke: ${strokeColor.toCssHex()};
+                        stroke-width: 1;
+                    }
+                    """.trimIndent()
+                    }
+                    renderOptions.css(countryHighlight)
+
+                    svg.renderToCanvas(nativeCanvas, renderOptions)
+                } else {
+                    svg.renderToCanvas(nativeCanvas)
+                }
                 nativeCanvas.restore()
             }
         }

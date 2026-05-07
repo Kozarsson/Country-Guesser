@@ -13,6 +13,7 @@ interface CountryModel {
     val continents: List<String>?
     val borders: List<String>?
     val cioc: String?
+    val cca2: String?
     
 //    fun compareTo(other: CountryModel): CountryComparisonResult
     fun compareAttributesTo(other: CountryModel, closenessCriteria: Double?): CountryComparisonResult
@@ -29,6 +30,7 @@ class CountryModelImpl(
     override val continents: List<String>? = null,
     override val borders: List<String>? = null,
     override val cioc: String? = null,
+    override val cca2: String? = null,
 ) : CountryModel {
     override fun compareAttributesTo(other: CountryModel, closenessCriteria: Double?): CountryComparisonResult {
         return CountryComparisonResult(
