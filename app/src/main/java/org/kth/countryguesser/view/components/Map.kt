@@ -1,7 +1,5 @@
 package org.kth.countryguesser.view.components
 
-
-import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTransformGestures
@@ -41,8 +39,6 @@ fun Map(
         return String.format("#%06X", (0xFFFFFF and this.toArgb()))
     }
 
-    Log.v("Map", "guessedCountries: $guessedCountries")
-
     val context = LocalContext.current
 
     val svg = remember {
@@ -66,9 +62,9 @@ fun Map(
             .background(Color(0xff70d6ef))
             .onSizeChanged { size ->
                 mapSize = size
-                if (!hasCentered && mapSize.height > 0) {
+                if (!hasCentered && scale > 1f) {
                     hasCentered = true
-                    val x = (mapSize.width * (scale - 1)).coerceAtLeast(0f)
+                    val x = (mapSize.width * (scale - 1))
                     offset = Offset(-x/2f, 0f)
                 }
             }
