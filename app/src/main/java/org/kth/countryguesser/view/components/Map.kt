@@ -1,6 +1,7 @@
 package org.kth.countryguesser.view.components
 
 
+import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTransformGestures
@@ -34,15 +35,17 @@ fun Map() {
     val svg = remember {
         context.resources.openRawResource(R.raw.world_map).use { SVG.getFromInputStream(it) }
     }
-
-    var scale by remember { mutableFloatStateOf(4.5f) }
-    var offset by remember { mutableStateOf(Offset.Zero) }
-    var mapSize by remember { mutableStateOf(IntSize(0, 0)) }
-    var hasCentered by remember { mutableStateOf(false) }
-
     val svgAspect = remember(svg) {
         svg.documentAspectRatio.takeIf { it > 0f } ?: (16f / 9f)
     }
+    var mapSize by remember { mutableStateOf(IntSize(0, 0)) }
+    val minScale = remember(mapSize, svgAspect) {
+        if (mapSize.width <= 0) 1f else mapSize.height / (mapSize.width / svgAspect)
+    }
+    var scale by remember(minScale) { mutableFloatStateOf(minScale) }
+    var offset by remember { mutableStateOf(Offset.Zero) }
+    var hasCentered by remember { mutableStateOf(false) }
+
 
     Box(
         modifier = Modifier
@@ -51,7 +54,7 @@ fun Map() {
             .background(Color(0xff70d6ef))
             .onSizeChanged { size ->
                 mapSize = size
-                if (!hasCentered) {
+                if (!hasCentered && mapSize.height > 0) {
                     hasCentered = true
                     val x = (mapSize.width * (scale - 1)).coerceAtLeast(0f)
                     offset = Offset(-x/2f, 0f)
@@ -59,12 +62,15 @@ fun Map() {
             }
             .pointerInput(Unit) {
                 detectTransformGestures { centroid, pan, zoom, _ ->
-                    scale = (scale * zoom).coerceIn(1f, 100f)
+                    val oldScale = scale
+                    scale = (scale * zoom).coerceIn(minScale, 100f)
+
+                    val trueZoom = scale / oldScale
 
                     val maxX = (mapSize.width * (scale - 1)).coerceAtLeast(0f)
-                    val maxY = (mapSize.height * (scale - 1)).coerceAtLeast(0f)
+                    val maxY = (mapSize.width / svgAspect * scale - mapSize.height).coerceAtLeast(0f)
 
-                    offset = (offset * zoom) + (centroid - centroid * zoom) + pan
+                    offset = (offset * trueZoom) + (centroid - centroid * trueZoom) + pan
                     offset = Offset(
                         x = offset.x.coerceIn(-maxX, 0f),
                         y = offset.y.coerceIn(-maxY, 0f),
