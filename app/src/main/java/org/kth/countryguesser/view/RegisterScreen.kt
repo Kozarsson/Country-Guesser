@@ -235,7 +235,7 @@ fun RegisterScreen(
                             },
                             modifier = Modifier.fillMaxWidth(),
                             enabled =
-                                    password != passwordConfirm &&
+                                    password == passwordConfirm &&
                                     nickname.isNotEmpty() &&
                                     email.isNotEmpty() &&
                                     password.isNotEmpty() &&
