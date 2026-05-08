@@ -115,14 +115,15 @@ fun GameScreen(
             PopupState.NO_INTERNET ->{NoInternetAlert(onPress = {gameVM.resetPopupState()})}
         }
 
+
     if (isGameWon) {
         SuccessScreen(
             onConfirm = {
-//                if (mode == "daily") {
-//                    navController.popBackStack()
-//                }
-                // stay here (do nothing) if 'endless' mode
                 gameVM.resetGameState()
+                if (mode == "daily") {
+                    navController.navigate("home")
+                }
+//                 stay here (do nothing) if 'endless' mode
             },
         )
     } else if (showMap) {
