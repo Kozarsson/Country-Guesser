@@ -118,9 +118,9 @@ fun GameScreen(
     if (isGameWon) {
         SuccessScreen(
             onConfirm = {
-                if (mode == "daily") {
-                    navController.popBackStack()
-                }
+//                if (mode == "daily") {
+//                    navController.popBackStack()
+//                }
                 // stay here (do nothing) if 'endless' mode
                 gameVM.resetGameState()
             },
@@ -536,7 +536,9 @@ private fun CountryRow(
             country.continents,
             country.inceptionYear?.year,
             //country.flagUrl
-            if (country.bordersDiff?.comparison as Boolean) "Yes" else "No",
+            if (country.bordersDiff?.comparison == null) {
+                "N/A"
+            } else if (country.bordersDiff.comparison as Boolean) "Yes" else "No",
         )
         val diffs = listOf(
             null,
