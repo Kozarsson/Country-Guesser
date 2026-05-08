@@ -171,7 +171,6 @@ class GameVMImpl @Inject constructor(
                             _score.value++
                         }
                     }
-                    Log.d("GameVM", _guessedCountries.value.toString())
                     _guessedCountries.value = listOf(
                         result.toUiModel(
                             comp?.populationComparison,
@@ -209,6 +208,7 @@ class GameVMImpl @Inject constructor(
                 firestoreRepository.updateStreak(_gamemode.value)
                 firestoreRepository.updateGamesPlayed(_gamemode.value)
                 if (_gamemode.value == "daily") {
+                    Log.d("GameVM", "Updating last daily guess in Firestore with country: ${targetCountry.value?.countryName}")
                     firestoreRepository.updateLastDailyGuess(
                         targetCountry.value?.countryName ?: "",
                         targetCountry.value?.flagUrl ?: ""

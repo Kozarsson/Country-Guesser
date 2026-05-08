@@ -9,6 +9,8 @@ import org.kth.countryguesser.ui.model.CountryUiModel
 import org.kth.countryguesser.ui.model.toUiModel
 import org.kth.countryguesser.util.extractYearFromWikiData
 import retrofit2.HttpException
+import java.io.IOException
+import java.net.SocketTimeoutException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -31,6 +33,12 @@ class CountryRepositoryImpl @Inject constructor(
         return try {
             val result = restCountriesApiService.searchCountries(searchQuery)
             result.map { it.toUiModel() }
+        } catch (e: SocketTimeoutException) {
+            Log.e("CountryRepository", "Timeout while searching countries: ${e.message}")
+            emptyList()
+        } catch (e: IOException) {
+            Log.e("CountryRepository", "Network error while searching countries: ${e.message}")
+            emptyList()
         } catch (e: HttpException) {
             Log.e("CountryRepository", "HTTP exception: ${e.message}")
             if (e.code() == 404) emptyList() else throw e
@@ -39,12 +47,13 @@ class CountryRepositoryImpl @Inject constructor(
 
     override suspend fun getCountryByName(name: String): CountryModel? {
         val restCountriesResult = try {
-//            restCountriesApiService.searchCountries(name)
-//                .firstOrNull { country ->
-//                    country.name?.common?.equals(name, ignoreCase = true) == true ||
-//                        country.name?.official?.equals(name, ignoreCase = true) == true
-//                }
             restCountriesApiService.searchCountry(name).firstOrNull()
+        } catch (e: SocketTimeoutException) {
+            Log.e("CountryRepository", "Timeout while fetching country by name: ${e.message}")
+            return null
+        } catch (e: IOException) {
+            Log.e("CountryRepository", "Network error while fetching country by name: ${e.message}")
+            return null
         } catch (e: HttpException) {
             Log.e("CountryRepository", "HTTP exception: ${e.message}")
             if (e.code() == 404) return null else throw e
@@ -70,6 +79,12 @@ class CountryRepositoryImpl @Inject constructor(
                 cioc = restCountriesResult.cioc,
                 cca2 = restCountriesResult.cca2,
             )
+        } catch (e: SocketTimeoutException) {
+            Log.e("CountryRepository", "Timeout while fetching WikiData: ${e.message}")
+            return null
+        } catch (e: IOException) {
+            Log.e("CountryRepository", "Network error while fetching WikiData: ${e.message}")
+            return null
         } catch (e: HttpException) {
             Log.e("CountryRepository", "WikiData HTTP exception: ${e.message}")
             if (e.code() == 404 || e.code() == 403) return null else throw e

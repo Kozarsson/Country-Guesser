@@ -11,6 +11,7 @@ import org.kth.countryguesser.model.api.RestCountriesEndpoints
 import org.kth.countryguesser.model.api.WikiDataEndpoints
 import javax.inject.Singleton
 import org.kth.countryguesser.BuildConfig
+import java.util.concurrent.TimeUnit
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -19,6 +20,9 @@ object NetworkModule {
     @Singleton
     fun provideOkHttpClient(): OkHttpClient =
         OkHttpClient.Builder()
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(20, TimeUnit.SECONDS)
+            .writeTimeout(20, TimeUnit.SECONDS)
             .addInterceptor { chain ->
                 val request = chain.request().newBuilder()
                     .header("User-Agent", "CountryGuesserApp/1.0; User:kozar@kth.se") // Required to bypass HTTP 403, see more at https://foundation.wikimedia.org/wiki/Policy:Wikimedia_Foundation_User-Agent_Policy
@@ -47,4 +51,3 @@ object NetworkModule {
             .build()
             .create(WikiDataEndpoints::class.java)
 }
-
