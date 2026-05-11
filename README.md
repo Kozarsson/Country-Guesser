@@ -32,13 +32,16 @@ You can directly download the [APK](https://github.com/Kozarsson/Country-Guesser
     - [ ] show distance to correct country
   - [x] guess
     - [x] guess suggestions
+  - [x] map
+    - [x] zoom/pan
+    - [x] highlight guessed countries
   - [x] success alert
     - [x] gamemode dependent handler
   - [ ] failure alert
-- [ ] study screen
-  - [ ] list countries
-  - [ ] searchable countries
-  - [ ] view country statistics
+- [x] study screen
+  - [x] list countries
+  - [x] searchable countries
+  - [x] view country statistics
 - [x] profile screen
   - [x] view personal stats/information
   - [x] save personal stats/information
