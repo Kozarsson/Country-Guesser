@@ -80,6 +80,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import kotlinx.coroutines.delay
+import org.kth.countryguesser.ui.theme.AppTheme
 import org.kth.countryguesser.util.PopupState
 import org.kth.countryguesser.view.components.Alert
 import org.kth.countryguesser.view.components.LoadingAlert
@@ -640,15 +641,15 @@ private fun countryAttributeGuessColor(attrComparisonResult: CountryAttributeRes
         return MaterialTheme.colorScheme.primary
     } else {
         if (attrComparisonResult.isClose == true && attrComparisonResult.comparison != 0) {
-            return Color.Yellow
+            return AppTheme.colors.guessOrange
         }
         return when (attrComparisonResult.comparison) {
-            -1 -> Color.Red
-            1 -> Color.Red
-            false -> Color.Red
-            0 -> Color.Green
-            true -> Color.Green
-            else -> MaterialTheme.colorScheme.primary
+            -1 -> AppTheme.colors.guessRed
+            1 -> AppTheme.colors.guessRed
+            false -> AppTheme.colors.guessRed
+            0 -> AppTheme.colors.guessGreen
+            true -> AppTheme.colors.guessGreen
+            else -> AppTheme.colors.guessGrey
         }
     }
 }

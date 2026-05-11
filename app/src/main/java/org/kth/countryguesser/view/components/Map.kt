@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.IntSize
 import com.caverock.androidsvg.RenderOptions
 import com.caverock.androidsvg.SVG
 import org.kth.countryguesser.R
+import org.kth.countryguesser.ui.theme.AppColors
+import org.kth.countryguesser.ui.theme.AppTheme
 
 
 @Composable
@@ -59,7 +61,7 @@ fun Map(
         modifier = Modifier
             .fillMaxSize()
             .clip(RectangleShape)
-            .background(Color(0xff70d6ef))
+            .background(AppTheme.colors.mapBlue)
             .onSizeChanged { size ->
                 mapSize = size
                 if (!hasCentered && scale > 1f) {
