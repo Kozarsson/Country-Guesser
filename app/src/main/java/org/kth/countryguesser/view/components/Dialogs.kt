@@ -3,10 +3,12 @@ package org.kth.countryguesser.view.components
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -100,6 +102,7 @@ fun GameWonAlert(
     onDismissPress: () -> Unit = {},
     country: String,
     flag: String?,
+    guesses: Int,
 ) {
     Dialog(
         onDismissRequest = { },
@@ -134,15 +137,37 @@ fun GameWonAlert(
                             .size(128.dp)
                     )
                 }
+                Text(
+                    text = "Number of guesses: $guesses",
+                    style = MaterialTheme.typography.bodyLarge,
+                )
                 Row(
-                    modifier = Modifier.padding(24.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    TextButton(onClick = { onDismissPress() }) {
-                        Text("Return to menu")
+                    Button(
+                        onClick = { onDismissPress() },
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Text(
+                            text = "Main Menu",
+                            style = MaterialTheme.typography.labelSmall,
+                            maxLines = 1
+                        )
                     }
+                    Spacer(modifier = Modifier.size(12.dp))
                     if (onConfirmPress != null) {
-                        TextButton(onClick = { onConfirmPress() }) {
-                            Text("Continue")
+                        Button(
+                            onClick = { onConfirmPress() },
+                            modifier = Modifier.weight(1f),
+                        ) {
+                            Text(
+                                text = "New Game",
+                                style = MaterialTheme.typography.labelSmall,
+                                maxLines = 1
+                            )
                         }
                     }
                 }

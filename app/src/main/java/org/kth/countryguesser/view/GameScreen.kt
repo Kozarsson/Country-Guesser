@@ -120,8 +120,8 @@ fun GameScreen(
             GamePopupState.NONE -> {}
             GamePopupState.NO_RESULT -> {Alert(onPress = {gameVM.resetGamePopupState()}, title = "No results", message = "No country with that name found")}
             GamePopupState.DUPLICATE_SEARCH -> {Alert(onPress = {gameVM.resetGamePopupState()}, title = "Country already guessed", message = "You cannot guess the same country twice")}
-            GamePopupState.GAME_WON_DAILY -> {GameWonAlert(onConfirmPress = null, onDismissPress = { gameVM.resetGamePopupState(); navController.navigate("home") }, country = gameVM.getTargetCountryName(), flag = gameVM.getTargetCountryFlagUrl())}
-            GamePopupState.GAME_WON_ENDLESS -> {GameWonAlert(onConfirmPress = {gameVM.resetGameState()}, onDismissPress = { gameVM.saveToFirestore(); gameVM.resetGamePopupState(); navController.navigate("home") }, country = gameVM.getTargetCountryName(), flag = gameVM.getTargetCountryFlagUrl()) }
+            GamePopupState.GAME_WON_DAILY -> {GameWonAlert(onConfirmPress = null, onDismissPress = { gameVM.resetGamePopupState(); navController.navigate("home") }, country = gameVM.getTargetCountryName(), flag = gameVM.getTargetCountryFlagUrl(), guesses = guessedCountries.size) }
+            GamePopupState.GAME_WON_ENDLESS -> {GameWonAlert(onConfirmPress = {gameVM.resetGameState()}, onDismissPress = { gameVM.saveToFirestore(); gameVM.resetGamePopupState(); navController.navigate("home") }, country = gameVM.getTargetCountryName(), flag = gameVM.getTargetCountryFlagUrl(), guesses = guessedCountries.size) }
         }
 
 
