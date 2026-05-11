@@ -85,7 +85,7 @@ class CountryModelImpl(
 
     private fun <T : Comparable<T>> checkMember(member: T?, list: List<T>?): CountryAttributeResult {
         if (member == null || list == null) {
-            return CountryAttributeResult(comparison = null, isClose = null)
+            return CountryAttributeResult(comparison = false, isClose = null)
         }
         return CountryAttributeResult(comparison = list.contains(member), isClose = null)
     }

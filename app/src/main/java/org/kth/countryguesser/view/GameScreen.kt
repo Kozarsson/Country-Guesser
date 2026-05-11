@@ -549,9 +549,7 @@ private fun CountryRow(
             country.continents,
             country.inceptionYear?.year,
             //country.flagUrl
-            if (country.bordersDiff?.comparison == null) {
-                "N/A"
-            } else if (country.bordersDiff.comparison as Boolean) "Yes" else "No",
+            if (country.bordersDiff?.comparison as Boolean) "Yes" else "No",
         )
         val diffs = listOf(
             null,
