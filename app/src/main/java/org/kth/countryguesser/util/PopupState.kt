@@ -3,8 +3,14 @@ package org.kth.countryguesser.util
 enum class PopupState {
     NONE,
     LOADING,
-    NO_RESULT,
     ERROR,
+    NO_INTERNET,
+}
+
+enum class GamePopupState {
+    NONE,
+    NO_RESULT,
     DUPLICATE_SEARCH,
-    NO_INTERNET
+    GAME_WON_DAILY,
+    GAME_WON_ENDLESS
 }

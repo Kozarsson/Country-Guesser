@@ -17,6 +17,7 @@ import org.kth.countryguesser.ui.model.CountryUiModel
 import org.kth.countryguesser.ui.model.toUiModel
 import org.kth.countryguesser.util.NetworkUtils
 import org.kth.countryguesser.util.PopupState
+import org.kth.countryguesser.util.GamePopupState
 import org.kth.countryguesser.util.getCurrentDateFromFirebase
 import javax.inject.Inject
 import kotlin.random.Random
@@ -32,8 +33,10 @@ interface GameVM {
     fun searchCountries(searchQuery: String)
     fun guessCountry(country: String)
     fun resetGameState()
+    fun saveToFirestore()
 
-    fun getAnswer(): String // TODO: for debug purposes, remove later
+    fun getTargetCountryName(): String
+    fun getTargetCountryFlagUrl(): String?
 }
 
 @HiltViewModel
@@ -54,6 +57,17 @@ class GameVMImpl @Inject constructor(
     private var isFetching: Boolean = false
     private var timerJob: Job? = null
 
+    private val _gamePopupState = MutableStateFlow(GamePopupState.NONE)
+    val gamePopupState: StateFlow<GamePopupState>
+        get() = _gamePopupState
+
+    private fun setGamePopupState(state: GamePopupState) {
+        _gamePopupState.value = state
+    }
+
+    fun resetGamePopupState() {
+        _gamePopupState.value = GamePopupState.NONE
+    }
 
     init {
         fetchCountry()
@@ -150,7 +164,7 @@ class GameVMImpl @Inject constructor(
         }
         val guessedCountries = _guessedCountries.value.map { it.countryName.lowercase() }
         if (guessedCountries.contains(country.lowercase())) {
-            setPopupState(PopupState.DUPLICATE_SEARCH)
+            setGamePopupState(GamePopupState.DUPLICATE_SEARCH)
             return
         }
         viewModelScope.launch {
@@ -164,12 +178,23 @@ class GameVMImpl @Inject constructor(
 
                     if (targetCountry.value?.countryName == result.countryName) {
                         _gameWon.value = true
+                        viewModelScope.launch {
+                            delay(1500)
+                            if (_gamemode.value == "daily") {
+                                saveToFirestore()
+                                setGamePopupState(GamePopupState.GAME_WON_DAILY)
+                            } else {
+                                setGamePopupState(GamePopupState.GAME_WON_ENDLESS)
+                                _score.value++
+                            }
+
+                        }
                         Log.d("GameVM", "Correct guess")
 
-                        if (_gamemode.value == "endless") {
-                            fetchCountry()
-                            _score.value++
-                        }
+//                        if (_gamemode.value == "endless") {
+//                            fetchCountry()
+//                            _score.value++
+//                        }
                     }
                     _guessedCountries.value = listOf(
                         result.toUiModel(
@@ -187,7 +212,7 @@ class GameVMImpl @Inject constructor(
                     Log.d("GameVM", "Guessed country: ${_guessedCountries.value}")
                     setPopupState(PopupState.NONE)
                 } else {
-                    setPopupState(PopupState.NO_RESULT)
+                    setGamePopupState(GamePopupState.NO_RESULT)
                     Log.e("GameVM", "No country found with name $country")
                 }
                 isFetching = false
@@ -201,6 +226,11 @@ class GameVMImpl @Inject constructor(
         _guessedCountries.value = listOf()
         _searchResults.value = listOf()
         _gameWon.value = false
+        fetchCountry()
+        resetGamePopupState()
+    }
+
+    override fun saveToFirestore() {
         viewModelScope.launch {
             if (!NetworkUtils.isNetworkAvailable(Application.APPLICATION.applicationContext)) {
                 setPopupState(PopupState.NO_INTERNET)
@@ -208,18 +238,22 @@ class GameVMImpl @Inject constructor(
                 if (!firestoreRepository.updateStreak(_gamemode.value)) Log.e("GameVM", "Failed to update streak in Firestore")
                 if(!firestoreRepository.updateGamesPlayed(_gamemode.value)) Log.e("GameVM", "Failed to update games played in Firestore")
                 if (_gamemode.value == "daily") {
-                    Log.d("GameVM", "Updating last daily guess in Firestore with country: ${targetCountry.value?.countryName}")
                     if(!firestoreRepository.updateLastDailyGuess(
-                        targetCountry.value?.countryName ?: "",
-                        targetCountry.value?.flagUrl ?: ""
-                    )) Log.e("GameVM", "Failed to update daily guess in Firestore")
+                            targetCountry.value?.countryName ?: "",
+                            targetCountry.value?.flagUrl ?: ""
+                        )) Log.e("GameVM", "Failed to update daily guess in Firestore")
                     if(!firestoreRepository.updateScore(_score.value)) Log.e("GameVM", "Failed to update score in Firestore")// TODO: score is not updating correctly in database
                 }
             }
         }
     }
 
-    override fun getAnswer(): String { // TODO: for debug purposes, remove later
+
+    override fun getTargetCountryName(): String { // TODO: for debug purposes, remove later
         return targetCountry.value?.countryName.toString()
+    }
+
+    override fun getTargetCountryFlagUrl(): String? {
+        return targetCountry.value?.flagUrl
     }
 }

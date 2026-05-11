@@ -81,8 +81,10 @@ import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import kotlinx.coroutines.delay
 import org.kth.countryguesser.ui.theme.AppTheme
+import org.kth.countryguesser.util.GamePopupState
 import org.kth.countryguesser.util.PopupState
 import org.kth.countryguesser.view.components.Alert
+import org.kth.countryguesser.view.components.GameWonAlert
 import org.kth.countryguesser.view.components.LoadingAlert
 import org.kth.countryguesser.view.components.NoInternetAlert
 import org.kth.countryguesser.view.components.TopBar
@@ -97,8 +99,8 @@ fun GameScreen(
     onMenuClick: () -> Unit,
 ) {
     val gameVM = hiltViewModel<GameVMImpl>()
-    val isGameWon by gameVM.gameWon.collectAsState()
     val popupState by gameVM.popupState.collectAsState()
+    val gamePopupState by gameVM.gamePopupState.collectAsState()
     val errorMessage by gameVM.errorMessage.collectAsState()
     val guessedCountries by gameVM.guessedCountries.collectAsState()
     var showMap by remember { mutableStateOf(false) }
@@ -109,25 +111,32 @@ fun GameScreen(
 
         when (popupState) {
             PopupState.NONE -> {}
-            PopupState.NO_RESULT -> {Alert(onPress = {gameVM.resetPopupState()}, title = "No results", message = "No country with that name found")}
             PopupState.LOADING -> {LoadingAlert("Loading...")}
-            PopupState.DUPLICATE_SEARCH -> {Alert(onPress = {gameVM.resetPopupState()}, title = "Country already guessed", message = "You cannot guess the same country twice")}
             PopupState.ERROR -> {Alert(onPress = {gameVM.resetPopupState()}, title = "Error", message = errorMessage ?: "Unknown error, try again")}
-            PopupState.NO_INTERNET ->{NoInternetAlert(onPress = {gameVM.resetPopupState()})}
+            PopupState.NO_INTERNET -> {NoInternetAlert(onPress = {gameVM.resetPopupState()})}
+        }
+
+        when (gamePopupState) {
+            GamePopupState.NONE -> {}
+            GamePopupState.NO_RESULT -> {Alert(onPress = {gameVM.resetGamePopupState()}, title = "No results", message = "No country with that name found")}
+            GamePopupState.DUPLICATE_SEARCH -> {Alert(onPress = {gameVM.resetGamePopupState()}, title = "Country already guessed", message = "You cannot guess the same country twice")}
+            GamePopupState.GAME_WON_DAILY -> {GameWonAlert(onConfirmPress = null, onDismissPress = { gameVM.resetGamePopupState(); navController.navigate("home") }, country = gameVM.getTargetCountryName(), flag = gameVM.getTargetCountryFlagUrl())}
+            GamePopupState.GAME_WON_ENDLESS -> {GameWonAlert(onConfirmPress = {gameVM.resetGameState()}, onDismissPress = { gameVM.saveToFirestore(); gameVM.resetGamePopupState(); navController.navigate("home") }, country = gameVM.getTargetCountryName(), flag = gameVM.getTargetCountryFlagUrl()) }
         }
 
 
-    if (isGameWon) {
-        SuccessScreen(
-            onConfirm = {
-                gameVM.resetGameState()
-                if (mode == "daily") {
-                    navController.navigate("home")
-                }
-//                 stay here (do nothing) if 'endless' mode
-            },
-        )
-    } else if (showMap) {
+//    if (isGameWon) {
+//        SuccessScreen(
+//            onConfirm = {
+//                gameVM.resetGameState()
+//                if (mode == "daily") {
+//                    navController.navigate("home")
+//                }
+////                 stay here (do nothing) if 'endless' mode
+//            },
+//        )
+//    }
+    if (showMap) {
         Dialog(
             onDismissRequest = { showMap = false },
             properties = DialogProperties(usePlatformDefaultWidth = false),
@@ -184,7 +193,7 @@ fun GameScreenContent(
             Column() {
                 FloatingActionButton(
                     onClick = {
-                        val answer = vm.getAnswer()
+                        val answer = vm.getTargetCountryName()
                         Toast.makeText(context, "Answer: $answer", Toast.LENGTH_SHORT).show()
                     },
                     containerColor = MaterialTheme.colorScheme.errorContainer,
@@ -309,6 +318,7 @@ private fun Input(
     var isFocused by remember { mutableStateOf(false) }
     val searchResults by vm.searchResults.collectAsState()
     val focusManager = LocalFocusManager.current
+    val isGameWon by vm.gameWon.collectAsState()
 
     LaunchedEffect(guess) {
         if (guess.isNotBlank()) {
@@ -336,6 +346,7 @@ private fun Input(
                 OutlinedTextField(
                     label = { Text("Guess") },
                     value = guess,
+                    enabled = !isGameWon,
                     textStyle = MaterialTheme.typography.bodyMedium,
                     onValueChange = { input ->
                         guess = input

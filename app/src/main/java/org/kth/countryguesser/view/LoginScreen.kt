@@ -70,9 +70,7 @@ fun LoginScreen(
 
     when (popupState) {
         PopupState.NONE -> {}
-        PopupState.NO_RESULT -> {Alert(onPress = {authVM.resetPopupState()}, title = "No results", message = "No country with that name found")}
         PopupState.LOADING -> {LoadingAlert("Loading...")}
-        PopupState.DUPLICATE_SEARCH -> {Alert(onPress = {authVM.resetPopupState()}, title = "Country already guessed", message = "You cannot guess the same country twice")}
         PopupState.ERROR -> {Alert(onPress = {authVM.resetPopupState()}, title = "Error", message = errorMessage ?: "Unknown error, try again")}
         PopupState.NO_INTERNET ->{NoInternetAlert(onPress = {authVM.resetPopupState()})}
     }

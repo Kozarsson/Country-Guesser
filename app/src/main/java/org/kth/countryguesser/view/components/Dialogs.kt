@@ -1,7 +1,10 @@
 package org.kth.countryguesser.view.components
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -14,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 
 @Composable
 fun WIPAlert(
@@ -88,4 +92,62 @@ fun NoInternetAlert(
             }
         }
     )
+}
+
+@Composable
+fun GameWonAlert(
+    onConfirmPress: (() -> Unit)? = null,
+    onDismissPress: () -> Unit = {},
+    country: String,
+    flag: String?,
+) {
+    Dialog(
+        onDismissRequest = { },
+    ) {
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 6.dp,
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                Text(
+                    text = "You Won!",
+                    style = MaterialTheme.typography.headlineLarge,
+                )
+                Spacer(modifier = Modifier.size(8.dp))
+                Text(
+                    text = "The country was:",
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Text(
+                    text = country,
+                    style = MaterialTheme.typography.headlineSmall,
+                )
+                if (flag != null) {
+                    AsyncImage(
+                        model = flag,
+                        contentDescription = "Flag",
+                        modifier = Modifier
+                            .size(128.dp)
+                    )
+                }
+                Row(
+                    modifier = Modifier.padding(24.dp),
+                ) {
+                    TextButton(onClick = { onDismissPress() }) {
+                        Text("Return to menu")
+                    }
+                    if (onConfirmPress != null) {
+                        TextButton(onClick = { onConfirmPress() }) {
+                            Text("Continue")
+                        }
+                    }
+                }
+            }
+        }
+
+    }
 }

@@ -70,9 +70,7 @@ fun UserScreen(
 
     when (popupState) {
         PopupState.NONE -> {}
-        PopupState.NO_RESULT -> {}
         PopupState.LOADING -> {LoadingAlert("Loading...")}
-        PopupState.DUPLICATE_SEARCH -> {}
         PopupState.ERROR -> {Alert(onPress = {profileStatsVM.resetPopupState()}, title = "Error", message = errorMessage ?: "Unknown error, try again")}
         PopupState.NO_INTERNET ->{NoInternetAlert(onPress = {profileStatsVM.resetPopupState()})}
     }
