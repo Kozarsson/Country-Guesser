@@ -35,7 +35,7 @@ import org.kth.countryguesser.ui.theme.AppTheme
 fun Map(
    guessedCountries: List<String?>
 ) {
-    val fillColor: Color = MaterialTheme.colorScheme.onErrorContainer
+    val fillColor: Color = AppTheme.colors.guessGrey
     val strokeColor: Color = MaterialTheme.colorScheme.errorContainer
     fun Color.toCssHex(): String {
         return String.format("#%06X", (0xFFFFFF and this.toArgb()))
