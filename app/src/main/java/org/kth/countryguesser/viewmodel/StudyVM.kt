@@ -8,16 +8,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.kth.countryguesser.Application
-import org.kth.countryguesser.data.repository.FirestoreRepository
-import org.kth.countryguesser.model.CountryModel
 import org.kth.countryguesser.model.repository.CountryRepository
-import org.kth.countryguesser.model.repository.GameRepository
 import org.kth.countryguesser.ui.model.CountryUiModel
 import org.kth.countryguesser.ui.model.toUiModel
 import org.kth.countryguesser.util.GamePopupState
 import org.kth.countryguesser.util.NetworkUtils
 import org.kth.countryguesser.util.PopupState
-import org.kth.countryguesser.util.getCurrentDateFromFirebase
 import javax.inject.Inject
 import kotlin.random.Random
 
