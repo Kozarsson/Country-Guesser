@@ -6,6 +6,7 @@ import org.kth.countryguesser.model.entity.LastGuessedDailyEntity
 import org.kth.countryguesser.model.entity.UserEntity
 import org.kth.countryguesser.model.entity.UserProfileEntity
 import org.kth.countryguesser.model.entity.UserStatsEntity
+import org.kth.countryguesser.ui.model.PlayerUiModel
 import org.kth.countryguesser.util.getCurrentDateFromFirebase
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -20,6 +21,7 @@ interface FirestoreRepository {
     suspend fun resetStreak(mode: String): Boolean
     suspend fun updateScore(score: Int): Boolean
     suspend fun getUserProfile(): UserProfileEntity?
+    suspend fun getLeaderboard(): List<PlayerUiModel>?
 }
 
 class FirestoreRepositoryImpl @Inject constructor(
@@ -166,4 +168,18 @@ class FirestoreRepositoryImpl @Inject constructor(
         return firestoreRemoteDataSource.getProfile(user.uid)
     }
 
+    /**
+     * Returns a list of [PlayerUiModel] sorted by longest daily streak in descending order.
+     */
+    override suspend fun getLeaderboard(): List<PlayerUiModel>? {
+        val profiles = firestoreRemoteDataSource.getAllProfiles()
+        return profiles.sortedByDescending { it.stats.bestStreakDaily }.map {
+            PlayerUiModel(
+                nickname = it.nickname,
+                gamesPlayedDaily = it.stats.gamesPlayedDaily,
+                currentStreakDaily = it.stats.currentStreakDaily,
+                bestStreakDaily = it.stats.bestStreakDaily,
+            )
+        }
+    }
 }

@@ -16,6 +16,7 @@ interface FirestoreRemoteDataSource {
 	suspend fun claimNickname(nickname: String, uid: String): Boolean
 	suspend fun releaseNickname(nickname: String, uid: String)
 	suspend fun getProfile(uid: String): UserProfileEntity?
+	suspend fun getAllProfiles(): List<UserProfileEntity>
 	suspend fun updateNickname(uid: String, nickname: String)
 	suspend fun updateSettings(uid: String, settings: UserSettingsEntity)
 	suspend fun updateStats(uid: String, stats: UserStatsEntity)
@@ -142,6 +143,45 @@ class FirestoreRemoteDataSourceImpl @Inject constructor() : FirestoreRemoteDataS
 			)
 		)
 	}
+
+	override suspend fun getAllProfiles(): List<UserProfileEntity> {
+		val snapshots = firestore.collection(USERS_COLLECTION).get().await()
+		return snapshots.documents.mapNotNull { snapshot ->
+			val data = snapshot.data ?: return@mapNotNull null
+			val uid = data[UID_FIELD] as? String ?: return@mapNotNull null
+
+			val statsMap = data[STATS_FIELD] as? Map<*, *> ?: emptyMap<String, Any>()
+			val settingsMap = data[SETTINGS_FIELD] as? Map<*, *> ?: emptyMap<String, Any>()
+			val lastGuessDailyMap = data[LAST_GUESSED_DAILY_FIELD] as? Map<*, *> ?: emptyMap<String, Any>()
+
+			UserProfileEntity(
+				uid = uid,
+				nickname = data[NICKNAME_FIELD] as? String ?: "",
+				stats = UserStatsEntity(
+					gamesPlayedDaily = statsMap.intValue(GAMES_PLAYED_DAILY_FIELD),
+					// DAILY mode
+					currentStreakDaily = statsMap.intValue(CURRENT_STREAK_DAILY_FIELD),
+					bestStreakDaily = statsMap.intValue(BEST_STREAK_DAILY_FIELD),
+					//lastGuessedDaily = statsMap[LAST_GUESSED_DAILY_FIELD] as? String ?: "",
+					totalScore = statsMap.intValue(TOTAL_SCORE_FIELD),
+					// ENDLESS mode
+					gamesPlayedEndless = statsMap.intValue(GAMES_PLAYED_ENDLESS_FIELD),
+					currentStreakEndless = statsMap.intValue(CURRENT_STREAK_ENDLESS_FIELD),
+					bestStreakEndless = statsMap.intValue(BEST_STREAK_ENDLESS_FIELD),
+				),
+				settings = UserSettingsEntity(
+					notificationsEnabled = settingsMap.booleanValue(NOTIFICATIONS_ENABLED_FIELD, true),
+					darkModeEnabled = settingsMap.booleanValue(DARK_MODE_ENABLED_FIELD, false)
+				),
+				lastGuessedDaily = LastGuessedDailyEntity(
+					date = lastGuessDailyMap[LAST_GUESSED_DAILY_DATE_FIELD] as? String ?: "",
+					countryName = lastGuessDailyMap[LAST_GUESSED_DAILY_COUNTRY_NAME_FIELD] as? String ?: "",
+					flagUrl = lastGuessDailyMap[LAST_GUESSED_DAILY_FLAG_URL_FIELD] as? String ?: ""
+				)
+			)
+		}
+	}
+
 	override suspend fun updateNickname(uid: String, nickname: String) {
 		val profile = getProfile(uid)
 		if (!claimNickname(nickname, uid)) {

@@ -15,7 +15,6 @@ import org.kth.countryguesser.util.GamePopupState
 import org.kth.countryguesser.util.NetworkUtils
 import org.kth.countryguesser.util.PopupState
 import javax.inject.Inject
-import kotlin.random.Random
 
 interface StudyVM {
     val searchResults: StateFlow<List<Pair<String, String?>>>
