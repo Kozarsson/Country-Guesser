@@ -15,8 +15,7 @@ fun CountryModel.toUiModel(): CountryUiModel = CountryUiModel(
     flagUrl = this.flagUrl,
     continents = this.continents,
     borders = this.borders,
-    cioc = this.cioc,
-    cca2 = this.cca2,
+    cca2 = this.cca3,
 )
 fun CountryModel.toUiModel(
     populationDiff: CountryAttributeResult?,
@@ -37,8 +36,7 @@ fun CountryModel.toUiModel(
     continentsDiff = continentsDiff,
     borders = this.borders,
     bordersDiff = bordersDiff,
-    cioc = this.cioc,
-    cca2 = this.cca2,
+    cca2 = this.cca3,
 )
 
 /**
@@ -52,7 +50,6 @@ fun CountryResultDto.toUiModel(): CountryUiModel = CountryUiModel(
     flagUrl = this.flags?.png,
     continents = this.continents,
     borders = this.borders,
-    cioc = this.cioc,
     cca2 = this.cca2,
 )
 

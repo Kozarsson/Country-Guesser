@@ -1,5 +1,6 @@
 package org.kth.countryguesser.model
 
+import android.util.Log
 import org.kth.countryguesser.util.InceptionYear
 import kotlin.math.abs
 
@@ -12,8 +13,7 @@ interface CountryModel {
     val flagUrl: String?
     val continents: List<String>?
     val borders: List<String>?
-    val cioc: String?
-    val cca2: String?
+    val cca3: String?
     
 //    fun compareTo(other: CountryModel): CountryComparisonResult
     fun compareAttributesTo(other: CountryModel, closenessCriteria: Double?): CountryComparisonResult
@@ -29,8 +29,7 @@ class CountryModelImpl(
     override var flagUrl: String? = null,
     override val continents: List<String>? = null,
     override val borders: List<String>? = null,
-    override val cioc: String? = null,
-    override val cca2: String? = null,
+    override val cca3: String? = null,
 ) : CountryModel {
     override fun compareAttributesTo(other: CountryModel, closenessCriteria: Double?): CountryComparisonResult {
         return CountryComparisonResult(
@@ -38,7 +37,7 @@ class CountryModelImpl(
             areaComparison = compareAttribute(this.area, other.area, closenessCriteria),
             inceptionYearComparison = compareAttribute<InceptionYear>(this.inceptionYear, other.inceptionYear, closenessCriteria),
             continentsComparison = compareAttribute(this.continents, other.continents),
-            bordersComparison = checkMember(this.cioc, other.borders),
+            bordersComparison = checkMember(other.cca3, this.borders),
         )
     }
 
@@ -84,10 +83,15 @@ class CountryModelImpl(
     }
 
     private fun <T : Comparable<T>> checkMember(member: T?, list: List<T>?): CountryAttributeResult {
-        if (member == null || list == null) {
-            return CountryAttributeResult(comparison = false, isClose = null)
+        return if (list == null) {
+            CountryAttributeResult(comparison = false, isClose = null)
+        } else if (member == null) {
+            CountryAttributeResult(comparison = null, isClose = null)
+        } else if (member == this.cca3) {
+            CountryAttributeResult(comparison = true, isClose = null)
+        } else {
+            CountryAttributeResult(comparison = list.contains(member), isClose = null)
         }
-        return CountryAttributeResult(comparison = list.contains(member), isClose = null)
     }
 }
 
