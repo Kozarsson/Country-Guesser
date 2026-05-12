@@ -112,7 +112,7 @@ fun GameScreen(
         when (popupState) {
             PopupState.NONE -> {}
             PopupState.LOADING -> {LoadingAlert("Loading...")}
-            PopupState.ERROR -> {Alert(onPress = {gameVM.resetPopupState()}, title = "Error", message = errorMessage ?: "Unknown error, try again")}
+            PopupState.ERROR -> {Alert(onPress = { gameVM.resetPopupState(); navController.navigate("home") }, title = "Error", message = errorMessage ?: "Unknown error, try again")}
             PopupState.NO_INTERNET -> {NoInternetAlert(onPress = {gameVM.resetPopupState()})}
         }
 

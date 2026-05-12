@@ -83,6 +83,12 @@ class GameVMImpl @Inject constructor(
                 var countryName: String
                 val countries = countryRepository.getAllCountrySearchResults()
 
+                if(countries.isEmpty()) {
+                    isFetching = false
+                    setError("Error connecting to the servers, try again later")
+                    return@launch
+                }
+
                 if (_gamemode.value == "daily") {
                     //val seed = LocalDate.now(ZoneOffset.UTC).toEpochDay()
                     val seed = getCurrentDateFromFirebase().toEpochDay()

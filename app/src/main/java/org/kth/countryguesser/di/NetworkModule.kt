@@ -20,9 +20,9 @@ object NetworkModule {
     @Singleton
     fun provideOkHttpClient(): OkHttpClient =
         OkHttpClient.Builder()
-            .connectTimeout(15, TimeUnit.SECONDS)
-            .readTimeout(20, TimeUnit.SECONDS)
-            .writeTimeout(20, TimeUnit.SECONDS)
+            .connectTimeout(10, TimeUnit.SECONDS)
+            .readTimeout(10, TimeUnit.SECONDS)
+            .writeTimeout(10, TimeUnit.SECONDS)
             .addInterceptor { chain ->
                 val request = chain.request().newBuilder()
                     .header("User-Agent", "CountryGuesserApp/1.0; User:kozar@kth.se") // Required to bypass HTTP 403, see more at https://foundation.wikimedia.org/wiki/Policy:Wikimedia_Foundation_User-Agent_Policy
