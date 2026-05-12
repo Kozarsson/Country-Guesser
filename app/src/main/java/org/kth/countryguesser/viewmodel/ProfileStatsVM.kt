@@ -6,8 +6,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.kth.countryguesser.data.repository.FirestoreRepository
+import org.kth.countryguesser.data.repository.LastDailyRepository
 import org.kth.countryguesser.model.entity.UserProfileEntity
 import org.kth.countryguesser.util.PopupState
+import org.kth.countryguesser.util.getCurrentDateFromFirebase
 import javax.inject.Inject
 
 interface ProfileStatsVM {
@@ -29,6 +31,7 @@ interface ProfileStatsVM {
 @HiltViewModel
 class ProfileStatsVMImpl @Inject constructor(
     private val firestoreRepository: FirestoreRepository,
+    private val lastDailyRepository: LastDailyRepository
 ) : BaseVM(), ProfileStatsVM {
 
     private val _nickname = MutableStateFlow<String>("")
@@ -72,12 +75,7 @@ class ProfileStatsVMImpl @Inject constructor(
     fun refreshStats() { // used in home screen
         viewModelScope.launch {
             val profile = firestoreRepository.getUserProfile()
-            //_lastGuessedDaily.value = profile?.stats?.lastGuessedDaily ?: ""
-            _lastGuessedDaily.value = LastGuessedDaily(
-                date = profile?.lastGuessedDaily?.date,
-                countryName = profile?.lastGuessedDaily?.countryName,
-                flagUrl = profile?.lastGuessedDaily?.flagUrl
-            )
+            _lastGuessedDaily.value = resolveLastDaily()
             _currentStreakDaily.value = profile?.stats?.currentStreakDaily ?: 0
             _currentStreakEndless.value = profile?.stats?.currentStreakEndless ?: 0
             // best streak does not need to be refreshed
@@ -98,11 +96,7 @@ class ProfileStatsVMImpl @Inject constructor(
                     _bestStreakDaily.value = playerInfo.stats.bestStreakDaily
                     //_lastGuessedDaily.value = playerInfo.stats.lastGuessedDaily
                     _totalScore.value = playerInfo.stats.totalScore
-                    _lastGuessedDaily.value = LastGuessedDaily(
-                        date = playerInfo.lastGuessedDaily.date,
-                        countryName = playerInfo.lastGuessedDaily.countryName,
-                        flagUrl = playerInfo.lastGuessedDaily.flagUrl
-                    )
+                    _lastGuessedDaily.value = resolveLastDaily()
 
                     // ENDLESS mode
                     _gamesPlayedEndless.value = playerInfo.stats.gamesPlayedEndless
@@ -117,6 +111,20 @@ class ProfileStatsVMImpl @Inject constructor(
                 }
             }
         }
+    }
+
+    private suspend fun resolveLastDaily(): LastGuessedDaily {
+        val today = getCurrentDateFromFirebase().toString()
+        val lastDaily = lastDailyRepository.getLastGuessedDaily()
+        if (lastDaily == null || lastDaily.date != today) {
+            lastDailyRepository.clearLastGuessedDaily()
+            return LastGuessedDaily(null, null, null)
+        }
+        return LastGuessedDaily(
+            date = lastDaily.date.takeIf { it.isNotBlank() },
+            countryName = lastDaily.countryName.takeIf { it.isNotBlank() },
+            flagUrl = lastDaily.flagUrl.takeIf { it.isNotBlank() }
+        )
     }
 }
 

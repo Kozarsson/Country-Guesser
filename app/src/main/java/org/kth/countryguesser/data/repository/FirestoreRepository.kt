@@ -2,12 +2,12 @@ package org.kth.countryguesser.data.repository
 
 import org.kth.countryguesser.data.remote.firebase.AuthRemoteDataSource
 import org.kth.countryguesser.data.remote.firebase.FirestoreRemoteDataSource
-import org.kth.countryguesser.model.entity.LastGuessedDailyEntity
+import org.kth.countryguesser.data.repository.LastDailyRepository
+import org.kth.countryguesser.util.getCurrentDateFromFirebase
 import org.kth.countryguesser.model.entity.UserEntity
 import org.kth.countryguesser.model.entity.UserProfileEntity
 import org.kth.countryguesser.model.entity.UserStatsEntity
 import org.kth.countryguesser.ui.model.PlayerUiModel
-import org.kth.countryguesser.util.getCurrentDateFromFirebase
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
@@ -17,7 +17,7 @@ interface FirestoreRepository {
     suspend fun updateStats(stats: UserStatsEntity): Boolean
     suspend fun updateGamesPlayed(mode: String, gamesPlayed: Int = -1): Boolean
     suspend fun updateStreak(mode: String): Boolean
-    suspend fun updateLastDailyGuess(countryName: String, flagUrl: String): Boolean
+    suspend fun updateLastDailyGuess(countryName: String, flagUrl: String, score: Int): Boolean
     suspend fun resetStreak(mode: String): Boolean
     suspend fun updateScore(score: Int): Boolean
     suspend fun getUserProfile(): UserProfileEntity?
@@ -26,7 +26,8 @@ interface FirestoreRepository {
 
 class FirestoreRepositoryImpl @Inject constructor(
     private val authRemoteDataSource: AuthRemoteDataSource,
-    private val firestoreRemoteDataSource: FirestoreRemoteDataSource
+    private val firestoreRemoteDataSource: FirestoreRemoteDataSource,
+    private val lastDailyRepository: LastDailyRepository
 ) : FirestoreRepository {
 
     override fun getCurrentUser(): UserEntity? = authRemoteDataSource.getCurrentUser()
@@ -71,7 +72,8 @@ class FirestoreRepositoryImpl @Inject constructor(
         val newStats: UserStatsEntity
         if (mode == "daily") {
             val todayDate = getCurrentDateFromFirebase()
-            val lastDateStr = profile.lastGuessedDaily.date
+            val lastDaily = lastDailyRepository.getLastGuessedDaily()
+            val lastDateStr = lastDaily?.date.orEmpty()
             val streak = if (lastDateStr.isNotEmpty()) {
                 val lastDate = LocalDate.parse(lastDateStr)
                 if (ChronoUnit.DAYS.between(lastDate, todayDate) > 1) {
@@ -116,17 +118,15 @@ class FirestoreRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateLastDailyGuess(countryName: String, flagUrl: String): Boolean {
-        val user = getCurrentUser() ?: return false
-        val profile = firestoreRemoteDataSource.getProfile(user.uid) ?: return false //TODO: Rewrite to remove duplication of code
+    override suspend fun updateLastDailyGuess(countryName: String, flagUrl: String, score: Int): Boolean {
         val todayDate = getCurrentDateFromFirebase()
-        val newLastDailyGuess = profile.lastGuessedDaily.copy(
-            date = todayDate.toString(),
-            countryName = countryName,
-            flagUrl = flagUrl
-        )
         return try {
-            firestoreRemoteDataSource.updateLastDailyGuess(user.uid, newLastDailyGuess)
+            lastDailyRepository.saveLastGuessedDaily(
+                date = todayDate.toString(),
+                countryName = countryName,
+                flagUrl = flagUrl,
+                score = score
+            )
             true
         } catch (e: Exception) {
             false

@@ -2,6 +2,9 @@ package org.kth.countryguesser.data.repository
 
 import org.kth.countryguesser.data.remote.firebase.AuthRemoteDataSource
 import org.kth.countryguesser.data.remote.firebase.FirestoreRemoteDataSource
+import org.kth.countryguesser.data.repository.LastDailyRepository
+import org.kth.countryguesser.data.repository.FirestoreRepository
+import org.kth.countryguesser.model.entity.LastGuessedDailyEntity
 import org.kth.countryguesser.model.entity.UserEntity
 import org.kth.countryguesser.model.entity.UserProfileEntity
 import org.kth.countryguesser.model.entity.UserSettingsEntity
@@ -29,7 +32,9 @@ sealed interface RegistrationResult {
 
 class FirebaseAuthRepositoryImpl @Inject constructor(
     private val authRemoteDataSource: AuthRemoteDataSource,
-    private val firestoreRemoteDataSource: FirestoreRemoteDataSource
+    private val firestoreRemoteDataSource: FirestoreRemoteDataSource,
+    private val lastDailyRepository: LastDailyRepository,
+    private val firestoreRepository: FirestoreRepository
 ) : FirebaseAuthRepository {
 
     override suspend fun signInAnonymously(): Boolean {
@@ -44,6 +49,7 @@ class FirebaseAuthRepositoryImpl @Inject constructor(
         val success = authRemoteDataSource.login(email, password)
         if (success) {
             runCatching { bootstrapProfileForCurrentUser() }
+            runCatching { syncLocalDailyGuessToFirestoreIfNeeded() }
         }
         return success
     }
@@ -82,6 +88,7 @@ class FirebaseAuthRepositoryImpl @Inject constructor(
                 currentUser.uid,
                 normalizedNickname
             )
+            syncLocalDailyGuessToFirestoreIfNeeded()
             RegistrationResult.Success
         } catch (e: IllegalStateException) {
             authRemoteDataSource.signOut()
@@ -137,6 +144,34 @@ class FirebaseAuthRepositoryImpl @Inject constructor(
     }
 
     override fun signOut() = authRemoteDataSource.signOut()
+
+    private suspend fun syncLocalDailyGuessToFirestoreIfNeeded() {
+        val user = getCurrentUser() ?: return
+        val localDaily = lastDailyRepository.getLastGuessedDaily() ?: return
+        if (localDaily.date.isBlank() && localDaily.countryName.isBlank() && localDaily.flagUrl.isBlank()) {
+            return
+        }
+        val profile = firestoreRemoteDataSource.getProfile(user.uid) ?: return
+        val remoteDaily = profile.lastGuessedDaily
+        if (
+            remoteDaily.date == localDaily.date &&
+            remoteDaily.countryName == localDaily.countryName &&
+            remoteDaily.flagUrl == localDaily.flagUrl
+        ) {
+            return
+        }
+        firestoreRemoteDataSource.updateLastDailyGuess(
+            user.uid,
+            LastGuessedDailyEntity(
+                date = localDaily.date,
+                countryName = localDaily.countryName,
+                flagUrl = localDaily.flagUrl
+            )
+        )
+        firestoreRepository.updateStreak("daily")
+        firestoreRepository.updateGamesPlayed("daily")
+        firestoreRepository.updateScore(localDaily.score)
+    }
 
     private suspend fun bootstrapProfileForCurrentUser(preferredNickname: String? = null) {
         val user = getCurrentUser() ?: return

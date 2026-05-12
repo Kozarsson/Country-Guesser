@@ -246,7 +246,8 @@ class GameVMImpl @Inject constructor(
                 if (_gamemode.value == "daily") {
                     if(!firestoreRepository.updateLastDailyGuess(
                             targetCountry.value?.countryName ?: "",
-                            targetCountry.value?.flagUrl ?: ""
+                            targetCountry.value?.flagUrl ?: "",
+                            _score.value
                         )) Log.e("GameVM", "Failed to update daily guess in Firestore")
                     if(!firestoreRepository.updateScore(_score.value)) Log.e("GameVM", "Failed to update score in Firestore")// TODO: score is not updating correctly in database
                 }
