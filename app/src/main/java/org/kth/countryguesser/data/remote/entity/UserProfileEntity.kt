@@ -1,6 +1,4 @@
-package org.kth.countryguesser.model.entity
-
-import java.time.LocalDate
+package org.kth.countryguesser.data.remote.entity
 
 data class UserProfileEntity(
     val uid: String,

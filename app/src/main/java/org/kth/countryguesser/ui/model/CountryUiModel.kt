@@ -17,4 +17,5 @@ data class CountryUiModel(
     val borders: List<String>?,
     val bordersDiff: CountryAttributeResult? = null,
     val cca2: String?,
+    val cca3: String?,
 )

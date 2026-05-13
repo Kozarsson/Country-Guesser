@@ -76,6 +76,7 @@ class CountryRepositoryImpl @Inject constructor(
                 flagUrl = restCountriesResult.flags?.png, //TODO: Fix bug that when searching for a country before the guessing country is loaded, the app crashes due to this image url
                 continents = restCountriesResult.continents,
                 borders = restCountriesResult.borders,
+                cca2 = restCountriesResult.cca2,
                 cca3 = restCountriesResult.cca3,
             )
         } catch (e: SocketTimeoutException) {

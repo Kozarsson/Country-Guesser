@@ -2,13 +2,10 @@ package org.kth.countryguesser.data.repository
 
 import org.kth.countryguesser.data.remote.firebase.AuthRemoteDataSource
 import org.kth.countryguesser.data.remote.firebase.FirestoreRemoteDataSource
-import org.kth.countryguesser.data.repository.LastDailyRepository
-import org.kth.countryguesser.data.repository.FirestoreRepository
-import org.kth.countryguesser.model.entity.LastGuessedDailyEntity
-import org.kth.countryguesser.model.entity.UserEntity
-import org.kth.countryguesser.model.entity.UserProfileEntity
-import org.kth.countryguesser.model.entity.UserSettingsEntity
-import org.kth.countryguesser.model.entity.UserStatsEntity
+import org.kth.countryguesser.data.remote.entity.LastGuessedDailyEntity
+import org.kth.countryguesser.data.remote.entity.UserEntity
+import org.kth.countryguesser.data.remote.entity.UserProfileEntity
+import org.kth.countryguesser.data.remote.entity.UserSettingsEntity
 import javax.inject.Inject
 
 interface FirebaseAuthRepository {

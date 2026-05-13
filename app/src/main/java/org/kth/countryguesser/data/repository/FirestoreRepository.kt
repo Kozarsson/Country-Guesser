@@ -2,11 +2,10 @@ package org.kth.countryguesser.data.repository
 
 import org.kth.countryguesser.data.remote.firebase.AuthRemoteDataSource
 import org.kth.countryguesser.data.remote.firebase.FirestoreRemoteDataSource
-import org.kth.countryguesser.data.repository.LastDailyRepository
 import org.kth.countryguesser.util.getCurrentDateFromFirebase
-import org.kth.countryguesser.model.entity.UserEntity
-import org.kth.countryguesser.model.entity.UserProfileEntity
-import org.kth.countryguesser.model.entity.UserStatsEntity
+import org.kth.countryguesser.data.remote.entity.UserEntity
+import org.kth.countryguesser.data.remote.entity.UserProfileEntity
+import org.kth.countryguesser.data.remote.entity.UserStatsEntity
 import org.kth.countryguesser.ui.model.PlayerUiModel
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit

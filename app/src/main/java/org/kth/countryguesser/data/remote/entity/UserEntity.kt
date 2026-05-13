@@ -1,4 +1,4 @@
-package org.kth.countryguesser.model.entity
+package org.kth.countryguesser.data.remote.entity
 
 data class UserEntity(
     val email: String? = null,

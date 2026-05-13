@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 import org.kth.countryguesser.Application
 import org.kth.countryguesser.data.repository.FirebaseAuthRepository
 import org.kth.countryguesser.data.repository.RegistrationResult
-import org.kth.countryguesser.model.entity.UserEntity
+import org.kth.countryguesser.data.remote.entity.UserEntity
 import org.kth.countryguesser.util.NetworkUtils
 import org.kth.countryguesser.util.PopupState
 import javax.inject.Inject

@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.kth.countryguesser.data.repository.FirestoreRepository
 import org.kth.countryguesser.data.repository.LastDailyRepository
-import org.kth.countryguesser.model.entity.UserProfileEntity
+import org.kth.countryguesser.data.remote.entity.UserProfileEntity
 import org.kth.countryguesser.util.PopupState
 import org.kth.countryguesser.util.getCurrentDateFromFirebase
 import javax.inject.Inject

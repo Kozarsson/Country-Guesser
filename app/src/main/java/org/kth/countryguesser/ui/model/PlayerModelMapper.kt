@@ -1,7 +1,6 @@
 package org.kth.countryguesser.ui.model
 
-import org.kth.countryguesser.data.remote.dto.CountryResultDto
-import org.kth.countryguesser.model.entity.UserProfileEntity
+import org.kth.countryguesser.data.remote.entity.UserProfileEntity
 
 /**
  * Maps a [UserProfileEntity] to a [PlayerUiModel] for UI display purposes.

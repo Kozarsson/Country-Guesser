@@ -3,10 +3,10 @@ package org.kth.countryguesser.data.remote.firebase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.tasks.await
-import org.kth.countryguesser.model.entity.LastGuessedDailyEntity
-import org.kth.countryguesser.model.entity.UserProfileEntity
-import org.kth.countryguesser.model.entity.UserSettingsEntity
-import org.kth.countryguesser.model.entity.UserStatsEntity
+import org.kth.countryguesser.data.remote.entity.LastGuessedDailyEntity
+import org.kth.countryguesser.data.remote.entity.UserProfileEntity
+import org.kth.countryguesser.data.remote.entity.UserSettingsEntity
+import org.kth.countryguesser.data.remote.entity.UserStatsEntity
 import javax.inject.Inject
 
 interface FirestoreRemoteDataSource {

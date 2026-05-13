@@ -5,7 +5,7 @@ import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
 import kotlinx.coroutines.tasks.await
-import org.kth.countryguesser.model.entity.UserEntity
+import org.kth.countryguesser.data.remote.entity.UserEntity
 import org.kth.countryguesser.model.service.MyFirebaseMessagingService
 import javax.inject.Inject
 
