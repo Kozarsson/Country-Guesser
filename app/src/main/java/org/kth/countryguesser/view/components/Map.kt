@@ -35,6 +35,7 @@ import org.kth.countryguesser.ui.theme.AppTheme
 fun Map(
    guessedCountries: List<String?>
 ) {
+    //TODO: make map not reset upon change of screen
     val fillColor: Color = AppTheme.colors.guessGrey
     val strokeColor: Color = MaterialTheme.colorScheme.errorContainer
     fun Color.toCssHex(): String {

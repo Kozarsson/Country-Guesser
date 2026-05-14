@@ -62,7 +62,7 @@ fun HomeScreen(
     
     
 
-    //TODO: Properly refresh the screen after winning a daily game to show the daily country
+
     LaunchedEffect(Unit) {
         profileStatsVM.refreshStats()
     }

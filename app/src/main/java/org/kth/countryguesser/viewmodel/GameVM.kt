@@ -257,7 +257,7 @@ class GameVMImpl @Inject constructor(
     }
 
 
-    override fun getTargetCountryName(): String { // TODO: for debug purposes, remove later
+    override fun getTargetCountryName(): String {
         return targetCountry.value?.countryName.toString()
     }
 

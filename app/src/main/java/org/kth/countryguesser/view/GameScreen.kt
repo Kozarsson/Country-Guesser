@@ -192,7 +192,7 @@ fun GameScreenContent(
         floatingActionButton = {
             Column() {
                 FloatingActionButton(
-                    onClick = {
+                    onClick = { //TODO: REMOVE
                         val answer = vm.getTargetCountryName()
                         Toast.makeText(context, "Answer: $answer", Toast.LENGTH_SHORT).show()
                     },
@@ -375,6 +375,7 @@ private fun Input(
                                         .padding(horizontal = 16.dp, vertical = 12.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
+                                    //TODO: Check if we can fix when image doesnt load from url
                                     AsyncImage(
                                         model = country.second,
                                         contentDescription = "Flag",
@@ -415,26 +416,6 @@ private fun Input(
             }
         }
     }
-}
-
-@Composable
-private fun SuccessScreen(
-    onConfirm: () -> Unit,
-) {
-    AlertDialog(
-        onDismissRequest = { },
-        title = { Text("Correct!") },
-        text = {
-            Text("You found the correct country!")
-        },
-        confirmButton = {
-            TextButton( onClick = {
-                onConfirm()
-            }) {
-                Text("OK")
-            }
-        }
-    )
 }
 
 @Composable

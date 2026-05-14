@@ -15,11 +15,9 @@ interface CountryModel {
     val borders: List<String>?
     val cca2: String?
     val cca3: String?
-    
-//    fun compareTo(other: CountryModel): CountryComparisonResult
+
     fun compareAttributesTo(other: CountryModel, closenessCriteria: Double?): CountryComparisonResult
     fun compareAttributesTo(other: CountryModel): CountryComparisonResult
-    suspend fun saveToDatabase()
 }
 
 class CountryModelImpl(
@@ -45,10 +43,6 @@ class CountryModelImpl(
 
     override fun compareAttributesTo(other: CountryModel): CountryComparisonResult {
         return compareAttributesTo(other, closenessCriteria = null)
-    }
-
-    override suspend fun saveToDatabase() {
-        // TODO: Implement save logic
     }
 
     private fun compareAttribute(value1: List<*>?, value2: List<*>?): CountryAttributeResult {

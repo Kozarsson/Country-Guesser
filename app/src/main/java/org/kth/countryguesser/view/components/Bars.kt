@@ -114,8 +114,6 @@ fun AppModalNavigationDrawer(
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    //TODO: Add a settings page
-
                     // Drawer Items
                     if (user != null && !user!!.isAnonymous) {
                         DrawerItem("Change Password") {

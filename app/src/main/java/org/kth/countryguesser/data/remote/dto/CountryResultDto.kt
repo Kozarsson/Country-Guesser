@@ -4,7 +4,6 @@ import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize
 
-//TODO: Remove every field not required for the app
 @Parcelize
 data class CountryResultDto(
 	val tld: List<String>? = null,
@@ -31,7 +30,7 @@ data class CountryResultDto(
 	val continents: List<String>? = null,
 	val flag: String? = null,
 	val name: CountryName? = null,
-	val currencies: Map<String, CurrencyInfo>? = null, //Potential attribute; structured with either $, € or others
+	val currencies: Map<String, CurrencyInfo>? = null,
 	val languages: Map<String, String>? = null,
 	val latlng: List<Double>? = null,
 	val demonyms: Map<String, GenderedDemonym>? = null,

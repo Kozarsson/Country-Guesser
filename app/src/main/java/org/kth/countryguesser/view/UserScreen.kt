@@ -75,7 +75,6 @@ fun UserScreen(
         PopupState.NO_INTERNET ->{NoInternetAlert(onPress = {profileStatsVM.resetPopupState()})}
     }
 
-    //WIPAlert(onPress = { navController.popBackStack() })  // TODO: remove when page is implemented
 
     UserScreenContent(
         topBar = {
@@ -170,7 +169,7 @@ private fun Header(nickname: String) {
                     .clip(RoundedCornerShape(50.dp))
                     .border(8.dp, MaterialTheme.colorScheme.surface, RoundedCornerShape(50.dp))
                     .background(
-                        Brush.verticalGradient( // TODO: replace with pfp
+                        Brush.verticalGradient( // TODO: REMOVE
                             colors = listOf(
                                 MaterialTheme.colorScheme.secondaryContainer,
                                 MaterialTheme.colorScheme.tertiaryContainer,
