@@ -241,15 +241,16 @@ class GameVMImpl @Inject constructor(
             if (!NetworkUtils.isNetworkAvailable(Application.APPLICATION.applicationContext)) {
                 setPopupState(PopupState.NO_INTERNET)
             } else {
-                if (!firestoreRepository.updateStreak(_gamemode.value)) Log.e("GameVM", "Failed to update streak in Firestore")
-                if(!firestoreRepository.updateGamesPlayed(_gamemode.value)) Log.e("GameVM", "Failed to update games played in Firestore")
                 if (_gamemode.value == "daily") {
                     if(!firestoreRepository.updateLastDailyGuess(
                             targetCountry.value?.countryName ?: "",
                             targetCountry.value?.flagUrl ?: "",
                             _score.value
-                        )) Log.e("GameVM", "Failed to update daily guess in Firestore")
-                    if(!firestoreRepository.updateScore(_score.value)) Log.e("GameVM", "Failed to update score in Firestore")// TODO: score is not updating correctly in database
+                        )) Log.e("GameVM", "Failed to update daily stats in Firestore")
+                } else {
+                    if(!firestoreRepository.updateStreak(_gamemode.value)) Log.e("GameVM", "Failed to update streak in Firestore")
+                    if(!firestoreRepository.updateGamesPlayed(_gamemode.value)) Log.e("GameVM", "Failed to update games played in Firestore")
+                    if(!firestoreRepository.updateScore(_score.value)) Log.e("GameVM", "Failed to update score in Firestore") // TODO: score is not updating correctly in database
                 }
             }
         }

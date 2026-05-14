@@ -6,6 +6,7 @@ import org.kth.countryguesser.util.getCurrentDateFromFirebase
 import org.kth.countryguesser.data.remote.entity.UserEntity
 import org.kth.countryguesser.data.remote.entity.UserProfileEntity
 import org.kth.countryguesser.data.remote.entity.UserStatsEntity
+import org.kth.countryguesser.data.remote.entity.LastGuessedDailyEntity
 import org.kth.countryguesser.ui.model.PlayerUiModel
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -118,8 +119,41 @@ class FirestoreRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateLastDailyGuess(countryName: String, flagUrl: String, score: Int): Boolean {
+        val user = getCurrentUser() ?: return false
+        val profile = firestoreRemoteDataSource.getProfile(user.uid) ?: return false
         val todayDate = getCurrentDateFromFirebase()
+        val lastDateStr = profile.lastGuessedDaily.date
+
+        val newCurrentStreak = if (lastDateStr.isNotEmpty()) {
+            val lastDate = LocalDate.parse(lastDateStr)
+            val daysBetween = ChronoUnit.DAYS.between(lastDate, todayDate)
+            when {
+                daysBetween <= 0L -> profile.stats.currentStreakDaily
+                daysBetween == 1L -> profile.stats.currentStreakDaily + 1
+                else -> 1
+            }
+        } else {
+            1
+        }
+
+        val newBestStreak = maxOf(profile.stats.bestStreakDaily, newCurrentStreak)
+        val newStats = profile.stats.copy(
+            gamesPlayedDaily = profile.stats.gamesPlayedDaily + 1,
+            currentStreakDaily = newCurrentStreak,
+            bestStreakDaily = newBestStreak,
+            totalScore = profile.stats.totalScore + score
+        )
+
         return try {
+            firestoreRemoteDataSource.updateStats(user.uid, newStats)
+            firestoreRemoteDataSource.updateLastDailyGuess(
+                user.uid,
+                LastGuessedDailyEntity(
+                    date = todayDate.toString(),
+                    countryName = countryName,
+                    flagUrl = flagUrl
+                )
+            )
             lastDailyRepository.saveLastGuessedDaily(
                 date = todayDate.toString(),
                 countryName = countryName,
