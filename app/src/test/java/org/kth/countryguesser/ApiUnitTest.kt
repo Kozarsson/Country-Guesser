@@ -23,13 +23,16 @@ class ApiUnitTest {
 
         assertTrue("Expected non-empty country list", result.isNotEmpty())
         for (country: CountryResultDto in result) {
-            for (field: String in listOf("name", "population", "area", "flags", "continents")) {
+            for (field: String in listOf("name", "population", "area", "flags", "continents", "cca2", "cca3")) {
                 val value = when (field) {
                     "name" -> country.name?.common
                     "population" -> country.population
                     "area" -> country.area
                     "flags" -> country.flags?.png
                     "continents" -> country.continents?.firstOrNull()
+                    "cca2" -> country.cca2
+                    "cca3" -> country.cca3
+                    //"borders" -> country.borders?.firstOrNull() If a country has no borders (like an island), the borders array is null from the api response
                     else -> null
                 }
                 assertNotNull("Expected non-null value for field '$field' in country '${country.name?.common}'", value)
