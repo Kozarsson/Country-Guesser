@@ -28,16 +28,19 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.animateContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ErrorOutline
+import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -94,6 +97,7 @@ import org.kth.countryguesser.view.components.TopBar
 import java.util.Locale
 import kotlin.math.abs
 import org.kth.countryguesser.view.components.Map
+import org.kth.countryguesser.view.components.TutorialAlert
 
 @Composable
 fun GameScreen(
@@ -119,6 +123,7 @@ fun GameScreen(
             PopupState.LOADING -> {LoadingAlert("Loading...")}
             PopupState.ERROR -> {Alert(onPress = { gameVM.resetPopupState(); navController.navigate("home") }, title = "Error", message = errorMessage ?: "Unknown error, try again")}
             PopupState.NO_INTERNET -> {NoInternetAlert(onPress = {gameVM.resetPopupState()})}
+            PopupState.TUTORIAL -> {TutorialAlert(onDismissPress = {gameVM.resetPopupState()})}
         }
 
         when (gamePopupState) {
@@ -177,6 +182,7 @@ fun GameScreen(
         },
         mode = mode,
         vm = gameVM,
+        onToggleHelp = { gameVM.setPopupState(PopupState.TUTORIAL) },
         onToggleMap = { showMap = true },
     )
 }
@@ -189,26 +195,29 @@ fun GameScreenContent(
     bottomBar: @Composable () -> Unit = {},
     mode: String,
     vm: GameVMImpl,
+    onToggleHelp: ()-> Unit,
     onToggleMap: () -> Unit,
 ) {
-    val context = LocalContext.current
     Scaffold(
         topBar = topBar,
         bottomBar = bottomBar,
+        floatingActionButtonPosition = FabPosition.Center,
         floatingActionButton = {
-            Column() {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
                 FloatingActionButton(
-                    onClick = { //TODO: REMOVE
-                        val answer = vm.getTargetCountryName()
-                        Toast.makeText(context, "Answer: $answer", Toast.LENGTH_SHORT).show()
-                    },
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                    onClick = { onToggleHelp() },
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                     modifier = Modifier.padding(bottom = 8.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.BugReport,
-                        contentDescription = "Reveal Answer"
+                        imageVector = Icons.AutoMirrored.Filled.Help,
+                        contentDescription = "Tutorial"
                     )
                 }
 

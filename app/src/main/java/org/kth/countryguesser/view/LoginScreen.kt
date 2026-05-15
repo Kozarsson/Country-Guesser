@@ -73,6 +73,7 @@ fun LoginScreen(
         PopupState.LOADING -> {LoadingAlert("Loading...")}
         PopupState.ERROR -> {Alert(onPress = {authVM.resetPopupState()}, title = "Error", message = errorMessage ?: "Unknown error, try again")}
         PopupState.NO_INTERNET ->{NoInternetAlert(onPress = {authVM.resetPopupState()})}
+        PopupState.TUTORIAL -> {}
     }
 
     Scaffold(

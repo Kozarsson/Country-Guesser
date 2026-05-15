@@ -66,6 +66,7 @@ fun StudyScreen(
         PopupState.LOADING -> {LoadingAlert("Loading...")}
         PopupState.ERROR -> {Alert(onPress = {studyVM.resetPopupState()}, title = "Error", message = errorMessage ?: "Unknown error, try again")}
         PopupState.NO_INTERNET -> {NoInternetAlert(onPress = {studyVM.resetPopupState()})}
+        PopupState.TUTORIAL -> {}
     }
 
     StudyScreenContent(

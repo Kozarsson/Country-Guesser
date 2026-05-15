@@ -5,6 +5,7 @@ enum class PopupState {
     LOADING,
     ERROR,
     NO_INTERNET,
+    TUTORIAL,
 }
 
 enum class GamePopupState {
