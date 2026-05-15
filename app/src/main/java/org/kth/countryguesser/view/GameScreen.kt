@@ -2,6 +2,7 @@ package org.kth.countryguesser.view
 
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -118,6 +119,10 @@ fun GameScreen(
         gameVM.setGamemode(mode)
     }
 
+    BackHandler(enabled = gamePopupState != GamePopupState.CONFIRM_QUIT) {
+        gameVM.setGamePopupState(GamePopupState.CONFIRM_QUIT)
+    }
+
         when (popupState) {
             PopupState.NONE -> {}
             PopupState.LOADING -> {LoadingAlert("Loading...")}
@@ -135,18 +140,6 @@ fun GameScreen(
             GamePopupState.CONFIRM_QUIT -> {ConfirmQuitAlert(onConfirmPress = {gameVM.resetGameState(); navController.navigate("home")}, onDismissPress = {gameVM.resetGamePopupState()})}
         }
 
-
-//    if (isGameWon) {
-//        SuccessScreen(
-//            onConfirm = {
-//                gameVM.resetGameState()
-//                if (mode == "daily") {
-//                    navController.navigate("home")
-//                }
-////                 stay here (do nothing) if 'endless' mode
-//            },
-//        )
-//    }
     if (showMap) {
         Dialog(
             onDismissRequest = { showMap = false },
