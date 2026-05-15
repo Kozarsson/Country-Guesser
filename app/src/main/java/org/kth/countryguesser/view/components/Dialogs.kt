@@ -173,6 +173,27 @@ fun GameWonAlert(
                 }
             }
         }
-
     }
 }
+@Composable
+fun ConfirmQuitAlert(
+    onConfirmPress: () -> Unit = {},
+    onDismissPress: () -> Unit = {},
+) {
+    AlertDialog(
+        onDismissRequest = { },
+        title = { Text("Are you sure you want to leave?")},
+        text = { Text("Your current game progress will not be saved!")},
+        dismissButton = {
+            TextButton(onClick = { onDismissPress() }) {
+                Text("Cancel")
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirmPress() }) {
+                Text("Confirm")
+            }
+        }
+    )
+}
+

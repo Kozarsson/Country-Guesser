@@ -1,5 +1,6 @@
 package org.kth.countryguesser.view.components
 
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.Image
@@ -16,11 +17,16 @@ import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonOutline
+import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.PersonOutline
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -49,10 +55,20 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import kotlinx.coroutines.launch
 import org.kth.countryguesser.R
+import org.kth.countryguesser.util.GamePopupState
+import org.kth.countryguesser.util.PopupState
 import org.kth.countryguesser.viewmodel.AuthVMImpl
+import org.kth.countryguesser.viewmodel.GameVMImpl
 
 @Composable
 private fun rememberActivityAuthVm(): AuthVMImpl {
+    val activity = LocalActivity.current as? ComponentActivity
+        ?: error("Top/bottom bars require a ComponentActivity host")
+    return hiltViewModel(activity)
+}
+
+@Composable
+private fun rememberActivityGameVm(): GameVMImpl {
     val activity = LocalActivity.current as? ComponentActivity
         ?: error("Top/bottom bars require a ComponentActivity host")
     return hiltViewModel(activity)
@@ -156,6 +172,38 @@ fun DrawerItem(label: String, onClick: () -> Unit) {
     }
 }
 
+@Composable
+fun BottomBarItem(navController: NavController, label: String, route: String, iconName: String) {
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+    val gameVM = rememberActivityGameVm()
+    val filledIcon = when (iconName) {
+        "Map" -> Icons.Filled.Map
+        "Home" -> Icons.Filled.Home
+        "Person" -> Icons.Filled.Person
+        else -> Icons.Filled.Error
+    }
+    val outlinedIcon = when (iconName) {
+        "Map" -> Icons.Outlined.Map
+        "Home" -> Icons.Outlined.Home
+        "Person" -> Icons.Outlined.Person
+        else -> Icons.Outlined.Error
+    }
+    TextButton(onClick = {
+        if (currentRoute.orEmpty().startsWith(Routes.GAME)) {
+            gameVM.setGamePopupState(GamePopupState.CONFIRM_QUIT)
+        } else if (currentRoute != route) navController.navigate(route) }) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                if (currentRoute == route) filledIcon else outlinedIcon,
+                contentDescription = label,
+                modifier = Modifier.size(32.dp),
+                tint = MaterialTheme.colorScheme.background
+            )
+            Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.background)
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 //TODO: Add a no internet indicator when device is not connected to the internet
@@ -189,9 +237,9 @@ fun TopBar(onMenuClick: () -> Unit) {
     )
 }
 
+
 @Composable
 fun BottomBar(navController: NavController) {
-    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
     val authVM = rememberActivityAuthVm()
     val user by authVM.userEntity.collectAsState()
 
@@ -210,44 +258,9 @@ fun BottomBar(navController: NavController) {
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            //TODO: DECIDE WHAT WE WANT AT THE BOTTOM BAR
-            TextButton(onClick = { if (currentRoute != Routes.STUDY) navController.navigate(Routes.STUDY) }) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        Icons.Default.Map,
-                        contentDescription = "Study",
-                        modifier = Modifier.size(32.dp),
-                        tint = MaterialTheme.colorScheme.background
-                    )
-                    Text("Study", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.background)
-                }
-            }
-
-            TextButton(onClick = { if (currentRoute != Routes.HOME) navController.navigate(Routes.HOME) }) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        if (currentRoute == Routes.HOME) Icons.Filled.Home else Icons.Outlined.Home,
-                        contentDescription = "Home",
-                        modifier = Modifier.size(32.dp),
-                        tint = MaterialTheme.colorScheme.background
-                    )
-                    Text("Home", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.background)
-                }
-            }
-
-            if (user != null && !user!!.isAnonymous) {
-                TextButton(onClick = { if (currentRoute != Routes.PROFILE) navController.navigate(Routes.PROFILE) }) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
-                            if (currentRoute == Routes.PROFILE) Icons.Filled.Person else Icons.Default.PersonOutline,
-                            contentDescription = "Personal statistics",
-                            modifier = Modifier.size(32.dp),
-                            tint = MaterialTheme.colorScheme.background
-                        )
-                        Text("Profile", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.background)
-                    }
-                }
-            }
+            BottomBarItem(navController, "Study", Routes.STUDY, "Map")
+            BottomBarItem(navController, "Home", Routes.HOME, "Home")
+            if (user != null && !user!!.isAnonymous) BottomBarItem(navController, "Profile", Routes.PROFILE, "Person")
         }
     }
 }

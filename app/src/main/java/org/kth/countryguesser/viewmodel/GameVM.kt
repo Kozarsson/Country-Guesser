@@ -61,7 +61,7 @@ class GameVMImpl @Inject constructor(
     val gamePopupState: StateFlow<GamePopupState>
         get() = _gamePopupState
 
-    private fun setGamePopupState(state: GamePopupState) {
+    internal fun setGamePopupState(state: GamePopupState) {
         _gamePopupState.value = state
     }
 

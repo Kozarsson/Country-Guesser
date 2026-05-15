@@ -1,6 +1,8 @@
 package org.kth.countryguesser.view
 
 import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -84,6 +86,7 @@ import org.kth.countryguesser.ui.theme.AppTheme
 import org.kth.countryguesser.util.GamePopupState
 import org.kth.countryguesser.util.PopupState
 import org.kth.countryguesser.view.components.Alert
+import org.kth.countryguesser.view.components.ConfirmQuitAlert
 import org.kth.countryguesser.view.components.GameWonAlert
 import org.kth.countryguesser.view.components.LoadingAlert
 import org.kth.countryguesser.view.components.NoInternetAlert
@@ -98,7 +101,9 @@ fun GameScreen(
     mode: String, // 'daily' or 'endless'
     onMenuClick: () -> Unit,
 ) {
-    val gameVM = hiltViewModel<GameVMImpl>()
+    val activity = LocalActivity.current as? ComponentActivity
+        ?: error("GameScreen requires a ComponentActivity host")
+    val gameVM = hiltViewModel<GameVMImpl>(activity)
     val popupState by gameVM.popupState.collectAsState()
     val gamePopupState by gameVM.gamePopupState.collectAsState()
     val errorMessage by gameVM.errorMessage.collectAsState()
@@ -122,6 +127,7 @@ fun GameScreen(
             GamePopupState.DUPLICATE_SEARCH -> {Alert(onPress = {gameVM.resetGamePopupState()}, title = "Country already guessed", message = "You cannot guess the same country twice")}
             GamePopupState.GAME_WON_DAILY -> {GameWonAlert(onConfirmPress = null, onDismissPress = { gameVM.resetGamePopupState(); navController.navigate("home") }, country = gameVM.getTargetCountryName(), flag = gameVM.getTargetCountryFlagUrl(), guesses = guessedCountries.size) }
             GamePopupState.GAME_WON_ENDLESS -> {GameWonAlert(onConfirmPress = {gameVM.resetGameState()}, onDismissPress = { gameVM.saveToFirestore(); gameVM.resetGamePopupState(); navController.navigate("home") }, country = gameVM.getTargetCountryName(), flag = gameVM.getTargetCountryFlagUrl(), guesses = guessedCountries.size) }
+            GamePopupState.CONFIRM_QUIT -> {ConfirmQuitAlert(onConfirmPress = {gameVM.resetGameState(); navController.navigate("home")}, onDismissPress = {gameVM.resetGamePopupState()})}
         }
 
 

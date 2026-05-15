@@ -18,7 +18,7 @@ abstract class BaseVM : ViewModel() {
     val errorMessage: StateFlow<String?>
         get() = _errorMessage
 
-    protected fun setPopupState(state: PopupState) {
+    fun setPopupState(state: PopupState) {
         _popupState.value = state
     }
 

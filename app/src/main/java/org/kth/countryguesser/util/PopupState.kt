@@ -12,5 +12,6 @@ enum class GamePopupState {
     NO_RESULT,
     DUPLICATE_SEARCH,
     GAME_WON_DAILY,
-    GAME_WON_ENDLESS
+    GAME_WON_ENDLESS,
+    CONFIRM_QUIT
 }
