@@ -138,8 +138,15 @@ fun ChangePasswordScreen(
                                 IconButton(onClick = {passwordVisible = !passwordVisible}){
                                     Icon(imageVector  = image, description)
                                 }
-                            }
+                            },
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = if (errorMessage.isNotEmpty()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                                unfocusedBorderColor = if (errorMessage.isNotEmpty()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                            )
                         )
+                        if (errorMessage.isNotEmpty()) {
+                            Text(errorMessage, color = MaterialTheme.colorScheme.error)
+                        }
 
                         Spacer(modifier = Modifier.height(32.dp))
 
@@ -197,10 +204,6 @@ fun ChangePasswordScreen(
                         )
                         if (newPassword != newPasswordConfirm && newPasswordConfirm.isNotEmpty()) {
                             Text("Passwords do not match", color = MaterialTheme.colorScheme.error)
-                        }
-
-                        if (errorMessage.isNotEmpty()) {
-                            Text(errorMessage, color = MaterialTheme.colorScheme.error)
                         }
 
                         Spacer(modifier = Modifier.height(24.dp))

@@ -156,7 +156,7 @@ class AuthVMImpl @Inject constructor(
                     onResult(true, null)
                 } else {
                     Log.d(TAG, "Failed to update password!")
-                    onResult(false, "Incorrect current password.")
+                    onResult(false, "Incorrect old password.")
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Password update error: ${e.localizedMessage}", e)

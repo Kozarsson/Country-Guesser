@@ -1,5 +1,6 @@
 package org.kth.countryguesser.data.remote.firebase
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseUser
@@ -92,6 +93,7 @@ class AuthRemoteDataSourceImpl @Inject constructor() : AuthRemoteDataSource {
             user.updatePassword(newPassword.trim()).await()
             true
         } catch (e: Exception) {
+            Log.e("AuthRemoteDataSource", "Error updating password: ${e.message}")
             false
         }
     }

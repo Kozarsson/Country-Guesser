@@ -1,5 +1,6 @@
 package org.kth.countryguesser.data.repository
 
+import android.util.Log
 import org.kth.countryguesser.data.remote.firebase.AuthRemoteDataSource
 import org.kth.countryguesser.data.remote.firebase.FirestoreRemoteDataSource
 import org.kth.countryguesser.data.remote.entity.LastGuessedDailyEntity
@@ -134,8 +135,8 @@ class FirebaseAuthRepositoryImpl @Inject constructor(
         val user = getCurrentUser() ?: return false
         return try {
             authRemoteDataSource.updatePassword(oldPassword, newPassword)
-            true
         } catch (e: Exception) {
+            Log.e("FirebaseAuthRepository", "Error updating password: ${e.message}")
             false
         }
     }
