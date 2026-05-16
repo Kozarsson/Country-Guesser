@@ -62,6 +62,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -86,6 +87,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.compose
 import org.kth.countryguesser.ui.theme.AppTheme
 import org.kth.countryguesser.util.GamePopupState
 import org.kth.countryguesser.util.PopupState
@@ -114,6 +116,9 @@ fun GameScreen(
     val errorMessage by gameVM.errorMessage.collectAsState()
     val guessedCountries by gameVM.guessedCountries.collectAsState()
     var showMap by remember { mutableStateOf(false) }
+
+    val mapZoom by gameVM.mapZoom.collectAsState()
+    val mapPan by gameVM.mapPan.collectAsState()
 
     LaunchedEffect(mode) {
         gameVM.setGamemode(mode)
@@ -159,7 +164,12 @@ fun GameScreen(
                 },
             ) { _ ->
                 Map(
-                    guessedCountries = guessedCountries.map { it.cca2?.lowercase() }
+                    guessedCountries = guessedCountries.map {
+                        it.cca2?.lowercase()
+                    },
+                    initZoom = mapZoom,
+                    initPan = mapPan,
+                    saveMapParam = { zoom, pan -> gameVM.setMapParam(zoom, pan) },
                 )
             }
 

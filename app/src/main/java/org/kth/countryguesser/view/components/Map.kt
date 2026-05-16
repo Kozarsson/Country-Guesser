@@ -27,15 +27,16 @@ import androidx.compose.ui.unit.IntSize
 import com.caverock.androidsvg.RenderOptions
 import com.caverock.androidsvg.SVG
 import org.kth.countryguesser.R
-import org.kth.countryguesser.ui.theme.AppColors
 import org.kth.countryguesser.ui.theme.AppTheme
 
 
 @Composable
 fun Map(
-   guessedCountries: List<String?>
+   guessedCountries: List<String?>,
+   initZoom: Float,
+   initPan: Offset,
+   saveMapParam: (Float, Offset) -> Unit,
 ) {
-    //TODO: make map not reset upon change of screen
     val fillColor: Color = AppTheme.colors.guessGrey
     val strokeColor: Color = MaterialTheme.colorScheme.errorContainer
     fun Color.toCssHex(): String {
@@ -51,12 +52,14 @@ fun Map(
         svg.documentAspectRatio.takeIf { it > 0f } ?: (16f / 9f)
     }
     var mapSize by remember { mutableStateOf(IntSize(0, 0)) }
+    
     val minScale = remember(mapSize, svgAspect) {
         if (mapSize.width <= 0) 1f else mapSize.height / (mapSize.width / svgAspect)
     }
-    var scale by remember(minScale) { mutableFloatStateOf(minScale) }
-    var offset by remember { mutableStateOf(Offset.Zero) }
-    var hasCentered by remember { mutableStateOf(false) }
+
+    var scale by remember { mutableFloatStateOf(if (initZoom > 0) initZoom else 1f) }
+    var offset by remember { mutableStateOf(initPan) }
+    var hasCentered by remember { mutableStateOf(initZoom > 0) } // initZoom is set to -1 if user hasn't used the map yet
 
     Box(
         modifier = Modifier
@@ -64,8 +67,7 @@ fun Map(
             .clip(RectangleShape)
             .background(AppTheme.colors.mapBlue)
             .onSizeChanged { size ->
-                mapSize = size
-                if (!hasCentered && scale > 1f) {
+                if (!hasCentered) {
                     hasCentered = true
                     val x = (mapSize.width * (scale - 1))
                     offset = Offset(-x/2f, 0f)
@@ -86,6 +88,8 @@ fun Map(
                         x = offset.x.coerceIn(-maxX, 0f),
                         y = offset.y.coerceIn(-maxY, 0f),
                     )
+
+                    saveMapParam(scale, offset)
                 }
             }
     ) {

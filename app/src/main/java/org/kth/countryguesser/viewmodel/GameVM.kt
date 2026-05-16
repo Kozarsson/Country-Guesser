@@ -1,6 +1,7 @@
 package org.kth.countryguesser.viewmodel
 
 import android.util.Log
+import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -28,12 +29,16 @@ interface GameVM {
     val gameWon: StateFlow<Boolean>
     val guessedCountries: StateFlow<List<CountryUiModel>>
     val searchResults: StateFlow<List<Pair<String, String?>>>
+    val mapZoom: StateFlow<Float>
+    val mapPan: StateFlow<Offset>
 
     fun setGamemode(gamemode: String)
     fun searchCountries(searchQuery: String)
     fun guessCountry(country: String)
     fun resetGameState()
     fun saveToFirestore()
+
+    fun setMapParam(zoom: Float, pan: Offset)
 
     fun getTargetCountryName(): String
     fun getTargetCountryFlagUrl(): String?
@@ -53,6 +58,15 @@ class GameVMImpl @Inject constructor(
         get() = _gameWon
     private val targetCountry = MutableStateFlow<CountryModel?>(null)
     private val _gamemode = MutableStateFlow<String>("daily")
+
+    private val _mapZoom = MutableStateFlow(1f)
+    override val mapZoom: StateFlow<Float>
+        get() = _mapZoom
+
+    private val _mapPan = MutableStateFlow(Offset.Zero)
+    override val mapPan: StateFlow<Offset>
+        get() = _mapPan
+
 
     private val _gamePopupState = MutableStateFlow(GamePopupState.NONE)
     val gamePopupState: StateFlow<GamePopupState>
@@ -108,6 +122,7 @@ class GameVMImpl @Inject constructor(
         viewModelScope.launch {
             if (gamemode == "daily") {
                 _score.value = 12
+
             } else {
                 val profile = firestoreRepository.getUserProfile()
                 _score.value = profile?.stats?.currentStreakEndless ?: 0
@@ -241,7 +256,10 @@ class GameVMImpl @Inject constructor(
         }
     }
 
-
+    override fun setMapParam(zoom: Float, pan: Offset) {
+        _mapZoom.value = zoom
+        _mapPan.value = pan
+    }
     override fun getTargetCountryName(): String {
         return targetCountry.value?.countryName.toString()
     }
