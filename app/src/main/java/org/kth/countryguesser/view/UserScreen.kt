@@ -181,7 +181,7 @@ private fun Header(nickname: String) {
 
             // username
             Text(
-                text = nickname, // TODO: replace
+                text = nickname,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -211,6 +211,7 @@ private fun Stats(
     ) {
 
         // DAILY CHALLENGE STATS
+        //TODO: Replace with LazyColumn (scrollable list)
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             HorizontalDivider(thickness = 2.dp)
             Text(
