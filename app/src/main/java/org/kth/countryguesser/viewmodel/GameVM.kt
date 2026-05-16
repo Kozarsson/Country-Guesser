@@ -54,9 +54,6 @@ class GameVMImpl @Inject constructor(
     private val targetCountry = MutableStateFlow<CountryModel?>(null)
     private val _gamemode = MutableStateFlow<String>("daily")
 
-    private var isFetching: Boolean = false
-    private var timerJob: Job? = null
-
     private val _gamePopupState = MutableStateFlow(GamePopupState.NONE)
     val gamePopupState: StateFlow<GamePopupState>
         get() = _gamePopupState
@@ -101,18 +98,6 @@ class GameVMImpl @Inject constructor(
                 targetCountry.value = result
                 isFetching = false
                 setPopupState(PopupState.NONE)
-            }
-        }
-    }
-
-    private fun startTimerUntilLoadingPopup(timeMillis: Long) {
-        timerJob?.cancel()
-        isFetching = true
-        timerJob = viewModelScope.launch {
-            delay(timeMillis)
-            while (isFetching) {
-                setPopupState(PopupState.LOADING)
-                delay(100)
             }
         }
     }

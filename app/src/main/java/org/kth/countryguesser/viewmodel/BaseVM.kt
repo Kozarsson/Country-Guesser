@@ -1,8 +1,12 @@
 package org.kth.countryguesser.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import org.kth.countryguesser.util.PopupState
 
 /**
@@ -17,6 +21,9 @@ abstract class BaseVM : ViewModel() {
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?>
         get() = _errorMessage
+
+    internal var isFetching: Boolean = false
+    internal var timerJob: Job? = null
 
     fun setPopupState(state: PopupState) {
         _popupState.value = state
@@ -35,5 +42,17 @@ abstract class BaseVM : ViewModel() {
     fun resetPopupState() {
         _errorMessage.value = null
         setPopupState(PopupState.NONE)
+    }
+
+    internal fun startTimerUntilLoadingPopup(timeMillis: Long) {
+        timerJob?.cancel()
+        isFetching = true
+        timerJob = viewModelScope.launch {
+            delay(timeMillis)
+            while (isFetching) {
+                setPopupState(PopupState.LOADING)
+                delay(100)
+            }
+        }
     }
 }

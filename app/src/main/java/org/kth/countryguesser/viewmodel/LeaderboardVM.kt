@@ -34,11 +34,14 @@ class LeaderboardVMImpl @Inject constructor(
                 if (players != null) {
                     _players.value = players.map { PlayerUiModel(it.nickname, it.gamesPlayedDaily, it.currentStreakDaily, it.bestStreakDaily) }
                 } else {
-                    //setPopupState(PopupState.ERROR)
+                    setError("Failed to fetch leaderboard")
                 }
-                setPopupState(PopupState.NONE)
             } catch (e: Exception) {
                 setError("Failed to fetch leaderboard")
+            } finally {
+                if(popupState.value == PopupState.LOADING) {
+                    setPopupState(PopupState.NONE)
+                }
             }
         }
     }

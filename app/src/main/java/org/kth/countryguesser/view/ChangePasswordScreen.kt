@@ -42,6 +42,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import org.kth.countryguesser.util.AuthPopupState
 import org.kth.countryguesser.util.PopupState
 import org.kth.countryguesser.view.components.Alert
 import org.kth.countryguesser.view.components.LoadingAlert
@@ -64,6 +65,7 @@ fun ChangePasswordScreen(
         ?: error("ChangePasswordScreen requires a ComponentActivity host")
     val authVM = hiltViewModel<AuthVMImpl>(activity)
     val popupState by authVM.popupState.collectAsState()
+    val authPopupState by authVM.authPopupState.collectAsState()
 
     when (popupState) {
         PopupState.NONE -> {}
@@ -71,6 +73,16 @@ fun ChangePasswordScreen(
         PopupState.ERROR -> {Alert(onPress = {authVM.resetPopupState()}, title = "Error", message = errorMessage ?: "Unknown error, try again")}
         PopupState.NO_INTERNET ->{NoInternetAlert(onPress = {authVM.resetPopupState()})}
         PopupState.TUTORIAL -> {}
+    }
+
+    when (authPopupState) {
+        AuthPopupState.NONE -> {}
+        AuthPopupState.ACCOUNT_REGISTERED -> {Alert(onPress = {authVM.resetAuthPopupState()}, title = "Account registered!", message = "Your account has been created!")}
+        AuthPopupState.PASSWORD_CHANGED -> {Alert(onPress = {
+            authVM.resetAuthPopupState()
+            navController.navigate("home") {
+                popUpTo(navController.graph.startDestinationId) { inclusive = true }
+            }}, title = "Password has been changed!", message = "Your password has been successfully updated")}
     }
 
     Scaffold(
@@ -215,7 +227,7 @@ fun ChangePasswordScreen(
                                     newPassword
                                 ) { success, error ->
                                     if (success) {
-                                        isChangeSuccessful = true
+                                        authVM.setAuthPopupState(AuthPopupState.PASSWORD_CHANGED)
                                     } else {
                                         errorMessage = error ?: "Password change failed"
                                     }

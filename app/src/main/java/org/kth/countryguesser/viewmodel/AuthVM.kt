@@ -12,6 +12,8 @@ import org.kth.countryguesser.Application
 import org.kth.countryguesser.data.repository.FirebaseAuthRepository
 import org.kth.countryguesser.data.repository.RegistrationResult
 import org.kth.countryguesser.data.remote.entity.UserEntity
+import org.kth.countryguesser.util.AuthPopupState
+import org.kth.countryguesser.util.GamePopupState
 import org.kth.countryguesser.util.NetworkUtils
 import org.kth.countryguesser.util.PopupState
 import javax.inject.Inject
@@ -66,6 +68,18 @@ class AuthVMImpl @Inject constructor(
     private val _userEntity = MutableStateFlow<UserEntity?>(null)
     override val userEntity: StateFlow<UserEntity?> get() = _userEntity
 
+    private val _authPopupState = MutableStateFlow(AuthPopupState.NONE)
+    val authPopupState: StateFlow<AuthPopupState>
+        get() = _authPopupState
+
+    internal fun setAuthPopupState(state: AuthPopupState) {
+        _authPopupState.value = state
+    }
+
+    fun resetAuthPopupState() {
+        _authPopupState.value = AuthPopupState.NONE
+    }
+
     init {
         _userEntity.value = authRepository.getCurrentUser()
         if (_userEntity.value != null) {
@@ -88,18 +102,23 @@ class AuthVMImpl @Inject constructor(
             try {
                 if (!NetworkUtils.isNetworkAvailable(Application.APPLICATION.applicationContext)) {
                     setPopupState(PopupState.NO_INTERNET)
-                }
-                if (authRepository.login(email, password)) {
-                    Log.d(TAG, "Signed in successfully!")
-                    _userEntity.value = authRepository.getCurrentUser()
-                    onResult(true, null)
                 } else {
-                    Log.d(TAG, "Failed to sign in with email and password!")
-                    onResult(false, "Incorrect email or password.")
+                    startTimerUntilLoadingPopup(1000)
+                    if (authRepository.login(email, password)) {
+                        Log.d(TAG, "Signed in successfully!")
+                        _userEntity.value = authRepository.getCurrentUser()
+                        onResult(true, null)
+                    } else {
+                        Log.d(TAG, "Failed to sign in with email and password!")
+                        onResult(false, "Incorrect email or password.")
+                    }
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Authentication error: ${e.localizedMessage}", e)
                 onResult(false, e.localizedMessage ?: "An unknown error occurred.")
+            } finally {
+                isFetching = false
+                setPopupState(PopupState.NONE)
             }
         }
     }
@@ -114,29 +133,34 @@ class AuthVMImpl @Inject constructor(
             try {
                 if (!NetworkUtils.isNetworkAvailable(Application.APPLICATION.applicationContext)) {
                     setPopupState(PopupState.NO_INTERNET)
-                }
-                when (val result = authRepository.register(nickname, email, password)) {
-                    RegistrationResult.Success -> {
-                        Log.d(TAG, "Registered successfully!")
-                        _userEntity.value = authRepository.getCurrentUser()
-                        onResult(true, null)
-                    }
+                } else {
+                    startTimerUntilLoadingPopup(1000)
+                    when (val result = authRepository.register(nickname, email, password)) {
+                        RegistrationResult.Success -> {
+                            Log.d(TAG, "Registered successfully!")
+                            _userEntity.value = authRepository.getCurrentUser()
+                            onResult(true, null)
+                        }
 
-                    RegistrationResult.EmailTaken -> {
-                        onResult(false, "This email is already in use.")
-                    }
+                        RegistrationResult.EmailTaken -> {
+                            onResult(false, "This email is already in use.")
+                        }
 
-                    RegistrationResult.NicknameTaken -> {
-                        onResult(false, "This nickname is already taken.")
-                    }
+                        RegistrationResult.NicknameTaken -> {
+                            onResult(false, "This nickname is already taken.")
+                        }
 
-                    is RegistrationResult.Error -> {
-                        onResult(false, result.message)
+                        is RegistrationResult.Error -> {
+                            onResult(false, result.message)
+                        }
                     }
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Authentication error: ${e.localizedMessage}", e)
                 onResult(false, e.localizedMessage ?: "An unknown error occurred.")
+            } finally {
+                isFetching = false
+                setPopupState(PopupState.NONE)
             }
         }
     }
@@ -150,17 +174,22 @@ class AuthVMImpl @Inject constructor(
             try {
                 if (!NetworkUtils.isNetworkAvailable(Application.APPLICATION.applicationContext)) {
                     setPopupState(PopupState.NO_INTERNET)
-                }
-                if (authRepository.updatePassword(oldPassword, newPassword)) {
-                    Log.d(TAG, "Password updated successfully!")
-                    onResult(true, null)
                 } else {
-                    Log.d(TAG, "Failed to update password!")
-                    onResult(false, "Incorrect old password.")
+                    startTimerUntilLoadingPopup(2000)
+                    if (authRepository.updatePassword(oldPassword, newPassword)) {
+                        Log.d(TAG, "Password updated successfully!")
+                        onResult(true, null)
+                    } else {
+                        Log.d(TAG, "Failed to update password!")
+                        onResult(false, "Incorrect old password.")
+                    }
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Password update error: ${e.localizedMessage}", e)
                 onResult(false, e.localizedMessage ?: "An unknown error occurred.")
+            } finally {
+                isFetching = false
+                setPopupState(PopupState.NONE)
             }
         }
     }

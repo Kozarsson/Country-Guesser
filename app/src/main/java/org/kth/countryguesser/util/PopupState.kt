@@ -16,3 +16,9 @@ enum class GamePopupState {
     GAME_WON_ENDLESS,
     CONFIRM_QUIT
 }
+
+enum class AuthPopupState {
+    NONE,
+    ACCOUNT_REGISTERED,
+    PASSWORD_CHANGED
+}

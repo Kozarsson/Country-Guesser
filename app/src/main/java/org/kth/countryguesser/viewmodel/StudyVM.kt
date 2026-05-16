@@ -28,8 +28,6 @@ interface StudyVM {
 class StudyVMImpl @Inject constructor(
     private val countryRepository: CountryRepository,
 ) : BaseVM(), StudyVM {
-    private var isFetching: Boolean = false
-    private var timerJob: Job? = null
 
     private val _searchResults = MutableStateFlow<List<Pair<String, String?>>>(listOf())
     override val searchResults: StateFlow<List<Pair<String, String?>>>
@@ -99,17 +97,5 @@ class StudyVMImpl @Inject constructor(
 
     fun clearCountryInfo() {
         _countryInfo.value = null
-    }
-
-    private fun startTimerUntilLoadingPopup(timeMillis: Long) {
-        timerJob?.cancel()
-        isFetching = true
-        timerJob = viewModelScope.launch {
-            delay(timeMillis)
-            while (isFetching) {
-                setPopupState(PopupState.LOADING)
-                delay(100)
-            }
-        }
     }
 }
