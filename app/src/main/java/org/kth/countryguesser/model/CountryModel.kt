@@ -37,7 +37,7 @@ class CountryModelImpl(
             areaComparison = compareAttribute(this.area, other.area, closenessCriteria),
             inceptionYearComparison = compareAttribute<InceptionYear>(this.inceptionYear, other.inceptionYear, closenessCriteria),
             continentsComparison = compareAttribute(this.continents, other.continents),
-            bordersComparison = checkMember(other.cca3, this.borders),
+            bordersComparison = checkMember(this.cca3, other.borders),
         )
     }
 
@@ -48,6 +48,10 @@ class CountryModelImpl(
     private fun compareAttribute(value1: List<*>?, value2: List<*>?): CountryAttributeResult {
         return if (value1 == null || value2 == null) {
             CountryAttributeResult(comparison = null, isClose = null)
+        } else if (value1.size < value2.size) {
+            CountryAttributeResult(comparison = value2.contains(value1.first()), isClose = null)
+        } else if (value1.size > value2.size) {
+            CountryAttributeResult(comparison = value1.contains(value2.first()), isClose = null)
         } else {
             CountryAttributeResult(comparison = value1 == value2, isClose = null)
         }
@@ -79,12 +83,8 @@ class CountryModelImpl(
     }
 
     private fun <T : Comparable<T>> checkMember(member: T?, list: List<T>?): CountryAttributeResult {
-        return if (list == null) {
+        return if (list == null || member == null) {
             CountryAttributeResult(comparison = false, isClose = null)
-        } else if (member == null) {
-            CountryAttributeResult(comparison = null, isClose = null)
-        } else if (member == this.cca3) {
-            CountryAttributeResult(comparison = true, isClose = null)
         } else {
             CountryAttributeResult(comparison = list.contains(member), isClose = null)
         }
