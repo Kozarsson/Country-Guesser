@@ -121,7 +121,7 @@ class GameVMImpl @Inject constructor(
 
         viewModelScope.launch {
             if (gamemode == "daily") {
-                _score.value = 12
+                _score.value = 10
 
             } else {
                 val profile = firestoreRepository.getUserProfile()
@@ -212,7 +212,7 @@ class GameVMImpl @Inject constructor(
                         )
                     ) + _guessedCountries.value
                     if (_gamemode.value == "daily" && !_gameWon.value) {
-                        _score.value = 12 - 2 * _guessedCountries.value.size
+                        _score.value = 10 - _guessedCountries.value.size
                     }
 
                     Log.d("GameVM", "Guessed country: ${_guessedCountries.value}")
@@ -226,7 +226,11 @@ class GameVMImpl @Inject constructor(
             }
         }
 
-        // TODO: run check if user has guessed too many times
+        // check if user has guessed too many times
+        if (_guessedCountries.value.size >= 10) {
+            setGamePopupState(GamePopupState.GAME_OVER)
+            onGameOver()
+        }
     }
     override fun resetGameState() {
         _guessedCountries.value = listOf()
@@ -270,5 +274,11 @@ class GameVMImpl @Inject constructor(
 
     override fun getTargetCountryFlagUrl(): String? {
         return targetCountry.value?.flagUrl
+    }
+
+    private fun onGameOver() {
+        viewModelScope.launch {
+            firestoreRepository.resetStreak(_gamemode.value)
+        }
     }
 }

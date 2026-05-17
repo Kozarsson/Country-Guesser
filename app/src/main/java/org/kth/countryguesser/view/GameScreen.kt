@@ -143,6 +143,7 @@ fun GameScreen(
             GamePopupState.GAME_WON_DAILY -> {GameWonAlert(onConfirmPress = null, onDismissPress = { gameVM.resetGamePopupState(); navController.navigate("home") }, country = gameVM.getTargetCountryName(), flag = gameVM.getTargetCountryFlagUrl(), guesses = guessedCountries.size) }
             GamePopupState.GAME_WON_ENDLESS -> {GameWonAlert(onConfirmPress = {gameVM.resetGameState()}, onDismissPress = { gameVM.saveToFirestore(); gameVM.resetGamePopupState(); navController.navigate("home") }, country = gameVM.getTargetCountryName(), flag = gameVM.getTargetCountryFlagUrl(), guesses = guessedCountries.size) }
             GamePopupState.CONFIRM_QUIT -> {ConfirmQuitAlert(onConfirmPress = {gameVM.resetGameState(); navController.navigate("home")}, onDismissPress = {gameVM.resetGamePopupState()})}
+            GamePopupState.GAME_OVER -> {Alert(onPress = { gameVM.resetGamePopupState(); navController.navigate("home") }, title = "Game Over!", message = "You ran out of guesses!")}
         }
 
     if (showMap) {
@@ -243,10 +244,10 @@ fun GameScreenContent(
             Spacer(modifier = Modifier.height(16.dp))
             Input(vm = vm)
             Spacer(modifier = Modifier.height(16.dp))
-                    GuessedCountries(
-                        guessedCountries = vm.guessedCountries.collectAsState().value,
-                        modifier = Modifier.weight(1f)
-                    )
+            GuessedCountries(
+                guessedCountries = vm.guessedCountries.collectAsState().value,
+                modifier = Modifier.weight(1f)
+            )
         }
     }
 }

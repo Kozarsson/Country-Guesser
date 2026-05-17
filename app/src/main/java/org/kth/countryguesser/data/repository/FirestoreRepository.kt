@@ -170,8 +170,23 @@ class FirestoreRepositoryImpl @Inject constructor(
         val user = getCurrentUser() ?: return false
         val profile = firestoreRemoteDataSource.getProfile(user.uid) ?: return false
         val newStats: UserStatsEntity
+        val placeholderFlag = "https://upload.wikimedia.org/wikipedia/he/8/88/Flag_of_unknown_country.svg"
         if (mode == "daily") {
             newStats = profile.stats.copy(currentStreakDaily = 0)
+            firestoreRemoteDataSource.updateLastDailyGuess(
+                user.uid,
+                LastGuessedDailyEntity(
+                    date = getCurrentDateFromFirebase().toString(),
+                    countryName = "Failed",
+                    flagUrl = placeholderFlag,
+                ),
+            )
+            lastDailyRepository.saveLastGuessedDaily(
+                date = getCurrentDateFromFirebase().toString(),
+                countryName = "Failed",
+                flagUrl = placeholderFlag,
+                score = 0
+            )
         } else { // ENDLESS mode
             newStats = profile.stats.copy(currentStreakEndless = 0)
         }
