@@ -57,9 +57,9 @@ fun Map(
         if (mapSize.width <= 0) 1f else mapSize.height / (mapSize.width / svgAspect)
     }
 
-    var scale by remember { mutableFloatStateOf(if (initZoom > 0) initZoom else 1f) }
+    var scale by remember(minScale) { mutableFloatStateOf(if (initZoom > minScale) initZoom else minScale) }
     var offset by remember { mutableStateOf(initPan) }
-    var hasCentered by remember { mutableStateOf(initZoom > 0) } // initZoom is set to -1 if user hasn't used the map yet
+    var hasCentered by remember { mutableStateOf(initZoom > 0f) } // initZoom is set to -1 if user hasn't used the map yet
 
     Box(
         modifier = Modifier
@@ -67,7 +67,8 @@ fun Map(
             .clip(RectangleShape)
             .background(AppTheme.colors.mapBlue)
             .onSizeChanged { size ->
-                if (!hasCentered) {
+                mapSize = size
+                if (!hasCentered && scale > 1f) {
                     hasCentered = true
                     val x = (mapSize.width * (scale - 1))
                     offset = Offset(-x/2f, 0f)

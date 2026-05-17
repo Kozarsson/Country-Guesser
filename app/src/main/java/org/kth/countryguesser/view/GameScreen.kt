@@ -393,7 +393,6 @@ private fun Input(
                                         .padding(horizontal = 16.dp, vertical = 12.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    //TODO: Check if we can fix when image doesnt load from url
                                     AsyncImage(
                                         model = country.second,
                                         contentDescription = "Flag",

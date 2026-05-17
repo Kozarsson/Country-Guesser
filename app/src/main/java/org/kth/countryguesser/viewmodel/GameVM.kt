@@ -234,6 +234,10 @@ class GameVMImpl @Inject constructor(
         _gameWon.value = false
         fetchCountry()
         resetGamePopupState()
+
+        // reset map save too
+        _mapZoom.value = -1f
+        _mapPan.value = Offset.Zero
     }
 
     override fun saveToFirestore() {
