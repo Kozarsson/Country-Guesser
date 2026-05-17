@@ -27,6 +27,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Help
@@ -447,6 +448,8 @@ private fun GuessedCountries(
     var revealingCountryKey by remember { mutableStateOf<String?>(null) }
     var revealCount by remember { mutableStateOf(attributeCount) }
 
+    val listState = rememberLazyListState()
+
     LaunchedEffect(guessedCountries) {
         if (guessedCountries.isEmpty()) {
             displayedCountries = emptyList()
@@ -478,6 +481,8 @@ private fun GuessedCountries(
         displayedCountries = guessedCountries
         revealingCountryKey = null
         revealCount = attributeCount
+
+        listState.animateScrollToItem(0)
     }
 
     BoxWithConstraints(modifier = modifier.animateContentSize()) {
@@ -502,6 +507,7 @@ private fun GuessedCountries(
                 }
             }
             LazyColumn(
+                state = listState,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp)
