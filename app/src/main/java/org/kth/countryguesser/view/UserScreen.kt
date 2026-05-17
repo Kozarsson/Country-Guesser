@@ -119,7 +119,10 @@ private fun UserScreenContent(
                 .padding(padding),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Header(nickname)
+            Header(
+                nickname,
+                currentStreakDaily,
+            )
 
             Stats(
                 gamesPlayedDaily,
@@ -136,7 +139,10 @@ private fun UserScreenContent(
 
 
 @Composable
-private fun Header(nickname: String) {
+private fun Header(
+    nickname: String,
+    currentStreakDaily: Int,
+) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy((-50).dp),
@@ -144,7 +150,7 @@ private fun Header(nickname: String) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(120.dp)
+                .height(100.dp)
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
@@ -158,37 +164,41 @@ private fun Header(nickname: String) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(IntrinsicSize.Min)
-                .padding(start = 24.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.Bottom,
+                .padding(horizontal = 24.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            // profile picture
-            Box(
-                modifier = Modifier
-                    .height(100.dp)
-                    .width(100.dp)
-                    .clip(RoundedCornerShape(50.dp))
-                    .border(8.dp, MaterialTheme.colorScheme.surface, RoundedCornerShape(50.dp))
-                    .background(
-                        Brush.verticalGradient( // TODO: REMOVE
-                            colors = listOf(
-                                MaterialTheme.colorScheme.secondaryContainer,
-                                MaterialTheme.colorScheme.tertiaryContainer,
-                            )
-                        )
-                    ),
-            )
-
             // username
             Text(
                 text = nickname,
-                fontSize = 24.sp,
+                fontSize = 36.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.padding(bottom = 16.dp),
             )
 
-            // Idea: we could do a 'current streak' with a fire icon showing the current number of days in a row played
+            // daily streak
+            Row() {
+                Text(
+                    text = "\uD83D\uDD25",
+                    fontSize = 36.sp,
+                )
+
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    Text(
+                        text = "$currentStreakDaily",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        text = "Daily Streak",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+
         }
     }
 }
@@ -211,7 +221,6 @@ private fun Stats(
     ) {
 
         // DAILY CHALLENGE STATS
-        //TODO: Replace with LazyColumn (scrollable list)
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             HorizontalDivider(thickness = 2.dp)
             Text(
@@ -223,7 +232,7 @@ private fun Stats(
 
         Stat(label = "Games Played", stat = "$gamesPlayedDaily")
         // max day's in a row
-        Stat(label = "Current Streak", stat = "$currentStreakDaily")
+//        Stat(label = "Current Streak", stat = "$currentStreakDaily")
 
         Stat(label = "Longest Streak", stat = "$bestStreakDaily")
 
@@ -245,14 +254,8 @@ private fun Stats(
         }
         Stat(label = "Games Played", stat = "$gamesPlayedEndless")
         Stat(label = "Current Streak", stat = "$currentStreakEndless")
-
         Stat(label = "Longest Streak", stat = "$bestStreakEndless")
 
-//        // highest streak
-//        Stat(label = "Longest Streak", stat = "7")
-//
-//        // average streak
-//        Stat(label = "Avg. Streak", stat = "2.3")
     }
 }
 
