@@ -65,7 +65,7 @@ When playing, the user has access to a world map displaying the 193 UN member st
 The map uses an SVG to render. This SVG is stored on the device and does not rely on an internet connection, lightening the network load.
 
 ### Search function
-To make it easier for the user to guess certain countries, an auto-complete feature was implemented. This makes use of a local list of every possible country to make a large gain in performance compared to repeatedly fetching a list from the API any time it's needed. This list of countries is fetched from the API between app uses and is cached locally only temporarily. This makes the list adaptible to changes in the APi and will not include countries or territories not available in the API.
+To make it easier for the user to guess certain countries, an auto-complete feature was implemented. This makes use of a local list of every possible country to make a large gain in performance compared to repeatedly fetching a list from the API any time it's needed. This list of countries is fetched from the API between app uses and is cached locally only temporarily. This makes the list adaptible to changes in the APi and will not include countries or territories not available in the API. The auto-complete function does not suggest countries that have already been guessed to avoid duplicates.
 
 ### Study screen
 Between games, the user can study countries unfammiliar to them, by scrolling or searching for an countri or territory. The list is orederd alphabetically but allows the user to fillter the list through a text field.
