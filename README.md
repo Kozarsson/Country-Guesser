@@ -169,6 +169,7 @@ This directory contains Hilt dependency-injection modules used to provide networ
 This directory contains shared utilities that support networking and data parsing.
 
 # Concept & design
+## Prototype
 **Home Screen**
 
 <img width="218" height="458" alt="home" src="https://github.com/user-attachments/assets/f3458483-3044-469c-b370-8105eafb2077" />
@@ -184,3 +185,22 @@ This directory contains shared utilities that support networking and data parsin
 **Profile Screen**
 
 <img width="218" height="458" alt="profile" src="https://github.com/user-attachments/assets/378c5a03-387e-4957-a0c2-8e87f06d0a7c" />
+
+## Final design
+**Home Screen**
+
+<img width="218" height="458" alt="image" src="https://github.com/user-attachments/assets/e654dae5-23a7-402e-8697-72723291c740" />
+
+**Game Screen**
+
+<img width="218" height="458" alt="image" src="https://github.com/user-attachments/assets/3f478bb8-3246-40b7-be2c-623e49730f6a" />
+
+
+**Map Screen**
+
+<img width="218" height="458" alt="image" src="https://github.com/user-attachments/assets/c8686090-a602-410d-84f5-5dda4b9ba5df" />
+
+
+**Profile Screen**
+
+<img width="218" height="458" alt="image" src="https://github.com/user-attachments/assets/51c3cfbd-03c8-4197-826b-70b1f575ac52" />
