@@ -293,9 +293,6 @@ class GameVMImpl @Inject constructor(
             if (_guessedCountries.value.isNotEmpty()) {
                 firestoreRepository.resetStreak(_gamemode.value)
             }
-            if (_gamemode.value == "daily") {
-
-            }
         }
     }
 }
