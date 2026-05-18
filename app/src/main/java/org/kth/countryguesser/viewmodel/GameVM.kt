@@ -101,7 +101,6 @@ class GameVMImpl @Inject constructor(
                 }
 
                 if (_gamemode.value == "daily") {
-                    //val seed = LocalDate.now(ZoneOffset.UTC).toEpochDay()
                     val seed = getCurrentDateFromFirebase().toEpochDay()
                     countryName = countries.random(Random(seed)).first
                 } else {
@@ -235,6 +234,7 @@ class GameVMImpl @Inject constructor(
         _guessedCountries.value = listOf()
         _searchResults.value = listOf()
         _gameWon.value = false
+        targetCountry.value = null
         fetchCountry()
         resetGamePopupState()
 
