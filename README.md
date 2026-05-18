@@ -34,7 +34,7 @@ You can directly download the [APK](https://github.com/Kozarsson/Country-Guesser
     - [x] highlight guessed countries
   - [x] success alert
     - [x] gamemode dependent handler
-  - [ ] failure alert
+  - [x] failure alert
 - [x] study screen
   - [x] list countries
   - [x] searchable countries
@@ -43,7 +43,6 @@ You can directly download the [APK](https://github.com/Kozarsson/Country-Guesser
   - [x] view personal stats/information
   - [x] save personal stats/information
   - [x] cloud persistence
-  - [ ] personal settings
 - [x] navigation bar
 
 ## Design Decisions
@@ -169,3 +168,19 @@ This directory contains Hilt dependency-injection modules used to provide networ
 ### [`util`](/app/src/main/java/org/kth/countryguesser/util)
 This directory contains shared utilities that support networking and data parsing.
 
+# Concept & design
+**Home Screen**
+
+<img width="218" height="458" alt="home" src="https://github.com/user-attachments/assets/f3458483-3044-469c-b370-8105eafb2077" />
+
+**Game Screen**
+
+<img width="218" height="458" alt="game" src="https://github.com/user-attachments/assets/4d4aa3fb-a8ea-4aba-9beb-f2c927ab084f" />
+
+**Map Screen**
+
+<img width="218" height="458" alt="map" src="https://github.com/user-attachments/assets/dda472f5-20f6-41ef-ae49-c85825015309" />
+
+**Profile Screen**
+
+<img width="218" height="458" alt="profile" src="https://github.com/user-attachments/assets/378c5a03-387e-4957-a0c2-8e87f06d0a7c" />
