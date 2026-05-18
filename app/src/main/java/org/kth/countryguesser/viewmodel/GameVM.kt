@@ -85,11 +85,11 @@ class GameVMImpl @Inject constructor(
     }
 
     private fun fetchCountry() {
-        //TODO: Refetch after internet establishment
         viewModelScope.launch {
-            if (!NetworkUtils.isNetworkAvailable(Application.APPLICATION.applicationContext)) {
+            while (!NetworkUtils.isNetworkAvailable(Application.APPLICATION.applicationContext)) {
                 setPopupState(PopupState.NO_INTERNET)
-            } else {
+                delay(1000)
+            }
                 startTimerUntilLoadingPopup(1000)
                 var countryName: String
                 val countries = countryRepository.getAllCountrySearchResults()
@@ -112,7 +112,6 @@ class GameVMImpl @Inject constructor(
                 targetCountry.value = result
                 isFetching = false
                 setPopupState(PopupState.NONE)
-            }
         }
     }
 

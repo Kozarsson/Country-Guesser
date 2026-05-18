@@ -73,7 +73,7 @@ class CountryRepositoryImpl @Inject constructor(
                 population = restCountriesResult.population,
                 area = restCountriesResult.area,
                 inceptionYear = inceptionYear,
-                flagUrl = restCountriesResult.flags?.png, //TODO: Fix bug that when searching for a country before the guessing country is loaded, the app crashes due to this image url
+                flagUrl = restCountriesResult.flags?.png,
                 continents = restCountriesResult.continents,
                 borders = restCountriesResult.borders,
                 cca2 = restCountriesResult.cca2,
