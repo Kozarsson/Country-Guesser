@@ -127,11 +127,11 @@ private fun UserScreenContent(
 
             Stats(
                 gamesPlayedDaily,
-                currentStreakDaily,
                 bestStreakDaily,
                 totalScore,
                 gamesPlayedEndless,
                 currentStreakEndless,
+                bestStreakEndless,
             )
         }
     }
