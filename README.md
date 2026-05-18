@@ -71,30 +71,37 @@ To make it easier for the user to guess certain countries, an auto-complete feat
 Between games, the user can study countries unfammiliar to them, by scrolling or searching for an countri or territory. The list is orederd alphabetically but allows the user to fillter the list through a text field.
 
 ### Leaderboard
-The leaderboard shows the longest streaks by users. To increase security this should be a cloud-function because the user shouldn't have access to edit the entire database. However, this requires a premium Firebase subscription and was decided to be out fo scope for this reason. As of the current implementation, every user is allowed to edit the entire database.
+The leaderboard shows the longest streaks by users. To increase security this should be a cloud-function because the user shouldn't have access to edit the entire database. However, this requires a premium Firebase subscription and was decided to be out of scope for this reason. As of the current implementation, every user is allowed to edit the entire database.
 
-# File structure
+# File structure (Not complete)
 ```
 app
  └ kotlin+java
     └ org.kth.countryguesser
+      ├ data
+      |  ├ local.room
+      |  |  ├ AppDatabase.kt
+      |  |  ├ LastGuessedDailyDao.kt
+      |  |  └ LastGuessedDailyRoomEntity.kt
+      |  ├ remote
+      |  |  ├ dto
+      |  |  ├ entity
+      |  |  └ firebase
+      |  ├ repository
+      |  |  ├ FirebaseAuthRepository.kt
+      |  |  ├ FirebaseTokenRepository.kt
+      |  |  ├ FirestoreRepository.kt
+      |  |  └ LastDailyRepository.kt
       ├ di
       |  ├ DatabaseModule.kt
       |  ├ NetworkModule.kt
-      |  ├ RepositoryModule.kt
-      |  └ UtilModule.kt
+      |  └ RepositoryModule.kt
       ├ model
       |  ├ api
       |  |  ├ RestCountriesEndpoints.kt
       |  |  └ WikiDataEndpoints.kt
-      |  ├ dto
-      |  ├ entity
       |  ├ repository
-      |  |  ├ ApiRepository.kt
       |  |  ├ CountryRepository.kt
-      |  |  ├ FirebaseAuthRepository.kt
-      |  |  ├ FirebaseTokenRepository.kt
-      |  |  └ GameRepository.kt
       |  └ service
       |     ├ ApiService.kt
       |     ├ FirebaseMessagingService.kt
@@ -128,7 +135,6 @@ app
       |  ├ ProfileStatsVM.kt
       |  └ StudyVM.kt
       ├ util
-      |  ├ Constants.kt
       |  ├ NetworkUtils.kt
       |  ├ PopupState.kt
       |  ├ TimeAndDate.kt
@@ -161,5 +167,5 @@ This directory contains files that bridge the model and view. These files handle
 This directory contains Hilt dependency-injection modules used to provide networking, repositories, and utility bindings.
 
 ### [`util`](/app/src/main/java/org/kth/countryguesser/util)
-This directory contains shared utilities and constants that support networking and data parsing.
+This directory contains shared utilities that support networking and data parsing.
 
