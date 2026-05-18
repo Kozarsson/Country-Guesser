@@ -41,6 +41,8 @@ interface GameVM {
 
     fun getTargetCountryName(): String
     fun getTargetCountryFlagUrl(): String?
+
+    fun onGameOver()
 }
 
 @HiltViewModel
@@ -116,6 +118,17 @@ class GameVMImpl @Inject constructor(
         _gamemode.value = gamemode
 
         viewModelScope.launch {
+            if (gamemode == "daily" && firestoreRepository.getCurrentUser() == null &&
+                firestoreRepository.isLocalDailyDoneToday()
+            ) {
+                setGamePopupState(GamePopupState.GAME_OVER)
+                return@launch
+            }
+
+            if (gamemode == "endless") {
+                fetchCountry()
+            }
+
             if (gamemode == "daily") {
                 _score.value = 10
 
@@ -160,16 +173,23 @@ class GameVMImpl @Inject constructor(
     }
 
     override fun guessCountry(country: String) {
-        if (targetCountry.value == null) {
-            setError("Try again later")
-            return
-        }
-        val guessedCountries = _guessedCountries.value.map { it.countryName.lowercase() }
-        if (guessedCountries.contains(country.lowercase())) {
-            setGamePopupState(GamePopupState.DUPLICATE_SEARCH)
-            return
-        }
         viewModelScope.launch {
+            if (_gamemode.value == "daily" && firestoreRepository.getCurrentUser() == null &&
+                firestoreRepository.isLocalDailyDoneToday()
+            ) {
+                setGamePopupState(GamePopupState.GAME_OVER)
+                return@launch
+            }
+
+            if (targetCountry.value == null) {
+                setError("Try again later")
+                return@launch
+            }
+            val guessedCountries = _guessedCountries.value.map { it.countryName.lowercase() }
+            if (guessedCountries.contains(country.lowercase())) {
+                setGamePopupState(GamePopupState.DUPLICATE_SEARCH)
+                return@launch
+            }
             if (!NetworkUtils.isNetworkAvailable(Application.APPLICATION.applicationContext)) {
                 setPopupState(PopupState.NO_INTERNET)
             } else {
@@ -215,20 +235,21 @@ class GameVMImpl @Inject constructor(
                 isFetching = false
                 setPopupState(PopupState.NONE)
             }
-        }
 
-        // check if user has guessed too many times
-        if (_guessedCountries.value.size >= 10) {
-            setGamePopupState(GamePopupState.GAME_OVER)
-            onGameOver()
+            // check if user has guessed too many times
+            if (_guessedCountries.value.size >= 10) {
+                setGamePopupState(GamePopupState.GAME_OVER)
+                onGameOver()
+            }
         }
     }
     override fun resetGameState() {
         _guessedCountries.value = listOf()
         _searchResults.value = listOf()
         _gameWon.value = false
-        targetCountry.value = null
-        fetchCountry()
+        if (_gamemode.value == "endless") {
+            fetchCountry()
+        }
         resetGamePopupState()
 
         _mapZoom.value = -1f
@@ -267,9 +288,14 @@ class GameVMImpl @Inject constructor(
         return targetCountry.value?.flagUrl
     }
 
-    private fun onGameOver() {
+    override fun onGameOver() {
         viewModelScope.launch {
-            firestoreRepository.resetStreak(_gamemode.value)
+            if (_guessedCountries.value.isNotEmpty()) {
+                firestoreRepository.resetStreak(_gamemode.value)
+            }
+            if (_gamemode.value == "daily") {
+
+            }
         }
     }
 }

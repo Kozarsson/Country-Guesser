@@ -34,6 +34,7 @@ Thumbs.db
 *.pem
 *.key
 keystore.properties
+release.keystore
 
 # --- Env / local config ---
 .env
@@ -46,3 +47,4 @@ google-services.json
 
 # --- Crashlytics / Fabric legacy ---
 fabric.properties
+

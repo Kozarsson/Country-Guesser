@@ -117,6 +117,14 @@ class ProfileStatsVMImpl @Inject constructor(
         val today = getCurrentDateFromFirebase().toString()
         val lastDaily = lastDailyRepository.getLastGuessedDaily()
         if (lastDaily == null || lastDaily.date != today) {
+            val remoteLastDaily = firestoreRepository.getUserProfile()?.lastGuessedDaily
+            if (remoteLastDaily?.date == today) {
+                return LastGuessedDaily(
+                    date = remoteLastDaily.date.takeIf { it.isNotBlank() },
+                    countryName = remoteLastDaily.countryName.takeIf { it.isNotBlank() },
+                    flagUrl = remoteLastDaily.flagUrl.takeIf { it.isNotBlank() }
+                )
+            }
             lastDailyRepository.clearLastGuessedDaily()
             return LastGuessedDaily(null, null, null)
         }

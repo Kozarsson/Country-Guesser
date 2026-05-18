@@ -203,7 +203,7 @@ fun ConfirmQuitAlert(
     AlertDialog(
         onDismissRequest = { },
         title = { Text("Are you sure you want to leave?")},
-        text = { Text("Your current game progress will not be saved!")},
+        text = { Text("Your current game progress will not be saved and any ongoing streaks will be reset!")},
         dismissButton = {
             TextButton(onClick = { onDismissPress() }) {
                 Text("Cancel")

@@ -22,6 +22,7 @@ interface FirestoreRepository {
     suspend fun updateScore(score: Int): Boolean
     suspend fun getUserProfile(): UserProfileEntity?
     suspend fun getLeaderboard(): List<PlayerUiModel>?
+    suspend fun isLocalDailyDoneToday(): Boolean
 }
 
 class FirestoreRepositoryImpl @Inject constructor(
@@ -119,9 +120,18 @@ class FirestoreRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateLastDailyGuess(countryName: String, flagUrl: String, score: Int): Boolean {
-        val user = getCurrentUser() ?: return false
-        val profile = firestoreRemoteDataSource.getProfile(user.uid) ?: return false
         val todayDate = getCurrentDateFromFirebase()
+        val user = getCurrentUser()
+        if (user == null) {
+            lastDailyRepository.saveLastGuessedDaily(
+                date = todayDate.toString(),
+                countryName = countryName,
+                flagUrl = flagUrl,
+                score = score
+            )
+            return false
+        }
+        val profile = firestoreRemoteDataSource.getProfile(user.uid) ?: return false
         val lastDateStr = profile.lastGuessedDaily.date
 
         val newCurrentStreak = if (lastDateStr.isNotEmpty()) {
@@ -167,10 +177,21 @@ class FirestoreRepositoryImpl @Inject constructor(
     }
 
     override suspend fun resetStreak(mode: String): Boolean {
-        val user = getCurrentUser() ?: return false
+        val user = getCurrentUser()
+        val placeholderFlag = "https://upload.wikimedia.org/wikipedia/he/8/88/Flag_of_unknown_country.svg"
+        if (user == null) {
+            if (mode == "daily") {
+                lastDailyRepository.saveLastGuessedDaily(
+                    date = getCurrentDateFromFirebase().toString(),
+                    countryName = "Failed",
+                    flagUrl = placeholderFlag,
+                    score = 0
+                )
+            }
+            return false
+        }
         val profile = firestoreRemoteDataSource.getProfile(user.uid) ?: return false
         val newStats: UserStatsEntity
-        val placeholderFlag = "https://upload.wikimedia.org/wikipedia/he/8/88/Flag_of_unknown_country.svg"
         if (mode == "daily") {
             newStats = profile.stats.copy(currentStreakDaily = 0)
             firestoreRemoteDataSource.updateLastDailyGuess(
@@ -229,5 +250,10 @@ class FirestoreRepositoryImpl @Inject constructor(
                 bestStreakDaily = it.stats.bestStreakDaily,
             )
         }
+    }
+
+    override suspend fun isLocalDailyDoneToday(): Boolean {
+        val lastDaily = lastDailyRepository.getLastGuessedDaily()
+        return lastDaily?.date == getCurrentDateFromFirebase().toString()
     }
 }

@@ -144,7 +144,7 @@ fun GameScreen(
             GamePopupState.DUPLICATE_SEARCH -> {Alert(onPress = {gameVM.resetGamePopupState()}, title = "Country already guessed", message = "You cannot guess the same country twice")}
             GamePopupState.GAME_WON_DAILY -> {GameWonAlert(onConfirmPress = null, onDismissPress = { gameVM.resetGameState(); navController.navigate("home") }, country = gameVM.getTargetCountryName(), flag = gameVM.getTargetCountryFlagUrl(), guesses = guessedCountries.size) }
             GamePopupState.GAME_WON_ENDLESS -> {GameWonAlert(onConfirmPress = {gameVM.resetGameState() }, onDismissPress = { gameVM.saveToFirestore(); gameVM.resetGamePopupState(); navController.navigate("home") }, country = gameVM.getTargetCountryName(), flag = gameVM.getTargetCountryFlagUrl(), guesses = guessedCountries.size) }
-            GamePopupState.CONFIRM_QUIT -> {ConfirmQuitAlert(onConfirmPress = {gameVM.resetGameState(); navController.navigate("home")}, onDismissPress = {gameVM.resetGamePopupState()})}
+            GamePopupState.CONFIRM_QUIT -> {ConfirmQuitAlert(onConfirmPress = { gameVM.onGameOver(); gameVM.resetGameState(); navController.navigate("home")}, onDismissPress = {gameVM.resetGamePopupState()})}
             GamePopupState.GAME_OVER -> {Alert(onPress = { gameVM.resetGameState(); navController.navigate("home") }, title = "Game Over!", message = "You ran out of guesses!")}
         }
 
@@ -537,13 +537,14 @@ private fun CountryRow(
             .height(cellSize),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        val hasBorder = (country.bordersDiff?.comparison as? Boolean) == true
         val attrs = listOf(
             country.flagUrl,
             country.population,
             country.area,
             country.continents,
             country.inceptionYear?.year,
-            if (country.bordersDiff?.comparison as Boolean) "Yes" else "No",
+            if (hasBorder) "Yes" else "No",
         )
         val diffs = listOf(
             null,

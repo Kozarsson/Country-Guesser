@@ -195,7 +195,7 @@ private fun TodaysCountry(
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
-                    if(isDailyDone) {
+                    if(isDailyDone && lastGuessedDaily.countryName != "Failed") {
                         AsyncImage(
                             model = lastGuessedDaily.flagUrl!!,
                             contentDescription = "Flag",
