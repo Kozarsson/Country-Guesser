@@ -59,7 +59,7 @@ class GameVMImpl @Inject constructor(
     private val targetCountry = MutableStateFlow<CountryModel?>(null)
     private val _gamemode = MutableStateFlow<String>("daily")
 
-    private val _mapZoom = MutableStateFlow(1f)
+    private val _mapZoom = MutableStateFlow(-1f)
     override val mapZoom: StateFlow<Float>
         get() = _mapZoom
 
