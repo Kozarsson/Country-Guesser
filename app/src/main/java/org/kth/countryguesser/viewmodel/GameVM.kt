@@ -13,7 +13,6 @@ import org.kth.countryguesser.Application
 import org.kth.countryguesser.data.repository.FirestoreRepository
 import org.kth.countryguesser.model.CountryModel
 import org.kth.countryguesser.model.repository.CountryRepository
-import org.kth.countryguesser.model.repository.GameRepository
 import org.kth.countryguesser.ui.model.CountryUiModel
 import org.kth.countryguesser.ui.model.toUiModel
 import org.kth.countryguesser.util.NetworkUtils
@@ -48,7 +47,6 @@ interface GameVM {
 class GameVMImpl @Inject constructor(
     private val countryRepository: CountryRepository,
     private val firestoreRepository: FirestoreRepository,
-    private val gameRepository: GameRepository,
 ) : BaseVM(), GameVM {
     private val _score = MutableStateFlow(0)
     override val score: StateFlow<Int>
@@ -104,7 +102,7 @@ class GameVMImpl @Inject constructor(
                     val seed = getCurrentDateFromFirebase().toEpochDay()
                     countryName = countries.random(Random(seed)).first
                 } else {
-                    countryName = countries.random().first //TODO: Make actually random
+                    countryName = countries.random().first
                 }
 
                 val result = countryRepository.getCountryByName(countryName)
@@ -194,11 +192,6 @@ class GameVMImpl @Inject constructor(
 
                         }
                         Log.d("GameVM", "Correct guess")
-
-//                        if (_gamemode.value == "endless") {
-//                            fetchCountry()
-//                            _score.value++
-//                        }
                     }
                     _guessedCountries.value = listOf(
                         result.toUiModel(
@@ -238,7 +231,6 @@ class GameVMImpl @Inject constructor(
         fetchCountry()
         resetGamePopupState()
 
-        // reset map save too
         _mapZoom.value = -1f
         _mapPan.value = Offset.Zero
     }

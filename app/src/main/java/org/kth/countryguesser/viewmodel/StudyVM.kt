@@ -37,20 +37,6 @@ class StudyVMImpl @Inject constructor(
     override val countryInfo: StateFlow<CountryUiModel?>
         get() = _countryInfo
 
-
-    private val _gamePopupState = MutableStateFlow(GamePopupState.NONE)
-    val gamePopupState: StateFlow<GamePopupState>
-        get() = _gamePopupState
-
-    private fun setGamePopupState(state: GamePopupState) {
-        _gamePopupState.value = state
-    }
-
-    fun resetGamePopupState() {
-        _gamePopupState.value = GamePopupState.NONE
-    }
-
-
     init {
         viewModelScope.launch {
             _searchResults.value = countryRepository.getAllCountrySearchResults()

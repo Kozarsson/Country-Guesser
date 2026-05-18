@@ -68,7 +68,7 @@ class FirestoreRepositoryImpl @Inject constructor(
 
     override suspend fun updateStreak(mode: String): Boolean {
         val user = getCurrentUser() ?: return false
-        val profile = firestoreRemoteDataSource.getProfile(user.uid) ?: return false //TODO: Rewrite to remove duplication of code
+        val profile = firestoreRemoteDataSource.getProfile(user.uid) ?: return false
         val newStats: UserStatsEntity
         if (mode == "daily") {
             val todayDate = getCurrentDateFromFirebase()

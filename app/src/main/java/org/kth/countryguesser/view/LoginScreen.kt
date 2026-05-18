@@ -189,16 +189,3 @@ fun LoginScreen(
         }
     )
 }
-
-//@SuppressLint("ViewModelConstructorInComposable")
-//@Preview
-//@Composable
-//fun LoginScreenPreview() {
-//    Surface {
-//        val navController = rememberNavController()
-//        LoginScreen(
-//            navController = navController,
-//            authVM = AuthVMImpl(FirebaseAuthRepository())
-//        )
-//    }
-//}

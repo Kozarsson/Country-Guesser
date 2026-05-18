@@ -78,7 +78,5 @@ object Routes {
     const val LEADERBOARD = "leaderboard"
     const val PROFILE = "profile"
     const val CHANGE_PASSWORD = "changePassword"
-
     const val STUDY = "study"
-
 }

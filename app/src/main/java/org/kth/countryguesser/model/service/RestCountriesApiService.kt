@@ -30,4 +30,3 @@ object WikiDataApiService : RetrofitApiService<WikiDataEndpoints>() {
             .create(WikiDataEndpoints::class.java)
     }
 }
-//TODO: add the other api we need (one service per base api url)

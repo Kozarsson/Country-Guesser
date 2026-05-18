@@ -1,5 +1,6 @@
 package org.kth.countryguesser.view
 
+import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -147,6 +148,7 @@ fun GameScreen(
             GamePopupState.GAME_OVER -> {Alert(onPress = { gameVM.resetGameState(); navController.navigate("home") }, title = "Game Over!", message = "You ran out of guesses!")}
         }
 
+    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     if (showMap) {
         Dialog(
             onDismissRequest = { showMap = false },
@@ -241,7 +243,7 @@ fun GameScreenContent(
                 .fillMaxSize()
                 .padding(top = padding.calculateTopPadding(), bottom = padding.calculateBottomPadding()),
         ) {
-            Header(navController, mode, vm.score.collectAsState().value)
+            Header(mode, vm.score.collectAsState().value)
             Spacer(modifier = Modifier.height(16.dp))
             Input(vm = vm)
             Spacer(modifier = Modifier.height(16.dp))
@@ -255,7 +257,6 @@ fun GameScreenContent(
 
 @Composable
 private fun Header(
-    navController: NavHostController,
     mode: String,
     score: Int,
 ) {
@@ -277,16 +278,6 @@ private fun Header(
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(
-                onClick = { navController.popBackStack() },
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }
-
             Text(
                 text = mode.replaceFirstChar { it.uppercase() },
                 style = TextStyle(
@@ -547,13 +538,11 @@ private fun CountryRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         val attrs = listOf(
-            //country.countryName,
             country.flagUrl,
             country.population,
             country.area,
             country.continents,
             country.inceptionYear?.year,
-            //country.flagUrl
             if (country.bordersDiff?.comparison as Boolean) "Yes" else "No",
         )
         val diffs = listOf(
@@ -588,7 +577,6 @@ private fun CountryRow(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center,
                     ) {
-//                        if (diffs[idx] != null && diffs[idx]?.comparison != null && diffs[idx]?.comparison != 0 && diffs[idx]?.comparison != false && diffs[idx]?.comparison != true) {
                         if (diffs[idx]?.comparison == 1 || diffs[idx]?.comparison == -1) {
                             val arrow: ImageVector = if (diffs[idx]?.comparison == 1) {
                                 Icons.Default.ArrowUpward

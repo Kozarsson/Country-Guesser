@@ -30,6 +30,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.unit.dp
@@ -289,6 +293,20 @@ fun TutorialAlert(
                         )
                     }
                 }
+                Text(
+                    text = buildAnnotatedString {
+                        append("You have ")
+                        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("10")
+                        }
+                        append(" tries to guess the country")
+                    },
+                    style = MaterialTheme.typography.labelMedium,
+                )
+                Text(
+                    text = "If you run out of guesses, it is game over",
+                    style = MaterialTheme.typography.labelSmall,
+                )
             }
         }
     }

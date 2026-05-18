@@ -37,6 +37,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
+import org.kth.countryguesser.ui.theme.AppTheme
 import org.kth.countryguesser.viewmodel.GameVMImpl
 import org.kth.countryguesser.viewmodel.LeaderboardVMImpl
 import org.kth.countryguesser.viewmodel.ProfileStatsVMImpl
@@ -66,32 +67,8 @@ private fun LeaderboardScreenContent(
     bottomBar: @Composable () -> Unit = {},
     vm: LeaderboardVMImpl,
 ) {
-    data class Player(val name: String, val stat: Int)
 
     val players by vm.players.collectAsState()
-
-//    val players = listOf(
-//        Player("Alex", 12),
-//        Player("Bella", 7),
-//        Player("Chris", 18),
-//        Player("Dana", 4),
-//        Player("Elliot", 22),
-//        Player("Farah", 15),
-//        Player("Gabe", 9),
-//        Player("Hana", 3),
-//        Player("Ivan", 11),
-//        Player("Jules", 6),
-//        Player("Kai", 19),
-//        Player("Luna", 2),
-//        Player("Mira", 13),
-//        Player("Nico", 8),
-//        Player("Owen", 5),
-//        Player("Pia", 16),
-//        Player("Quinn", 10),
-//        Player("Ravi", 14),
-//        Player("Sara", 1),
-//        Player("Tess", 20),
-//    )
 
     Scaffold(
         topBar = topBar,
@@ -168,9 +145,9 @@ private fun PlayerRow(
     stat: Int
 ) {
     val medalColor = when (position) {
-        1 -> Color(0xFFFFD54F)
-        2 -> Color(0xFFCFD8DC)
-        3 -> Color(0xFFD7A86E)
+        1 -> AppTheme.colors.leaderBoardGold
+        2 -> AppTheme.colors.leaderBoardSilver
+        3 -> AppTheme.colors.leaderBoardBronze
         else -> Color.Transparent
     }
 

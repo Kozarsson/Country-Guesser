@@ -104,11 +104,6 @@ fun HomeScreen(
                     .padding(horizontal = 16.dp, vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-//                Text(
-//                    text = "COUNTRY GUESSER",
-//                    style = MaterialTheme.typography.titleLarge,
-//                    color = MaterialTheme.colorScheme.onBackground,
-//                )
 
                 TodaysCountry(isDailyDone, lastGuessedDaily)
 

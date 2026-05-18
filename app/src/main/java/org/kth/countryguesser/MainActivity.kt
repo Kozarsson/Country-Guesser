@@ -23,8 +23,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         enableEdgeToEdge()
-//        initializeViewModels()
-//        handleIncomingNotification()
 
         setContent {
             DefaultTheme {
@@ -40,23 +38,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
-//    private fun handleIncomingNotification() {
-//        val notificationId = intent.getIntExtra("NOTIFICATION_ID", -1)
-//        if (notificationId != -1) {
-//            NotificationManagerCompat.from(this).cancel(notificationId)
-//        }
-//    }
-
-//    private fun initializeViewModels() {
-//        //val firebaseAuthRepository = FirebaseAuthRepository()
-//        val tokenRepository = FirebaseTokenRepository()
-//
-////        val authViewModelFactory = AuthVMImpl.Factory(firebaseAuthRepository)
-////
-////
-////        authViewModel = ViewModelProvider(this, authViewModelFactory)[AuthVMImpl::class.java]
-//    }
 
     override fun onRequestPermissionsResult(
         requestCode: Int,

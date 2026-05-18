@@ -87,7 +87,7 @@ class ProfileStatsVMImpl @Inject constructor(
         setPopupState(PopupState.LOADING)
         viewModelScope.launch {
             try {
-                val playerInfo = firestoreRepository.getUserProfile() //TODO: playerInfo should be an Ui model not an Entity
+                val playerInfo = firestoreRepository.getUserProfile()
                 if (playerInfo != null) {
                     _nickname.value = playerInfo.nickname
                     // DAILY mode

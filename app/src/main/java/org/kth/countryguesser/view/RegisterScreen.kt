@@ -162,7 +162,6 @@ fun RegisterScreen(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        //TODO: Maybe add password restrictions, like at least 8 characters, one uppercase, number etc.
                         OutlinedTextField(
                             value = password,
                             onValueChange = { password = it },

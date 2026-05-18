@@ -87,7 +87,6 @@ class AuthRemoteDataSourceImpl @Inject constructor() : AuthRemoteDataSource {
         val user = auth.currentUser ?: return false
         val email = user.email ?: return false
         val credential = EmailAuthProvider.getCredential(email, oldPassword.trim())
-        //TODO: Check if old password is correct
         return try {
             user.reauthenticate(credential).await()
             user.updatePassword(newPassword.trim()).await()

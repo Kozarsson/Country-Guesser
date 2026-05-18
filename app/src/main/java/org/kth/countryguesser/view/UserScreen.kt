@@ -54,7 +54,6 @@ fun UserScreen(
     onMenuClick: () -> Unit,
 ) {
     val authVM = hiltViewModel<AuthVMImpl>()
-    val user by authVM.userEntity.collectAsState()
     val popupState by authVM.popupState.collectAsState()
     var errorMessage by remember { mutableStateOf("") }
     val profileStatsVM = hiltViewModel<ProfileStatsVMImpl>()
@@ -133,7 +132,6 @@ private fun UserScreenContent(
                 totalScore,
                 gamesPlayedEndless,
                 currentStreakEndless,
-                bestStreakEndless
             )
         }
     }
@@ -181,7 +179,7 @@ private fun Header(
             // daily streak
             Row() {
                 Text(
-                    text = "\uD83D\uDD25",
+                    text = "\uD83D\uDD25", //Fire emoji
                     fontSize = 36.sp,
                 )
 
@@ -208,7 +206,6 @@ private fun Header(
 @Composable
 private fun Stats(
     gamesPlayedDaily: Int,
-    currentStreakDaily: Int,
     bestStreakDaily: Int,
     totalScore: Int,
     gamesPlayedEndless: Int,
@@ -235,8 +232,6 @@ private fun Stats(
         }
 
         Stat(label = "Games Played", stat = "$gamesPlayedDaily")
-        // max day's in a row
-//        Stat(label = "Current Streak", stat = "$currentStreakDaily")
 
         Stat(label = "Longest Streak", stat = "$bestStreakDaily")
 

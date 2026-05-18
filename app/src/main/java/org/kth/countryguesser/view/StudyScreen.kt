@@ -92,7 +92,6 @@ private fun StudyScreenContent(
     val listState = rememberLazyListState()
 
     val sheetState = rememberModalBottomSheetState()
-    val scope = rememberCoroutineScope()
 
     LaunchedEffect(countries) {
         if (countries.isNotEmpty()) {
@@ -112,7 +111,6 @@ private fun StudyScreenContent(
                     bottom = padding.calculateBottomPadding()
                 ),
         ) {
-            // searchable/scrollable list of countries
             SearchBox(vm)
             LazyColumn(
                 state = listState,

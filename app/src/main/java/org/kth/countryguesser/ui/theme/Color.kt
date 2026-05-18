@@ -18,6 +18,10 @@ val GuessGrey = Color(0xFF757575)
 
 val MapBlue = Color(0xff70d6ef)
 
+val LeaderBoardGold = Color(0xFFFFD54F)
+val LeaderBoardSilver = Color(0xFFCFD8DC)
+val LeaderBoardBronze = Color(0xFFD7A86E)
+
 // Named palette for game-specific colors.
 data class AppColors(
     val guessGreen: Color = GuessGreen,
@@ -25,6 +29,10 @@ data class AppColors(
     val guessOrange: Color = GuessOrange,
     val guessGrey: Color = GuessGrey,
     val mapBlue: Color = MapBlue,
+
+    val leaderBoardGold: Color = LeaderBoardGold,
+    val leaderBoardSilver: Color = LeaderBoardSilver,
+    val leaderBoardBronze: Color = LeaderBoardBronze,
 )
 
 val LocalAppColors = staticCompositionLocalOf { AppColors() }
