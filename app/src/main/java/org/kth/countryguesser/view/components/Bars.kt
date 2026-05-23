@@ -55,6 +55,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import kotlinx.coroutines.launch
 import org.kth.countryguesser.R
+import org.kth.countryguesser.util.AuthPopupState
 import org.kth.countryguesser.util.GamePopupState
 import org.kth.countryguesser.util.PopupState
 import org.kth.countryguesser.viewmodel.AuthVMImpl
@@ -84,6 +85,8 @@ fun AppModalNavigationDrawer(
     val authVM = rememberActivityAuthVm()
     val user by authVM.userEntity.collectAsState()
     val scope = rememberCoroutineScope()
+    val authPopupState by authVM.authPopupState.collectAsState()
+    val inGame by authVM.inGame.collectAsState()
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -91,6 +94,14 @@ fun AppModalNavigationDrawer(
                 modifier = Modifier
                     .background(MaterialTheme.colorScheme.background)
             ) {
+
+                when (authPopupState) {
+                    AuthPopupState.NONE -> {}
+                    AuthPopupState.ACCOUNT_REGISTERED -> {}
+                    AuthPopupState.PASSWORD_CHANGED -> {}
+                    AuthPopupState.AUTH_NOT_ALLOWED -> {Alert(onPress = {authVM.resetAuthPopupState()}, title = "Authentication not allowed", message = "You cannot perform this action while in a game. Please finish or quit your current game and try again.") }
+                }
+
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -133,20 +144,36 @@ fun AppModalNavigationDrawer(
                     // Drawer Items
                     if (user != null && !user!!.isAnonymous) {
                         DrawerItem("Change Password") {
-                            navController.navigate(Routes.CHANGE_PASSWORD)
+                            if (inGame) {
+                                authVM.setAuthPopupState(AuthPopupState.AUTH_NOT_ALLOWED)
+                            } else {
+                                navController.navigate(Routes.CHANGE_PASSWORD)
+                            }
                             scope.launch { drawerState.close() }
                         }
                         DrawerItem("Logout") {
-                            authVM.signOut()
+                            if (inGame) {
+                                authVM.setAuthPopupState(AuthPopupState.AUTH_NOT_ALLOWED)
+                            } else {
+                                authVM.signOut()
+                            }
                             scope.launch { drawerState.close() }
                         }
                     } else {
                         DrawerItem("Login") {
-                            navController.navigate(Routes.LOGIN)
+                            if (inGame) {
+                                authVM.setAuthPopupState(AuthPopupState.AUTH_NOT_ALLOWED)
+                            } else {
+                                navController.navigate(Routes.LOGIN)
+                            }
                             scope.launch { drawerState.close() }
                         }
                         DrawerItem("Register") {
-                            navController.navigate(Routes.REGISTER)
+                            if (inGame) {
+                                authVM.setAuthPopupState(AuthPopupState.AUTH_NOT_ALLOWED)
+                            } else {
+                                navController.navigate(Routes.REGISTER)
+                            }
                             scope.launch { drawerState.close() }
                         }
                     }

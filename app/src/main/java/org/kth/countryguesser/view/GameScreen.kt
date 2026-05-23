@@ -55,6 +55,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -121,6 +122,13 @@ fun GameScreen(
 
     val mapZoom by gameVM.mapZoom.collectAsState()
     val mapPan by gameVM.mapPan.collectAsState()
+
+    DisposableEffect(Unit) {
+        gameVM.setInGameActive(true)
+        onDispose {
+            gameVM.setInGameActive(false)
+        }
+    }
 
     LaunchedEffect(mode) {
         gameVM.setGamemode(mode)

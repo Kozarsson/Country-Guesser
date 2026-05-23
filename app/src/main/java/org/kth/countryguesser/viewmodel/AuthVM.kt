@@ -14,6 +14,7 @@ import org.kth.countryguesser.data.repository.RegistrationResult
 import org.kth.countryguesser.data.remote.entity.UserEntity
 import org.kth.countryguesser.util.AuthPopupState
 import org.kth.countryguesser.util.GamePopupState
+import org.kth.countryguesser.util.GameSessionState
 import org.kth.countryguesser.util.NetworkUtils
 import org.kth.countryguesser.util.PopupState
 import javax.inject.Inject
@@ -21,6 +22,7 @@ import javax.inject.Inject
 
 interface AuthVM {
     val userEntity: StateFlow<UserEntity?>
+    val inGame: StateFlow<Boolean>
     fun signInWithEmailPassword(
         email: String,
         password: String,
@@ -47,18 +49,22 @@ interface AuthVM {
 
 @HiltViewModel
 class AuthVMImpl @Inject constructor(
-    private val authRepository: FirebaseAuthRepository
+    private val authRepository: FirebaseAuthRepository,
+    private val gameSessionState: GameSessionState
 ) : BaseVM(), AuthVM {
 
     companion object {
         const val TAG: String = "[Authentication]"
 
-        fun Factory(authRepository: FirebaseAuthRepository): ViewModelProvider.Factory =
+        fun Factory(
+            authRepository: FirebaseAuthRepository,
+            gameSessionState: GameSessionState
+        ): ViewModelProvider.Factory =
             object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
                     if (modelClass.isAssignableFrom(AuthVMImpl::class.java)) {
-                        return AuthVMImpl(authRepository) as T
+                        return AuthVMImpl(authRepository, gameSessionState) as T
                     }
                     throw IllegalArgumentException("Unknown ViewModel class")
                 }
@@ -67,6 +73,8 @@ class AuthVMImpl @Inject constructor(
 
     private val _userEntity = MutableStateFlow<UserEntity?>(null)
     override val userEntity: StateFlow<UserEntity?> get() = _userEntity
+
+    override val inGame: StateFlow<Boolean> get() = gameSessionState.inGame
 
     private val _authPopupState = MutableStateFlow(AuthPopupState.NONE)
     val authPopupState: StateFlow<AuthPopupState>
@@ -103,6 +111,10 @@ class AuthVMImpl @Inject constructor(
                 if (!NetworkUtils.isNetworkAvailable(Application.APPLICATION.applicationContext)) {
                     setPopupState(PopupState.NO_INTERNET)
                 } else {
+                    if (inGame.value) {
+                        setAuthPopupState(AuthPopupState.AUTH_NOT_ALLOWED)
+                        return@launch
+                    }
                     startTimerUntilLoadingPopup(1000)
                     if (authRepository.login(email, password)) {
                         Log.d(TAG, "Signed in successfully!")
@@ -134,6 +146,10 @@ class AuthVMImpl @Inject constructor(
                 if (!NetworkUtils.isNetworkAvailable(Application.APPLICATION.applicationContext)) {
                     setPopupState(PopupState.NO_INTERNET)
                 } else {
+                    if (inGame.value) {
+                        setAuthPopupState(AuthPopupState.AUTH_NOT_ALLOWED)
+                        return@launch
+                    }
                     startTimerUntilLoadingPopup(1000)
                     when (val result = authRepository.register(nickname, email, password)) {
                         RegistrationResult.Success -> {
@@ -195,9 +211,13 @@ class AuthVMImpl @Inject constructor(
     }
 
     override fun signOut() {
-        authRepository.signOut()
-        _userEntity.value = null
-        Log.d(TAG, "User signed out!")
+        if (inGame.value) {
+            setAuthPopupState(AuthPopupState.AUTH_NOT_ALLOWED)
+        } else {
+            authRepository.signOut()
+            _userEntity.value = null
+            Log.d(TAG, "User signed out!")
+        }
     }
 
     override fun signInAnonymously() {

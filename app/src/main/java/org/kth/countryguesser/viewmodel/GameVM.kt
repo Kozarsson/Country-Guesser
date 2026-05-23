@@ -18,6 +18,7 @@ import org.kth.countryguesser.ui.model.toUiModel
 import org.kth.countryguesser.util.NetworkUtils
 import org.kth.countryguesser.util.PopupState
 import org.kth.countryguesser.util.GamePopupState
+import org.kth.countryguesser.util.GameSessionState
 import org.kth.countryguesser.util.getCurrentDateFromFirebase
 import javax.inject.Inject
 import kotlin.random.Random
@@ -49,6 +50,7 @@ interface GameVM {
 class GameVMImpl @Inject constructor(
     private val countryRepository: CountryRepository,
     private val firestoreRepository: FirestoreRepository,
+    private val gameSessionState: GameSessionState
 ) : BaseVM(), GameVM {
     private val _score = MutableStateFlow(0)
     override val score: StateFlow<Int>
@@ -97,6 +99,7 @@ class GameVMImpl @Inject constructor(
                 if(countries.isEmpty()) {
                     isFetching = false
                     setError("Error connecting to the servers, try again later")
+                    gameSessionState.setInGame(false)
                     return@launch
                 }
 
@@ -122,6 +125,7 @@ class GameVMImpl @Inject constructor(
                 firestoreRepository.isLocalDailyDoneToday()
             ) {
                 setGamePopupState(GamePopupState.GAME_OVER)
+                gameSessionState.setInGame(false)
                 return@launch
             }
 
@@ -178,6 +182,7 @@ class GameVMImpl @Inject constructor(
                 firestoreRepository.isLocalDailyDoneToday()
             ) {
                 setGamePopupState(GamePopupState.GAME_OVER)
+                gameSessionState.setInGame(false)
                 return@launch
             }
 
@@ -200,6 +205,7 @@ class GameVMImpl @Inject constructor(
 
                     if (targetCountry.value?.countryName == result.countryName) {
                         _gameWon.value = true
+                        gameSessionState.setInGame(false)
                         viewModelScope.launch {
                             delay(1500)
                             if (_gamemode.value == "daily") {
@@ -247,6 +253,7 @@ class GameVMImpl @Inject constructor(
         _guessedCountries.value = listOf()
         _searchResults.value = listOf()
         _gameWon.value = false
+        gameSessionState.setInGame(false)
         if (_gamemode.value == "endless") {
             fetchCountry()
         }
@@ -293,6 +300,12 @@ class GameVMImpl @Inject constructor(
             if (_guessedCountries.value.isNotEmpty()) {
                 firestoreRepository.resetStreak(_gamemode.value)
             }
+            gameSessionState.setInGame(false)
         }
     }
+
+    fun setInGameActive(active: Boolean) {
+        gameSessionState.setInGame(active)
+    }
 }
+

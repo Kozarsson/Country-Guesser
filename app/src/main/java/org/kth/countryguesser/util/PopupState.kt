@@ -15,11 +15,12 @@ enum class GamePopupState {
     GAME_WON_DAILY,
     GAME_WON_ENDLESS,
     GAME_OVER,
-    CONFIRM_QUIT
+    CONFIRM_QUIT,
 }
 
 enum class AuthPopupState {
     NONE,
     ACCOUNT_REGISTERED,
-    PASSWORD_CHANGED
+    PASSWORD_CHANGED,
+    AUTH_NOT_ALLOWED
 }

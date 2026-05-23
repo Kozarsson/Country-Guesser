@@ -83,6 +83,7 @@ fun ChangePasswordScreen(
             navController.navigate("home") {
                 popUpTo(navController.graph.startDestinationId) { inclusive = true }
             }}, title = "Password has been changed!", message = "Your password has been successfully updated")}
+        AuthPopupState.AUTH_NOT_ALLOWED -> {}
     }
 
     Scaffold(
