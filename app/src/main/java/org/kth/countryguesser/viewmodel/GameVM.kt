@@ -237,7 +237,7 @@ class GameVMImpl @Inject constructor(
             }
 
             // check if user has guessed too many times
-            if (_guessedCountries.value.size >= 10) {
+            if (_guessedCountries.value.size >= 10 && _gameWon.value == false) {
                 setGamePopupState(GamePopupState.GAME_OVER)
                 onGameOver()
             }
