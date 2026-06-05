@@ -42,6 +42,7 @@ interface GameVM {
 
     fun getTargetCountryName(): String
     fun getTargetCountryFlagUrl(): String?
+    fun getTargetCountry(): CountryUiModel?
 
     fun onGameOver()
 }
@@ -293,6 +294,10 @@ class GameVMImpl @Inject constructor(
 
     override fun getTargetCountryFlagUrl(): String? {
         return targetCountry.value?.flagUrl
+    }
+
+    override fun getTargetCountry(): CountryUiModel? {
+        return targetCountry.value?.toUiModel()
     }
 
     override fun onGameOver() {

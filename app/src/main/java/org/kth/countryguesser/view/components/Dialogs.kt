@@ -123,6 +123,7 @@ fun GameWonAlert(
     country: String,
     flag: String?,
     guesses: Int,
+    ResultRow: @Composable () -> Unit,
 ) {
     Dialog(
         onDismissRequest = { },
@@ -157,6 +158,8 @@ fun GameWonAlert(
                             .size(128.dp)
                     )
                 }
+                ResultRow()
+
                 Text(
                     text = "Number of guesses: $guesses",
                     style = MaterialTheme.typography.bodyLarge,
