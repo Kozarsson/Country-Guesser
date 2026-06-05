@@ -70,6 +70,7 @@ class StudyVMImpl @Inject constructor(
             if (!NetworkUtils.isNetworkAvailable(Application.APPLICATION.applicationContext)) {
                 setPopupState(PopupState.NO_INTERNET)
             } else {
+                setPopupState(PopupState.LOADING)
                 startTimerUntilLoadingPopup(1000)
 
                 val result = countryRepository.getCountryByName(countryName)
