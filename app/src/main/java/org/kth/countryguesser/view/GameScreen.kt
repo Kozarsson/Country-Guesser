@@ -256,10 +256,29 @@ fun GameScreenContent(
             Spacer(modifier = Modifier.height(16.dp))
             Input(vm = vm)
             Spacer(modifier = Modifier.height(16.dp))
-            GuessedCountries(
-                guessedCountries = vm.guessedCountries.collectAsState().value,
-                modifier = Modifier.weight(1f)
-            )
+
+            Box(modifier = Modifier.weight(1f)) {
+                val countries = vm.guessedCountries.collectAsState().value
+
+                if (countries.isNotEmpty()) {
+                    GuessedCountries(
+                        guessedCountries = vm.guessedCountries.collectAsState().value,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = "Start by guessing a country",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                        )
+                    }
+                }
+            }
+
         }
     }
 }
