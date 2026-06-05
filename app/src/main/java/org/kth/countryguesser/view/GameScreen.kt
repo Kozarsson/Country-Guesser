@@ -31,6 +31,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Backspace
 import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
@@ -379,6 +380,16 @@ private fun Input(
                             enabled = true
                         ), // only used for emulator with keyboard
                     shape = RoundedCornerShape(8.dp),
+                    trailingIcon = {
+                        if (guess.isNotBlank()) {
+                            IconButton(onClick = { guess = "" }) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Default.Backspace,
+                                    contentDescription = "Clear guess",
+                                )
+                            }
+                        }
+                    },
                 )
 
                 ExposedDropdownMenu(
