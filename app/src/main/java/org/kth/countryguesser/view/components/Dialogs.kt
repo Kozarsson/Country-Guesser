@@ -310,6 +310,11 @@ fun TutorialAlert(
                     text = "If you run out of guesses, it is game over",
                     style = MaterialTheme.typography.labelSmall,
                 )
+
+                Text(
+                    text = "\nThe answer can be one of 260+ states/territories",
+                    style = MaterialTheme.typography.labelSmall,
+                )
             }
         }
     }
