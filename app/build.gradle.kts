@@ -22,6 +22,13 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
+// Load secret.properties (contains API tokens) if present.
+val secretProperties = Properties()
+val secretPropertiesFile = rootProject.file("secret.properties")
+if (secretPropertiesFile.exists()) {
+    secretProperties.load(FileInputStream(secretPropertiesFile))
+}
+
 android {
     namespace = "org.kth.countryguesser"
     compileSdk = 35
@@ -35,8 +42,11 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "BASE_RESTCOUNTRIES_URI", "\"https://restcountries.com/v3.1/\"")
+        buildConfigField("String", "BASE_RESTCOUNTRIES_URI", "\"https://restcountries.com/v5/\"")
         buildConfigField("String", "BASE_WIKIDATA_URI", "\"https://www.wikidata.org/\"")
+        // REST countries API token (empty string if not provided)
+        val restToken = secretProperties.getProperty("RESTCOUNTRIES_API_TOKEN") ?: ""
+        buildConfigField("String", "RESTCOUNTRIES_API_TOKEN", "\"$restToken\"")
     }
 
     if (keystorePropertiesFile.exists()) {

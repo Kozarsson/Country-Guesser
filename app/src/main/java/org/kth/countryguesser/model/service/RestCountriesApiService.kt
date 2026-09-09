@@ -10,8 +10,19 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 /** Main Country Guesser Api Service. */
 object RestCountriesApiService : RetrofitApiService<RestCountriesEndpoints>() {
     override val api: RestCountriesEndpoints by lazy {
+        // Create a client that adds the Authorization header to every request.
+        val clientWithAuth = network.newBuilder()
+            .addInterceptor { chain ->
+                val request = chain.request().newBuilder()
+                    // Use BuildConfig to supply the token injected at build time (secret.properties).
+                    .addHeader("Authorization", "Bearer ${BuildConfig.RESTCOUNTRIES_API_TOKEN}")
+                    .build()
+                chain.proceed(request)
+            }
+            .build()
+
         Retrofit.Builder()
-            .client(network)
+            .client(clientWithAuth)
             .baseUrl(BuildConfig.BASE_RESTCOUNTRIES_URI)
             .addConverterFactory(GsonConverterFactory.create())
             .build()

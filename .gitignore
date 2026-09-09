@@ -41,6 +41,9 @@ release.keystore
 .env.*
 *.env
 
+# Local secret properties
+secret.properties
+
 # --- Firebase / Google services (public repo) ---
 google-services.json
 **/google-services.json
