@@ -19,6 +19,7 @@ local.properties
 *.ap_
 *.aab
 *.dex
+apk/
 
 # --- Logs ---
 *.log

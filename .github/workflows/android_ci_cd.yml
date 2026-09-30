@@ -16,26 +16,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Set up JDK
-        uses: actions/setup-java@v5
+      - name: Build Docker image
+        run: docker build -t country-guesser .
+
+      - name: Run lint, tests, and build APK in container
+        run: |
+          docker run --name cg-build country-guesser
+          mkdir -p build/outputs/apk/debug
+          docker cp cg-build:/app/build/outputs/apk/debug/app-debug.apk build/outputs/apk/debug/
+          docker rm cg-build
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
         with:
-          distribution: temurin
-          java-version: '17'
-
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v4
-
-      - name: Make Gradle executable
-        run: chmod +x ./gradlew
-
-      - name: Run lint
-        run: ./gradlew lint
-
-      - name: Run tests
-        run: ./gradlew test
-
-      - name: Build APK
-        run: ./gradlew assembleDebug
+          name: app-debug
+          path: build/outputs/apk/debug/app-debug.apk
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
