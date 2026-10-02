@@ -19,6 +19,7 @@ local.properties
 *.ap_
 *.aab
 *.dex
+apk/
 
 # --- Logs ---
 *.log
@@ -40,6 +41,9 @@ release.keystore
 .env
 .env.*
 *.env
+
+# Local secret properties
+secret.properties
 
 # --- Firebase / Google services (public repo) ---
 google-services.json
