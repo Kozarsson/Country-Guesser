@@ -23,7 +23,7 @@ jobs:
         run: |
           docker run --name cg-build country-guesser
           mkdir -p build/outputs/apk/debug
-          docker cp cg-build:/app/build/outputs/apk/debug/app-debug.apk build/outputs/apk/debug/
+          docker cp cg-build:/app/app/build/outputs/apk/debug/app-debug.apk build/outputs/apk/debug/
           docker rm cg-build
 
       - name: Upload APK artifact
