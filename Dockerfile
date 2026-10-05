@@ -24,4 +24,8 @@ COPY . .
 
 RUN sed -i 's/\r$//' gradlew && chmod +x ./gradlew
 
-CMD ["./gradlew", "lint", "test", "assembleDebug"]
+RUN ./gradlew --no-daemon lint test assembleDebug \
+    && mkdir -p /output \
+    && cp app/build/outputs/apk/debug/app-debug.apk /output/country-guesser-debug.apk
+
+CMD ["sh", "-c", "ls -lh /output/country-guesser-debug.apk"]

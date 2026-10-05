@@ -45,6 +45,13 @@ release.keystore
 # Local secret properties
 secret.properties
 
+# --- Terraform ---
+infrastructure/.terraform/
+infrastructure/*.tfstate
+infrastructure/*.tfstate.*
+infrastructure/terraform.tfvars
+infrastructure/*.tfvars.json
+
 # --- Firebase / Google services (public repo) ---
 google-services.json
 **/google-services.json
