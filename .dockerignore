@@ -1,0 +1,17 @@
+.git
+.gradle
+.idea
+**/build
+.kotlin
+captures
+local.properties
+keystore.properties
+release.keystore
+secret.properties
+*.jks
+*.keystore
+*.p12
+*.pem
+*.key
+functions
+Dockerfile
