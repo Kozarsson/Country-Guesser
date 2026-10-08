@@ -19,6 +19,7 @@ local.properties
 *.ap_
 *.aab
 *.dex
+apk/
 
 # --- Logs ---
 *.log
@@ -40,6 +41,16 @@ release.keystore
 .env
 .env.*
 *.env
+
+# Local secret properties
+secret.properties
+
+# --- Terraform ---
+infrastructure/.terraform/
+infrastructure/*.tfstate
+infrastructure/*.tfstate.*
+infrastructure/terraform.tfvars
+infrastructure/*.tfvars.json
 
 # --- Firebase / Google services (public repo) ---
 google-services.json

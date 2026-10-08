@@ -22,6 +22,13 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
+// Load secret.properties (contains API tokens) if present.
+val secretProperties = Properties()
+val secretPropertiesFile = rootProject.file("secret.properties")
+if (secretPropertiesFile.exists()) {
+    secretProperties.load(FileInputStream(secretPropertiesFile))
+}
+
 android {
     namespace = "org.kth.countryguesser"
     compileSdk = 35
@@ -30,13 +37,16 @@ android {
         applicationId = "org.kth.countryguesser"
         minSdk = 33
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = System.getenv("VERSION_CODE")?.toIntOrNull() ?: 1
+        versionName = System.getenv("VERSION_NAME") ?: "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "BASE_RESTCOUNTRIES_URI", "\"https://restcountries.com/v3.1/\"")
+        buildConfigField("String", "BASE_RESTCOUNTRIES_URI", "\"https://restcountries.com/v5/\"")
         buildConfigField("String", "BASE_WIKIDATA_URI", "\"https://www.wikidata.org/\"")
+        // REST countries API token (empty string if not provided)
+        val restToken = secretProperties.getProperty("RESTCOUNTRIES_API_TOKEN") ?: ""
+        buildConfigField("String", "RESTCOUNTRIES_API_TOKEN", "\"$restToken\"")
     }
 
     if (keystorePropertiesFile.exists()) {
@@ -122,6 +132,9 @@ dependencies {
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     implementation("io.coil-kt:coil-compose:2.6.0")
     implementation("com.caverock:androidsvg-aar:1.4")
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("io.mockk:mockk:1.13.17")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
 }
 
 kapt {
